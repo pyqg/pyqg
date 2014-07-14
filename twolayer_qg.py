@@ -3,19 +3,10 @@ import mkl
 
 
 #import numpy
-#np.use_fastnumpy = True
+np.use_fastnumpy = True
 
-mkl.set_num_threads(1)
+#mkl.set_num_threads(1)
 pi = np.pi
-
-#=======================================
-#   Function Definitions
-#=======================================
-    
-
-# ===================================================
-# Here starts the actual model
-#====================================================
 
 class QGModel(object):
     """A class that represents the two-layer QG model."""
@@ -154,15 +145,15 @@ class QGModel(object):
         # determine inversion matrix: psi=Aq (i.e. A=B**(-1) where q=B*psi)
         # this gives a warning because wavenumber 0 entries cause div by 0
         # they are set to zero later though (could probably write this more elegantly)
-        det = self.wv2 * (self.wv2 + self.F1 + self.F2)
-        self.a11 = -(self.wv2 + self.F2)/det
-        self.a12 = -self.F1/det
-        self.a21 = -self.F2/det
-        self.a22 = -(self.wv2 + self.F1)/det
-        self.a11[0,0] = 0.
-        self.a12[0,0] = 0.
-        self.a21[0,0] = 0.
-        self.a22[0,0] = 0.
+        det = np.ma.masked_equal(self.wv2 * (self.wv2 + self.F1 + self.F2),0.)
+        self.a11 = -((self.wv2 + self.F2)/det).filled(0.)
+        self.a12 = -(self.F1/det).filled(0.)
+        self.a21 = -(self.F2/det).filled(0.)
+        self.a22 = -((self.wv2 + self.F1)/det).filled(0.)
+        #self.a11[0,0] = 0.
+        #self.a12[0,0] = 0.
+        #self.a21[0,0] = 0.
+        #self.a22[0,0] = 0.
 
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi 

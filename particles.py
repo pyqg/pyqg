@@ -33,8 +33,8 @@ class LagrangianParticleArray2D(object):
         assert self.x.shape == self.y.shape
         
         # check that the particles are within the specified boundaries
-        assert np.all(self.x > xmin) and np.all(self.x < xmax)
-        assert np.all(self.y > ymin) and np.all(self.y < ymax)
+        assert np.all(self.x >= xmin) and np.all(self.x <= xmax)
+        assert np.all(self.y >= ymin) and np.all(self.y <= ymax)
         
         self.xmin = xmin
         self.xmax = xmax

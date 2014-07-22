@@ -287,15 +287,15 @@ class QGModel(object):
         self.add_diagnostic('APEflux',
             description='spectral flux of available potential energy',
             function=(lambda self:
-              self.rd**-2 *
+              self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph1-self.ph2)*np.conj(self.Jptpc)) )
         )
         
         self.add_diagnostic('KEflux',
             description='spectral flux of kinetic energy',
             function=(lambda self:
-              2*np.real(self.del1*self.ph1*np.conj(self.Jp1xi1)) + 
-              2*np.real(self.del2*self.ph2*np.conj(self.Jp2xi2)) )
+              np.real(self.del1*self.ph1*np.conj(self.Jp1xi1)) + 
+              np.real(self.del2*self.ph2*np.conj(self.Jp2xi2)) )
         )
         # fix for delta.neq.1 
         # The 2* is just to adjust for the fact that all other terms
@@ -334,20 +334,20 @@ class QGModel(object):
         self.add_diagnostic('diss',
             description='total energy dissipation by bottom drag',
             function=( lambda self:
-                       (self.rek*self.wv2*np.abs(self.ph2)**2.).sum())
+                       (self.del2*self.rek*self.wv2*np.abs(self.ph2)**2.).sum())
         )
         
         self.add_diagnostic('APEgenspec',
             description='spectrum of APE generation',
-            function=( lambda self: self.U * self.rd**-2 * 0.25 *
-                       np.real(1j*self.k*(self.ph1 + self.ph2) *
+            function=( lambda self: self.U * self.rd**-2 * del1 * del2 *
+                       np.real(1j*self.k*(self.del1*self.ph1 + self.del2*self.ph2) *
                                   np.conj(self.ph1 - self.ph2)) )
         )
         
-        self.add_diagnostic('diss',
+        self.add_diagnostic('gen',
             description='total APE generation',
-            function=( lambda self: self.U * self.rd**-2 * 0.25 *
-                       np.real(1j*self.k*(self.ph1 + self.ph2) *
+            function=( lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
+                       np.real(1j*self.k*(self.del1*self.ph1 + self.del2*self.ph2) *
                                   np.conj(self.ph1 - self.ph2)).sum() )
         )
 
@@ -375,8 +375,8 @@ class QGModel(object):
         self.xi1 = np.real(np.fft.ifft2(-self.wv2*self.ph1))
         self.xi2 = np.real(np.fft.ifft2(-self.wv2*self.ph2))
         self.Jptpc = -self.advect(
-                    0.5*(self.p1 - self.p2), 0.5*(self.u1 + self.u2),
-                    0.5*(self.v1 + self.v2))
+                    0.5*(self.p1 - self.p2), (self.del1*self.u1 + self.del2*self.u2),
+                    0.5*(self.del1*self.v1 + self.del2*self.v2))
         # fix for delta.neq.1
         self.Jp1xi1 = self.advect(self.xi1, self.U1, self.v1)
         self.Jp2xi2 = self.advect(self.xi2, self.U2, self.v2)

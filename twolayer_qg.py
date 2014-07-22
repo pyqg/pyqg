@@ -102,9 +102,9 @@ class QGModel(object):
         self.taveints = np.ceil(taveint/dt)      
 
         self.x,self.y = np.meshgrid(
-            np.linspace((2*self.nx)**-1, 1, nx)*self.L,
-            np.linspace((2*self.ny)**-1, 1, ny)*self.W )
-
+            np.arange(0.5,self.nx,1.)/self.nx*self.L,
+            np.arange(0.5,self.ny,1.)/self.ny*self.W )
+        
         # initial conditions: (PV anomalies)
         self.set_q1q2(
             1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(

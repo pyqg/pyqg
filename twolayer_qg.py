@@ -102,13 +102,15 @@ class QGModel(object):
         self.taveints = np.ceil(taveint/dt)      
 
         self.x,self.y = np.meshgrid(
-            np.linspace((2*self.nx)**-1,1,nx)*self.L,
-            np.linspace((2*self.ny)**-1,1,ny)*self.W )
+            np.linspace((2*self.nx)**-1, 1, nx)*self.L,
+            np.linspace((2*self.ny)**-1, 1, ny)*self.W )
 
         # initial conditions: (PV anomalies)
-        self.q1 = 1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
-                    np.ones((self.ny,1)) * np.random.rand(1,self.nx) )
-        self.q2 = np.zeros_like(self.x)
+        self.set_q1q2(
+            1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
+                                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
+            np.zeros_like(self.x)        
+        )    
 
         # Background zonal flow (m/s):
         self.U = self.U1 - self.U2
@@ -167,10 +169,6 @@ class QGModel(object):
         self.t=0        # actual time
         self.tc=0       # timestep number
 
-        # initialize spectral PV
-        self.qh1 = np.fft.fft2(self.q1)
-        self.qh2 = np.fft.fft2(self.q2)
-
         # Set time-stepping parameters for very first timestep (Euler-forward stepping).
         # Adams Bashford used thereafter and is set up at the end of the first time-step (see below)
         self.dqh1dt_p = 0.
@@ -185,6 +183,14 @@ class QGModel(object):
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
+
+    def set_q1q2(self, q1, q2):
+        self.q1 = q1
+        self.q2 = q2
+        # initialize spectral PV
+        self.qh1 = np.fft.fft2(self.q1)
+        self.qh2 = np.fft.fft2(self.q2)
+        
 
     # compute advection in grid space (returns qdot in fourier space)
     def advect(self, q, u, v):
@@ -254,7 +260,7 @@ class QGModel(object):
         self.dqh1dt_p = self.dqh1dt
         self.dqh2dt_p = self.dqh2dt
         
-        # the actual Adams-Bashfort stepping can only be used starting
+        # the actual Adams-Bashforth stepping can only be used starting
         # at the second time-step and is thus set here:   
         if self.tc==0:
             self.dt0 = 1.5*self.dt
@@ -263,6 +269,7 @@ class QGModel(object):
         # augment timestep
         self.tc += 1
         self.t += self.dt
+
         
     def calc_cfl(self):
         return np.abs(np.hstack([self.u1 + self.U1, self.v1,
@@ -339,7 +346,7 @@ class QGModel(object):
         
         self.add_diagnostic('APEgenspec',
             description='spectrum of APE generation',
-            function=( lambda self: self.U * self.rd**-2 * del1 * del2 *
+            function=( lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph1 + self.del2*self.ph2) *
                                   np.conj(self.ph1 - self.ph2)) )
         )

@@ -1,4 +1,5 @@
-# pyqg - A Python Quasigeostrophic Model #
+# pyqg #
+## A Python Quasigeostrophic Model ##
 
 This is a pure-python implementation of the classic doubly-periodic pseudo-spectral quasigeostrophic model. So far it only supports two layers and a flat bottom.
 
@@ -13,4 +14,4 @@ If you are helping to develop the code, you might prefer to install it in [devel
 
 ## Usage ##
 
-We have an [example ipython notebook](http://nbviewer.ipython.org/github/rabernat/pyqg/blob/master/examples/pyqg_example.ipynb)
+We have an [example ipython notebook](http://nbviewer.ipython.org/github/rabernat/pyqg/blob/master/examples/pyqg_example.ipynb).

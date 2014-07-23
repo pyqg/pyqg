@@ -1,3 +1,7 @@
 *.pyc
-*.npz
 *.ipynb_*
+*.egg-info/
+*.egg
+.installed.cfg
+pop-log.txt
+nosetests.xml

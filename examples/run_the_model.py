@@ -1,7 +1,7 @@
 from pylab import *
-import twolayer_qg
+from pyqg import qg_model
 
-m = twolayer_qg.QGModel(tavestart=0,  dt=8000)
+m = qg_model.QGModel(tavestart=0,  dt=8000)
 
 for snapshot in m.run_with_snapshots(
         tsnapstart=155520000, tsnapint=m.dt):

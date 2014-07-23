@@ -1,11 +1,11 @@
 import numpy as np
-import twolayer_qg
+from pyqg import qg_model
 
 def test_the_model(rtol=1e-15):
     """Make sure the results are correct within relative tolerance rtol."""
 
     year = 360*86400.
-    m = twolayer_qg.QGModel(
+    m = qg_model.QGModel(
             nx=32,                      # grid resolution
             ny=None,
             L=1e6,                      # domain size 

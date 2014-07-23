@@ -2,7 +2,7 @@ import numpy as np
 try:
     import mkl
     np.use_fastnumpy = True
-except ImportError
+except ImportError:
     pass
 
 pi = np.pi

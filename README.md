@@ -13,4 +13,4 @@ If you are helping to develop the code, you might prefer to install it in [devel
 
 ## Usage ##
 
-We are working on filling in some examples in the examples directory.
+We have an [example ipython notebook](http://nbviewer.ipython.org/github/rabernat/pyqg/blob/master/examples/pyqg_example.ipynb)

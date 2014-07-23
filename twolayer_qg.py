@@ -1,11 +1,10 @@
 import numpy as np
-import mkl
+try:
+    import mkl
+    np.use_fastnumpy = True
+except ImportError
+    pass
 
-
-#import numpy
-np.use_fastnumpy = True
-
-#mkl.set_num_threads(1)
 pi = np.pi
 
 class QGModel(object):
@@ -285,7 +284,7 @@ class QGModel(object):
         # Initialization for diagnotics
         self.diagnostics = dict()
 
-        self.add_diagnostic('ent',
+        self.add_diagnostic('entspec',
             description='barotropic enstrophy spectrum',
             function=(lambda self:
                       np.abs(self.del1*self.qh1 + self.del2*self.qh2)**2.)
@@ -304,10 +303,7 @@ class QGModel(object):
               np.real(self.del1*self.ph1*np.conj(self.Jp1xi1)) + 
               np.real(self.del2*self.ph2*np.conj(self.Jp2xi2)) )
         )
-        # fix for delta.neq.1 
-        # The 2* is just to adjust for the fact that all other terms
-        # right now are for EKE1+EKE2 budget
-        
+
         self.add_diagnostic('KE1spec',
             description='upper layer kinetic energy spectrum',
             function=(lambda self: 0.5*self.wv2*np.abs(self.ph1)**2)
@@ -338,10 +334,11 @@ class QGModel(object):
             function=(lambda self: 0.5*(self.v2**2 + self.u2**2).mean())
         )
         
-        self.add_diagnostic('diss',
+        self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function=( lambda self:
-                       (self.del2*self.rek*self.wv2*np.abs(self.ph2)**2.).sum())
+                       (self.del2*self.rek*self.wv2*
+                        np.abs(self.ph2)**2./(self.nx*self.ny)).sum())
         )
         
         self.add_diagnostic('APEgenspec',
@@ -351,11 +348,13 @@ class QGModel(object):
                                   np.conj(self.ph1 - self.ph2)) )
         )
         
-        self.add_diagnostic('gen',
+        self.add_diagnostic('APEgen',
             description='total APE generation',
             function=( lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real(1j*self.k*(self.del1*self.ph1 + self.del2*self.ph2) *
-                                  np.conj(self.ph1 - self.ph2)).sum() )
+                       np.real(1j*self.k*
+                           (self.del1*self.ph1 + self.del2*self.ph2) *
+                            np.conj(self.ph1 - self.ph2)).sum() / 
+                            (self.nx*self.ny) )
         )
 
     def add_diagnostic(self, diag_name, description=None, units=None, function=None):
@@ -382,11 +381,12 @@ class QGModel(object):
         self.xi1 = np.real(np.fft.ifft2(-self.wv2*self.ph1))
         self.xi2 = np.real(np.fft.ifft2(-self.wv2*self.ph2))
         self.Jptpc = -self.advect(
-                    0.5*(self.p1 - self.p2), (self.del1*self.u1 + self.del2*self.u2),
-                    0.5*(self.del1*self.v1 + self.del2*self.v2))
+                    (self.p1 - self.p2),
+                    (self.del1*self.u1 + self.del2*self.u2),
+                    (self.del1*self.v1 + self.del2*self.v2))
         # fix for delta.neq.1
-        self.Jp1xi1 = self.advect(self.xi1, self.U1, self.v1)
-        self.Jp2xi2 = self.advect(self.xi2, self.U2, self.v2)
+        self.Jp1xi1 = self.advect(self.xi1, self.u1, self.v1)
+        self.Jp2xi2 = self.advect(self.xi2, self.u2, self.v2)
         
         for dname in self.diagnostics:
             if self.diagnostics[dname]['active']:

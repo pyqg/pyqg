@@ -25,12 +25,12 @@ class QGModel(object):
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
         # timestepping parameters
-        dt= 1600.,                  # numerical timstep
+        dt=7200.,                   # numerical timstep
         tplot=10000.,               # interval for plots (in timesteps)
         tcfl=1000.,                 # interval for cfl writeout (in timesteps)
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
-        taveint=16000.,             # time interval used for summation in longterm average in seconds
+        taveint=86400.,             # time interval used for summation in longterm average in seconds
         tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
         # diagnostics parameters
         diagnostics_list='all'      # which diagnostics to output

@@ -134,10 +134,12 @@ class LagrangianParticleArray2D(object):
         dx = x1-x0
         dy = y1-y0
         # roll displacements across the borders
-        dx[ dx > self.Lx/2 ] -= self.Lx
-        dx[ dx < -self.Lx/2 ] += self.Lx
-        dy[ dy > self.Ly/2 ] -= self.Ly
-        dy[ dy < -self.Ly/2 ] += self.Ly
+        if self.pix:
+            dx[ dx > self.Lx/2 ] -= self.Lx
+            dx[ dx < -self.Lx/2 ] += self.Lx
+        if self.piy:
+            dy[ dy > self.Ly/2 ] -= self.Ly
+            dy[ dy < -self.Ly/2 ] += self.Ly
         return dx, dy
         
         

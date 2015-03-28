@@ -146,7 +146,7 @@ class QGModel(object):
         self.F1 = self.rd**-2 / (1.+self.delta)
         self.F2 = self.delta*self.F1
 
-        # the PV gradients in each layer
+        # the meridional PV gradients in each layer
         self.beta1 = self.beta + self.F1*(self.U1 - self.U2)
         self.beta2 = self.beta - self.F2*(self.U1 - self.U2)
 
@@ -156,7 +156,7 @@ class QGModel(object):
         # isotropic wavenumber^2 grid
         self.wv2 = np.ma.masked_equal(self.k**2 + self.l**2, 0.).filled(1.e20)
         self.wv2i = self.wv2**-2
-
+        
         # determine inversion matrix: psi = A q (i.e. A=M_2**(-1) where q=M_2*psi)
         det = self.wv2 * (self.wv2 + self.F1 + self.F2)
         self.a11 = -((self.wv2 + self.F2)/det)
@@ -167,19 +167,18 @@ class QGModel(object):
         self.det = det
 
         # this defines the spectral filter (following Arbic and Flierl, 2003)
-        cphi=0.65*pi 
+        cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        #filtr=exp(-18.4*(wvx-cphi)**4.)*(wvx>cphi)+(wvx<=cphi)
-        #filtr[isnan(filtr)]=1.0
-        self.filtr = np.exp(-18.4*(wvx-cphi)**4.)
-        self.filtr[wvx<=cphi] = 1.
+        self.filtr = np.exp(-23.6*(wvx-cphi)**4.)     
+        self.filtr[wvx<=cphi] = 1.                   
+
 
         # initialize timestep
         self.t=0        # actual time
         self.tc=0       # timestep number
         
         # Set time-stepping parameters for very first timestep (Euler-forward stepping).
-        # Adams Bashford used thereafter and is set up at the end of the first time-step (see below)
+        # Second-order Adams Bashford used thereafter and is set up at the end of the first time-step (see below)
         self.dqh1dt_p = 0.
         self.dqh2dt_p = 0.
         self.dt0 = self.dt
@@ -275,7 +274,7 @@ class QGModel(object):
                            self.calc_ke() )
         
         # compute tendency from advection and bottom drag:  
-        self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1) 
+        self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
                   -self.beta1*1j*self.k*self.ph1)
         self.dqh2dt = (-self.advect(self.q2, self.u2 + self.U2, self.v2)
                   -self.beta2*1j*self.k*self.ph2 + self.rek*self.wv2*self.ph2)
@@ -303,7 +302,7 @@ class QGModel(object):
     def calc_cfl(self):
         return np.abs(np.hstack([self.u1 + self.U1, self.v1,
                           self.u2 + self.U2, self.v2])).max()*self.dt/self.dx
- 
+
     def calc_ke(self):
         return  ( 2.*0.5*self.wv2*( np.abs(self.ph1)**2 + \
                 np.abs(self.ph2)**2 )/ ( (self.nx*self.ny)**2) ).sum()
@@ -329,6 +328,7 @@ class QGModel(object):
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph1-self.ph2)*np.conj(self.Jptpc)) )
+
         )
         
         self.add_diagnostic('KEflux',
@@ -340,14 +340,12 @@ class QGModel(object):
 
         self.add_diagnostic('KE1spec',
             description='upper layer kinetic energy spectrum',
-            function= (lambda self: 2.*0.5*self.wv2*np.abs(self.ph1)**2/\
-                    ( (self.nx*self.ny)**2) )
+            function=(lambda self: 0.5*self.wv2*np.abs(self.ph1)**2)
         )
         
         self.add_diagnostic('KE2spec',
             description='lower layer kinetic energy spectrum',
-            function= (lambda self: 2.*0.5*self.wv2*np.abs(self.ph2)**2/\
-                    ( (self.nx*self.ny)**2) )
+            function=(lambda self: 0.5*self.wv2*np.abs(self.ph2)**2)
         )
         
         self.add_diagnostic('q1',

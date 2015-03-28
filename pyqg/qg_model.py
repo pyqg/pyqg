@@ -190,40 +190,24 @@ class QGModel(object):
         elif diagnostics_list == 'none':
             self.set_active_diagnostics([])
         else:
-            self.set_active_diagnostics(diagnostics_list)   
-
-    def _fft2(self, A):
-        if self.fftw:
-            a = pyfftw.n_byte_align_empty(A.shape, 8, 'float64')
-            a[:]= A.copy()
-            return pyfftw.builders.rfft2(a,threads=self.ntd)()
-        else:
-            return np.fft.rfft2(A)
-
-    def _ifft2(self, Ahat):
-        if self.fftw:
-            ahat = pyfftw.n_byte_align_empty(Ahat.shape, 16, 'complex128')
-            ahat[:]= Ahat.copy()
-            return pyfftw.builders.irfft2(ahat,threads=self.ntd)()
-        else:
-            return np.fft.irfft2(Ahat)
+            self.set_active_diagnostics(diagnostics_list)
 
     def set_q1q2(self, q1, q2):
         self.q1 = q1
         self.q2 = q2
 
         # initialize spectral PV
-        self.qh1 = self._fft2(self.q1)
-        self.qh2 = self._fft2(self.q2) 
+        self.qh1 = fft2(self, self.q1)
+        self.qh2 = fft2(self, self.q2) 
 
     # compute advection in grid space (returns qdot in fourier space)
     def advect(self, q, u, v):
-        return 1j*self.k*self._fft2(u*q) + 1j*self.l*self._fft2(v*q)
+        return 1j*self.k*fft2(self, u*q) + 1j*self.l*fft2(self, v*q)
         
     # compute grid space u and v from fourier streafunctions
     def caluv(self, ph):
-        u = -self._ifft2(1j*self.l*ph)
-        v = self._ifft2(1j*self.k*ph)
+        u = -ifft2(self, 1j*self.l*ph)
+        v = ifft2(self, 1j*self.k*ph)
         return u, v
   
     # Invert PV for streamfunction
@@ -255,8 +239,8 @@ class QGModel(object):
 
     def _step_forward(self):
         # compute grid space qgpv
-        self.q1 = self._ifft2(self.qh1)
-        self.q2 = self._ifft2(self.qh2)
+        self.q1 = ifft2(self, self.qh1)
+        self.q2 = ifft2(self, self.qh2)
 
         # invert qgpv to find streamfunction and velocity
         self.ph1, self.ph2 = self.invph(self.qh1, self.qh2)
@@ -286,8 +270,8 @@ class QGModel(object):
                     self.qh2 + self.dt0*self.dqh2dt + self.dt1*self.dqh2dt_p)  
         
         # remember previous tendencies
-        self.dqh1dt_p = self.dqh1dt
-        self.dqh2dt_p = self.dqh2dt
+        self.dqh1dt_p = self.dqh1dt.copy()
+        self.dqh2dt_p = self.dqh2dt.copy()
         
         # the actual Adams-Bashforth stepping can only be used starting
         # at the second time-step and is thus set here:   
@@ -410,10 +394,10 @@ class QGModel(object):
            
     def _increment_diagnostics(self):
         # compute intermediate quantities needed for some diagnostics
-        self.p1 = self._ifft2(self.ph1)
-        self.p2 = self._ifft2(self.ph2)
-        self.xi1 = self._ifft2(-self.wv2*self.ph1)
-        self.xi2 = self._ifft2(-self.wv2*self.ph2)
+        self.p1 = ifft2(self, self.ph1)
+        self.p2 = ifft2(self, self.ph2)
+        self.xi1 = ifft2(self, -self.wv2*self.ph1)
+        self.xi2 = ifft2(self, -self.wv2*self.ph2)
         self.Jptpc = -self.advect(
                     (self.p1 - self.p2),
                     (self.del1*self.u1 + self.del2*self.u2),
@@ -434,3 +418,22 @@ class QGModel(object):
     def get_diagnostic(self, dname):
         return (self.diagnostics[dname]['value'] / 
                 self.diagnostics[dname]['count'])
+
+
+# DFT functions
+def fft2(cself, a):
+    if cself.fftw:
+        aw = pyfftw.n_byte_align_empty(a.shape, 8, 'float64')
+        aw[:]= a.copy()
+        return pyfftw.builders.rfft2(aw,threads=cself.ntd)()
+    else:
+        return np.fft.rfft2(a)
+
+def ifft2(cself, ah):
+    if cself.fftw:
+        awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
+        awh[:]= ah.copy()
+        return pyfftw.builders.irfft2(awh,threads=cself.ntd)()
+    else:
+        return np.fft.irfft2(ah)
+

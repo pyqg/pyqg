@@ -32,14 +32,14 @@ class QGModel(object):
         # timestepping parameters
         dt=7200.,                   # numerical timestep
         tplot=10000.,               # interval for plots (in timesteps)
-        tcfl=1000.,                 # interval for cfl writeout (in timesteps)
+        tprint=1000.,               # interval for cfl and ke writeout (in timesteps)
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
         tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
-        # fft parameter
+        # fft parameters
         fftw = False,               # fftw flag 
         ntd = 3,                    # number of threads to use in fftw computations
         ):
@@ -100,7 +100,7 @@ class QGModel(object):
         # timestepping
         self.dt = dt
         self.tplot = tplot
-        self.tcfl = tcfl
+        self.tprint = tprint
         self.tmax = tmax
         self.tavestart = tavestart
         self.taveint = taveint
@@ -164,19 +164,16 @@ class QGModel(object):
         self.a21 = -((self.F2)/det)
         self.a22 = -((self.wv2 + self.F1)/det)
 
-        self.det = det
-
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
         self.filtr = np.exp(-23.6*(wvx-cphi)**4.)     
         self.filtr[wvx<=cphi] = 1.                   
 
-
         # initialize timestep
         self.t=0        # actual time
         self.tc=0       # timestep number
-        
+
         # Set time-stepping parameters for very first timestep (Euler-forward stepping).
         # Second-order Adams Bashford used thereafter and is set up at the end of the first time-step (see below)
         self.dqh1dt_p = 0.
@@ -191,6 +188,7 @@ class QGModel(object):
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
+
 
     def set_q1q2(self, q1, q2):
         self.q1 = q1
@@ -238,6 +236,7 @@ class QGModel(object):
                 break
 
     def _step_forward(self):
+
         # compute grid space qgpv
         self.q1 = ifft2(self, self.qh1)
         self.q2 = ifft2(self, self.qh2)
@@ -247,16 +246,30 @@ class QGModel(object):
         self.u1, self.v1 = self.caluv(self.ph1)
         self.u2, self.v2 = self.caluv(self.ph2)
         
+        # the actual Adams-Bashforth stepping can only be used starting
+        # at the second time-step and is thus set here:   
+        if self.tc==0:
+            self.dt0 = 1.5*self.dt
+            self.dt1 = -0.5*self.dt
+
+            # initialize ke and time arrays
+            self.ke = np.array([self.calc_ke()])
+            self.time = np.array([self.t])
+
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-        # check cfl
-        if (self.tc % self.tcfl)==0:
+        #   print out
+        if (self.tc % self.tprint)==0:
             print 't=%16d, tc=%10d: cfl=%5.6f, ke=%5.6f' % (
                    self.t, self.tc, self.calc_cfl(), \
-                           self.calc_ke() )
+                           self.ke[-1] )
         
+            # append ke and time
+            self.ke = np.append(self.ke,self.calc_ke())
+            self.time = np.append(self.time,self.t)
+
         # compute tendency from advection and bottom drag:  
         self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
                   -self.beta1*1j*self.k*self.ph1)
@@ -272,14 +285,8 @@ class QGModel(object):
         # remember previous tendencies
         self.dqh1dt_p = self.dqh1dt.copy()
         self.dqh2dt_p = self.dqh2dt.copy()
-        
-        # the actual Adams-Bashforth stepping can only be used starting
-        # at the second time-step and is thus set here:   
-        if self.tc==0:
-            self.dt0 = 1.5*self.dt
-            self.dt1 = -0.5*self.dt
-        
-        # augment timestep
+                
+        # augment timestep and current time
         self.tc += 1
         self.t += self.dt
     
@@ -418,7 +425,6 @@ class QGModel(object):
     def get_diagnostic(self, dname):
         return (self.diagnostics[dname]['value'] / 
                 self.diagnostics[dname]['count'])
-
 
 # DFT functions
 def fft2(cself, a):

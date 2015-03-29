@@ -312,21 +312,11 @@ class QGModel(object):
         return np.abs(np.hstack([self.u1 + self.U1, self.v1,
                           self.u2 + self.U2, self.v2])).max()*self.dt/self.dx
 
-    def ke_spec(self,ph):
-        return .5 * ( self.wv2 * np.abs(ph)**2 ) / self.M**2 
-
-    def spec_var(self,ph):
-        """ compute variance of p from Fourier coefficients ph """
-        var_dens = 2. * np.abs(ph)**2 / self.M**2 
-        # only half of coefs [0] and [nx/2+1] due to symmetry in real fft2
-        var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2. 
-        return var_dens.sum()
-
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
     def calc_ke(self):
-        ke1 = self.spec_var(self.wv*self.ph1) / 2.
-        ke2 = self.spec_var(self.wv*self.ph2) / 2.
+        ke1 = spec_var(self, self.wv*self.ph1) / 2.
+        ke2 = spec_var(self, self.wv*self.ph2) / 2.
         return ke1.sum() + ke2.sum()
 
     def set_active_diagnostics(self, diagnostics_list):
@@ -471,4 +461,16 @@ def ifft2(cself, ah):
         return pyfftw.builders.irfft2(awh,threads=cself.ntd)()
     else:
         return np.fft.irfft2(ah)
+
+
+# some diagnostics 
+def ke_spec(self,ph):
+    return .5 * ( self.wv2 * np.abs(ph)**2 ) / self.M**2 
+
+def spec_var(self,ph):
+    """ compute variance of p from Fourier coefficients ph """
+    var_dens = 2. * np.abs(ph)**2 / self.M**2 
+    # only half of coefs [0] and [nx/2+1] due to symmetry in real fft2
+    var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2.
+    return var_dens.sum()
 

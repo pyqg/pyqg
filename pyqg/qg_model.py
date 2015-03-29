@@ -27,12 +27,13 @@ class QGModel(object):
         rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
         delta=0.25,                 # layer thickness ratio (H1/H2)
+        H1 = 500,                   # depth of layer 1 (H1)
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
         # timestepping parameters
         dt=7200.,                   # numerical timestep
         tplot=10000.,               # interval for plots (in timesteps)
-        tprint=1000.,               # interval for cfl and ke writeout (in timesteps)
+        twrite=1000.,               # interval for cfl and ke writeout (in timesteps)
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
@@ -95,12 +96,14 @@ class QGModel(object):
         self.rek = rek
         self.rd = rd
         self.delta = delta
+        self.H1 = H1
+        self.H2 = H1/delta
         self.U1 = U1
         self.U2 = U2
         # timestepping
         self.dt = dt
         self.tplot = tplot
-        self.tprint = tprint
+        self.twrite = twrite
         self.tmax = tmax
         self.tavestart = tavestart
         self.taveint = taveint
@@ -119,28 +122,30 @@ class QGModel(object):
         # initial conditions: (PV anomalies)
         self.set_q1q2(
             1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
-                                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
-            np.zeros_like(self.x)        
-        )   
+                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
+                np.zeros_like(self.x) )   
 
         # Background zonal flow (m/s):
         self.U = self.U1 - self.U2
 
         # Notice: at xi=1 U=beta*rd^2 = c for xi>1 => U>c
 
-        # wavenumber one
-        self.k0x = 2.*pi/self.L
-        self.k0y = 2.*pi/self.W
+        # wavenumber one (equals to dkx/dky)
+        self.dk = 2.*pi/self.L
+        self.dl = 2.*pi/self.W
+
         # wavenumber grids
-        
-        self.ll = (2.*pi/self.W)*np.append( np.arange(0.,self.nx/2), \
+        self.ll = self.dl*np.append( np.arange(0.,self.nx/2), \
             np.arange(-self.nx/2,0.) )
-        self.kk = (2.*pi/self.L)*np.arange(0.,self.nx/2+1)
+        self.kk = self.dk*np.arange(0.,self.nx/2+1)
 
         self.k, self.l = np.meshgrid(self.kk, self.ll)
         # physical grid spacing
         self.dx = self.L / self.nx
         self.dy = self.W / self.ny
+
+        # constant for spectral normalizations
+        self.M = nx*ny
 
         # the F parameters
         self.F1 = self.rd**-2 / (1.+self.delta)
@@ -154,20 +159,30 @@ class QGModel(object):
         self.del2 = (self.delta+1.)**-1
 
         # isotropic wavenumber^2 grid
-        self.wv2 = np.ma.masked_equal(self.k**2 + self.l**2, 0.).filled(1.e20)
-        self.wv2i = self.wv2**-2
+        # the inversion is not defined at kappa = 0 
+        # it is better to be explicit and not compute
+        self.wv2 = self.k**2 + self.l**2
+        self.wv = np.sqrt( self.wv2 )
+
+        iwv2 = self.wv2 != 0.
+        self.wv2i = np.zeros(self.wv2.shape)
+        self.wv2i[iwv2] = self.wv2[iwv2]**-2
         
         # determine inversion matrix: psi = A q (i.e. A=M_2**(-1) where q=M_2*psi)
+        self.a11 = np.zeros(self.wv2.shape)
+        self.a12,self.a21 = self.a11.copy(), self.a11.copy()
+        self.a22 = self.a11.copy()
+
         det = self.wv2 * (self.wv2 + self.F1 + self.F2)
-        self.a11 = -((self.wv2 + self.F2)/det)
-        self.a12 = -((self.F1)/det)
-        self.a21 = -((self.F2)/det)
-        self.a22 = -((self.wv2 + self.F1)/det)
+        self.a11[iwv2] = -((self.wv2[iwv2] + self.F2)/det[iwv2])
+        self.a12[iwv2] = -((self.F1)/det[iwv2])
+        self.a21[iwv2] = -((self.F2)/det[iwv2])
+        self.a22[iwv2] = -((self.wv2[iwv2] + self.F1)/det[iwv2])
 
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-23.6*(wvx-cphi)**4.)     
+        self.filtr = np.exp(-23.6*(wvx-cphi)**4.)  
         self.filtr[wvx<=cphi] = 1.                   
 
         # initialize timestep
@@ -204,18 +219,19 @@ class QGModel(object):
         
     # compute grid space u and v from fourier streafunctions
     def caluv(self, ph):
-        u = -ifft2(self, 1j*self.l*ph)
+        u = ifft2(self, -1j*self.l*ph)
         v = ifft2(self, 1j*self.k*ph)
         return u, v
   
     # Invert PV for streamfunction
     def invph(self, zh1, zh2):
+        """ From q_i compute psi_i, i= 1,2"""
         ph1 = self.a11*zh1 + self.a12*zh2
         ph2 = self.a21*zh1 + self.a22*zh2
         return ph1, ph2
     
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
-        """Run the model forward until the next snapshot, then yield."""
+        """ Run the model forward until the next snapshot, then yield."""
         
         tsnapints = np.ceil(tsnapint/self.dt)
         nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
@@ -227,11 +243,11 @@ class QGModel(object):
         return
                 
     def run(self):
-        """Run the model forward without stopping until the end."""
+        """ Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
 
-            if np.isnan(self.calc_ke()):
+            if np.isnan(self.qh1.sum()):
                 print " *** Blow up  "
                 break
 
@@ -260,15 +276,15 @@ class QGModel(object):
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-        #   print out
-        if (self.tc % self.tprint)==0:
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%5.6f' % (
+        #    write out
+        if (self.tc % self.twrite)==0:
+            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
                    self.t, self.tc, self.calc_cfl(), \
                            self.ke[-1] )
         
-            # append ke and time
-            self.ke = np.append(self.ke,self.calc_ke())
-            self.time = np.append(self.time,self.t)
+        # append ke and time
+        self.ke = np.append(self.ke,self.calc_ke())
+        self.time = np.append(self.time,self.t)
 
         # compute tendency from advection and bottom drag:  
         self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
@@ -289,16 +305,29 @@ class QGModel(object):
         # augment timestep and current time
         self.tc += 1
         self.t += self.dt
-    
+  
+
+    ### All the diagnostic stuff follows. ###
     def calc_cfl(self):
         return np.abs(np.hstack([self.u1 + self.U1, self.v1,
                           self.u2 + self.U2, self.v2])).max()*self.dt/self.dx
 
-    def calc_ke(self):
-        return  ( 2.*0.5*self.wv2*( np.abs(self.ph1)**2 + \
-                np.abs(self.ph2)**2 )/ ( (self.nx*self.ny)**2) ).sum()
+    def ke_spec(self,ph):
+        return .5 * ( self.wv2 * np.abs(ph)**2 ) / self.M**2 
 
-    ### All the diagnostic stuff follows. ###
+    def spec_var(self,ph):
+        """ compute variance of p from Fourier coefficients ph """
+        var_dens = 2. * np.abs(ph)**2 / self.M**2 
+        # only half of coefs [0] and [nx/2+1] due to symmetry in real fft2
+        var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2. 
+        return var_dens.sum()
+
+    # calculate KE: this has units of m^2 s^{-2}
+    #   (should also multiply by H1 and H2...)
+    def calc_ke(self):
+        ke1 = self.spec_var(self.wv*self.ph1) / 2.
+        ke2 = self.spec_var(self.wv*self.ph2) / 2.
+        return ke1.sum() + ke2.sum()
 
     def set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:

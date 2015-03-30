@@ -191,11 +191,11 @@ class QGModel(object):
 
         # Set time-stepping parameters for very first timestep (Euler-forward stepping).
         # Second-order Adams Bashford used thereafter and is set up at the end of the first time-step (see below)
-        self.dqh1dt_p = 0.
-        self.dqh2dt_p = 0.
-        self.dt0 = self.dt
-        self.dt1 = 0.
-        
+        self.dqh1dt_p, self.dqh1dt_p = np.zeros(self.wv2.shape), np.zeros(self.wv2.shape) 
+        self.dqh2dt_p, self.dqh2dt_p = self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
+        self.dqh1dt_pp, self.dqh1dt_pp = self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
+        self.dqh2dt_pp, self.dqh2dt_pp =  self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
+
         self._initialize_diagnostics()
         if diagnostics_list == 'all':
             pass # by default, all diagnostics are active
@@ -267,24 +267,36 @@ class QGModel(object):
         if self.tc==0:
             self.dt0 = 1.5*self.dt
             self.dt1 = -0.5*self.dt
+            self.dt2 = 0.
 
             # initialize ke and time arrays
             self.ke = np.array([self.calc_ke()])
+            self.eddy_time = np.array([self.calc_eddy_time()])
             self.time = np.array([self.t])
+
+        # third-order AB afterwards
+        if self.tc==1:
+            #self.dt0 =  self.dt * 23/12.
+            #self.dt1 = -self.dt * 16/12.
+            #self.dt2 = self.dt * 5/12.
+            self.dt0 = 1.5*self.dt
+            self.dt1 = -0.5*self.dt
+            self.dt2 = 0.
 
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-        #    write out
+        # write out
         if (self.tc % self.twrite)==0:
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
+            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
                    self.t, self.tc, self.calc_cfl(), \
-                           self.ke[-1] )
+                           self.ke[-1], self.eddy_time[-1] )
         
-        # append ke and time
-        self.ke = np.append(self.ke,self.calc_ke())
-        self.time = np.append(self.time,self.t)
+            # append ke and time
+            self.ke = np.append(self.ke,self.calc_ke())
+            self.eddy_time = np.append(self.eddy_time,self.calc_eddy_time())
+            self.time = np.append(self.time,self.t)
 
         # compute tendency from advection and bottom drag:  
         self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
@@ -294,11 +306,16 @@ class QGModel(object):
               
         # add time tendencies (using Adams-Bashforth):
         self.qh1 = self.filtr*(
-                    self.qh1 + self.dt0*self.dqh1dt + self.dt1*self.dqh1dt_p)
+                    self.qh1 + self.dt0*self.dqh1dt + self.dt1*self.dqh1dt_p\
+                            + self.dt2*self.dqh1dt_pp)
         self.qh2 = self.filtr*(
-                    self.qh2 + self.dt0*self.dqh2dt + self.dt1*self.dqh2dt_p)  
+                    self.qh2 + self.dt0*self.dqh2dt + self.dt1*self.dqh2dt_p\
+                            +  self.dt1*self.dqh2dt_pp)  
         
         # remember previous tendencies
+        self.dqh1dt_pp = self.dqh1dt_p.copy()
+        self.dqh2dt_pp = self.dqh1dt_p.copy()
+        
         self.dqh1dt_p = self.dqh1dt.copy()
         self.dqh2dt_p = self.dqh2dt.copy()
                 
@@ -318,6 +335,15 @@ class QGModel(object):
         ke1 = spec_var(self, self.wv*self.ph1) / 2.
         ke2 = spec_var(self, self.wv*self.ph2) / 2.
         return ke1.sum() + ke2.sum()
+
+    # calculate eddy turn over time 
+    # (perhaps should change to fraction of year...)
+    def calc_eddy_time(self):
+        """ estimate the eddy turn-over time in days """
+        tens1 = 2*pi / np.sqrt( spec_var(self, self.wv2*self.ph1) ) / 86400.
+        tens2 = 2*pi / np.sqrt( spec_var(self, self.wv2*self.ph2) ) / 86400.
+        return (self.H1*tens1 + self.H2*tens2) / (self.H1 + self.H2)
+
 
     def set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
@@ -445,6 +471,7 @@ class QGModel(object):
         return (self.diagnostics[dname]['value'] / 
                 self.diagnostics[dname]['count'])
 
+
 # DFT functions
 def fft2(cself, a):
     if cself.fftw:
@@ -461,7 +488,6 @@ def ifft2(cself, ah):
         return pyfftw.builders.irfft2(awh,threads=cself.ntd)()
     else:
         return np.fft.irfft2(ah)
-
 
 # some diagnostics 
 def ke_spec(self,ph):

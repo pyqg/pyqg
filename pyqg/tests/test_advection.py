@@ -2,11 +2,17 @@ import numpy as np
 from pyqg import qg_model
 
 def test_advect(rtol=1.e-13):
-    """ Make sure advective term vanishes for plane wave """
+    """ Make sure advective term vanishes for plane wave 
+        It is an unpleasant fact that we cannot to get
+        a double precision accuracy when the plane wave is 
+        slanted (kx != 0 and ky !=0 ) """
 
     m = qg_model.QGModel(L=2.*np.pi,nx=256)
 
-    
+    # there are some magic combinations that
+    #   fails the test...try kx=12,ky=24
+    #   should investigate what's going on...
+
     kx = np.array([1.,5.,10.,0.,24.,2.])
     ky = np.array([2.,0.,10.,21.,12.,49.])
 

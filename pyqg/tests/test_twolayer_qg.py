@@ -39,49 +39,49 @@ def test_the_model(rtol=1e-15):
     print 'time:       %g' % m.t
     assert m.t == 93312000.0
     print 'q1norm:     %.15e' % q1norm
-    np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol)
+    np.testing.assert_allclose(q1norm, 9.723198783759038e-08, rtol)
     print 'EKE1:       %.15e' % m.get_diagnostic('EKE1')
     np.testing.assert_allclose(m.get_diagnostic('EKE1'),
-                0.008183776317328265, rtol)
+                5.695448642915733e-03, rtol)
     print 'EKE2:       %.15e' % m.get_diagnostic('EKE2')
     np.testing.assert_allclose(m.get_diagnostic('EKE2'),
-                0.00015616609033468579, rtol)
-    print 'APEgen:     %.15e' % m.get_diagnostic('APEgen')
+                1.088253274803528e-04, rtol)
+    print 'APEge:     %.15e' % m.get_diagnostic('APEgen')
     np.testing.assert_allclose(m.get_diagnostic('APEgen'),
-                2.5225558013107688e-07, rtol)
+                8.842056320175081e-08, rtol)
     print 'EKEdiss:    %.15e' % m.get_diagnostic('EKEdiss')
     np.testing.assert_allclose(m.get_diagnostic('EKEdiss'),
-                1.4806764171539711e-07, rtol)
+                6.368668363708053e-08, rtol)
                 
     entspec = abs(m.get_diagnostic('entspec')).sum()
     print 'entspec:    %.15e' % entspec
     np.testing.assert_allclose(entspec,
-                1.5015983257921716e-06, rtol)
+                5.703438193477885e-07, rtol)
     
     apeflux = abs(m.get_diagnostic('APEflux')).sum()
     print 'apeflux:    %.15e' % apeflux
     np.testing.assert_allclose(apeflux,
-                0.00017889483037254459, rtol)
+                9.192940039964286e-05, rtol)
                 
     KEflux = abs(m.get_diagnostic('KEflux')).sum()
     print 'KEflux:     %.15e' % KEflux
     np.testing.assert_allclose(KEflux,
-                0.00037067750708912918, rtol)
+                1.702621259427053e-04, rtol)
 
     APEgenspec = abs(m.get_diagnostic('APEgenspec')).sum()
     print 'APEgenspec: %.15e' % APEgenspec
     np.testing.assert_allclose(APEgenspec,
-                0.00025837684260178754, rtol)
+                9.058591846403974e-05, rtol)
                 
     KE1spec = abs(m.get_diagnostic('KE1spec')).sum()
     print 'KE1spec:    %.15e' % KE1spec
     np.testing.assert_allclose(KE1spec,
-                8581.3114357188006, rtol)
+                3.338261440237941e+03, rtol)
 
     KE2spec = abs(m.get_diagnostic('KE2spec')).sum()
     print 'KE2spec:    %.15e' % KE2spec
     np.testing.assert_allclose(KE2spec,
-                163.75201433878425, rtol)
+                7.043282793801889e+01, rtol)
                               
                
 

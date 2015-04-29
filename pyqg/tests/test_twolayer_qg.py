@@ -38,51 +38,64 @@ def test_the_model(rtol=1e-15):
 
     print 'time:       %g' % m.t
     assert m.t == 93312000.0
-    print 'q1norm:     %.15e' % q1norm
-    np.testing.assert_allclose(q1norm, 9.723198783759038e-08, rtol)
-    print 'EKE1:       %.15e' % m.get_diagnostic('EKE1')
-    np.testing.assert_allclose(m.get_diagnostic('EKE1'),
-                5.695448642915733e-03, rtol)
-    print 'EKE2:       %.15e' % m.get_diagnostic('EKE2')
-    np.testing.assert_allclose(m.get_diagnostic('EKE2'),
-                1.088253274803528e-04, rtol)
-    print 'APEge:     %.15e' % m.get_diagnostic('APEgen')
-    np.testing.assert_allclose(m.get_diagnostic('APEgen'),
-                8.842056320175081e-08, rtol)
-    print 'EKEdiss:    %.15e' % m.get_diagnostic('EKEdiss')
-    np.testing.assert_allclose(m.get_diagnostic('EKEdiss'),
-                6.368668363708053e-08, rtol)
-                
-    entspec = abs(m.get_diagnostic('entspec')).sum()
-    print 'entspec:    %.15e' % entspec
-    np.testing.assert_allclose(entspec,
-                5.703438193477885e-07, rtol)
     
-    apeflux = abs(m.get_diagnostic('APEflux')).sum()
-    print 'apeflux:    %.15e' % apeflux
-    np.testing.assert_allclose(apeflux,
-                9.192940039964286e-05, rtol)
-                
-    KEflux = abs(m.get_diagnostic('KEflux')).sum()
-    print 'KEflux:     %.15e' % KEflux
-    np.testing.assert_allclose(KEflux,
-                1.702621259427053e-04, rtol)
+    ## do we really need this if we have all the other diagnostics?
+    #print 'q1norm:     %.15e' % q1norm
+    #np.testing.assert_allclose(q1norm, 9.723198783759038e-08, rtol)
+    # old value
+    # np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol)
+    
+    
+    ## raw diagnostics (scalar output)
+    diagnostic_results = {
+        'EKE1': 5.695448642915733e-03,
+        'EKE2': 1.088253274803528e-04,
+        'APEgen': 8.842056320175081e-08,
+        'EKEdiss': 6.368668363708053e-08,        
+    }
+    ## old values
+    #diagnostic_results = {
+    #    'EKE1': 0.008183776317328265,
+    #    'EKE2': 0.00015616609033468579,
+    #    'APEgen': 2.5225558013107688e-07,
+    #    'EKEdiss': 1.4806764171539711e-07,        
+    #}
+    
+    ## need to average these diagnostics
+    avg_diagnostic_results = {
+        'entspec': 5.703438193477885e-07,
+        'APEflux': 9.192940039964286e-05,
+        'KEflux': 1.702621259427053e-04,
+        'APEgenspec': 9.058591846403974e-05,
+        'KE1spec': 3.338261440237941e+03,
+        'KE2spec': 7.043282793801889e+01
+    }
+    
+    ## old values
+    #avg_diagnostic_results = {
+    #    'entspec': 1.5015983257921716e-06,,
+    #    'APEflux': 0.00017889483037254459,
+    #    'KEflux':  0.00037067750708912918,
+    #    'APEgenspec': 0.00025837684260178754,
+    #    'KE1spec': 8581.3114357188006,,
+    #    'KE2spec': 163.75201433878425
+    #}    
+    
+    # first print all output
+    for name, des in diagnostic_results.iteritems():
+        res = m.get_diagnostic(name)
+        print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+    for name, des in avg_diagnostic_results.iteritems():
+        res = np.abs(m.get_diagnostic(name)).sum()
+        print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
 
-    APEgenspec = abs(m.get_diagnostic('APEgenspec')).sum()
-    print 'APEgenspec: %.15e' % APEgenspec
-    np.testing.assert_allclose(APEgenspec,
-                9.058591846403974e-05, rtol)
-                
-    KE1spec = abs(m.get_diagnostic('KE1spec')).sum()
-    print 'KE1spec:    %.15e' % KE1spec
-    np.testing.assert_allclose(KE1spec,
-                3.338261440237941e+03, rtol)
-
-    KE2spec = abs(m.get_diagnostic('KE2spec')).sum()
-    print 'KE2spec:    %.15e' % KE2spec
-    np.testing.assert_allclose(KE2spec,
-                7.043282793801889e+01, rtol)
-                              
+    # now do assertions
+    for name, des in diagnostic_results.iteritems():
+        res = m.get_diagnostic(name)
+        np.testing.assert_allclose(res, des, rtol)
+    for name, des in avg_diagnostic_results.iteritems():
+        res = np.abs(m.get_diagnostic(name)).sum()
+        np.testing.assert_allclose(res, des, rtol)
                
 
 if __name__ == "__main__":

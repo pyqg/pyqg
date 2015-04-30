@@ -30,6 +30,7 @@ class QGModel(object):
         H1 = 500,                   # depth of layer 1 (H1)
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
+        filterfac=23.6,             # the factor for use in the exponential filter
         # timestepping parameters
         dt=7200.,                   # numerical timestep
         tplot=10000.,               # interval for plots (in timesteps)
@@ -65,6 +66,8 @@ class QGModel(object):
         (NOTE: currently some diagnostics assume delta==1)
         U1 -- upper layer flow, units m/s
         U2 -- lower layer flow, units m/s
+        filterfac -- amplitdue of the spectral spherical filter
+                     (originally 18.4, later changed to 23.6)
         
         Timestep-related Keyword Arguments:
         dt -- numerical timstep, units seconds
@@ -101,6 +104,7 @@ class QGModel(object):
         self.H = self.H1 + self.H2
         self.U1 = U1
         self.U2 = U2
+        self.filterfac = filterfac
         # timestepping
         self.dt = dt
         self.tplot = tplot
@@ -183,7 +187,7 @@ class QGModel(object):
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-23.6*(wvx-cphi)**4.)  
+        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
         self.filtr[wvx<=cphi] = 1.  
 
         # initialize timestep

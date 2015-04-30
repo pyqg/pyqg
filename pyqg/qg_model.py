@@ -39,6 +39,7 @@ class QGModel(object):
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
         tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
+        useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -83,6 +84,7 @@ class QGModel(object):
         tsnapint -- time interval for snapshots, units seconds 
         tpickup -- time interval for writing pickup files, units seconds
         (NOTE: all time intervals will be rounded to nearest dt interval)
+        useAB2 -- use second order Adams Bashforth timestepping instead of third
         """
 
         if ny is None: ny = nx
@@ -113,6 +115,7 @@ class QGModel(object):
         self.tavestart = tavestart
         self.taveint = taveint
         self.tpickup = tpickup
+        self.useAB2 = useAB2
         # fft 
         self.fftw = fftw
         self.ntd = ntd
@@ -266,27 +269,14 @@ class QGModel(object):
         self.ph1, self.ph2 = self.invph(self.qh1, self.qh2)
         self.u1, self.v1 = self.caluv(self.ph1)
         self.u2, self.v2 = self.caluv(self.ph2)
-        
-        # Note that Adams-Bashforth is not self-starting
-        # forward Euler at the first step
-        # AB2 at step 2
-        # AB3 from step 3 on
 
         if self.tc==0:
             assert self.calc_cfl()<1., " *** time-step too large "
-            self.dt0 = 1.5*self.dt
-            self.dt1 = -0.5*self.dt
-            self.dt2 = 0.
-
             # initialize ke and time arrays
             self.ke = np.array([self.calc_ke()])
             self.eddy_time = np.array([self.calc_eddy_time()])
             self.time = np.array([0.])
 
-        if self.tc==1:
-            self.dt0 =  self.dt * 23/12.
-            self.dt1 = -self.dt * 16/12.
-            self.dt2 = self.dt * 5/12.
 
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
@@ -310,13 +300,25 @@ class QGModel(object):
         self.dqh2dt = (-self.advect(self.q2, self.u2 + self.U2, self.v2)
                   -self.beta2*1j*self.k*self.ph2 + self.rek*self.wv2*self.ph2)
               
-        # add time tendencies (using Adams-Bashforth):
-        self.qh1 = self.filtr*(
-                    self.qh1 + self.dt0*self.dqh1dt + self.dt1*self.dqh1dt_p\
-                            + self.dt2*self.dqh1dt_pp)
-        self.qh2 = self.filtr*(
-                    self.qh2 + self.dt0*self.dqh2dt + self.dt1*self.dqh2dt_p\
-                            +  self.dt2*self.dqh2dt_pp)  
+        # Note that Adams-Bashforth is not self-starting
+        if self.tc==0:
+            # forward Euler at the first step
+            q1tend = tendency_forward_euler(self.dt, self.dqh1dt)
+            q2tend = tendency_forward_euler(self.dt, self.dqh2dt)
+        elif (self.tc==1) or (self.useAB2):
+            # AB2 at step 2
+            q1tend = tendency_ab2(self.dt, self.dqh1dt, self.dqh1dt_p)
+            q2tend = tendency_ab2(self.dt, self.dqh2dt, self.dqh2dt_p)
+        else:
+            # AB3 from step 3 on
+            q1tend = tendency_ab3(self.dt, self.dqh1dt,
+                        self.dqh1dt_p, self.dqh1dt_pp)
+            q2tend = tendency_ab3(self.dt, self.dqh2dt,
+                        self.dqh2dt_p, self.dqh2dt_pp)
+            
+        # add tendency and filter
+        self.qh1 = self.filtr*(self.qh1 + q1tend)
+        self.qh2 = self.filtr*(self.qh2 + q2tend)  
         
         # remember previous tendencies
         self.dqh1dt_pp = self.dqh1dt_p.copy()
@@ -327,7 +329,6 @@ class QGModel(object):
         # augment timestep and current time
         self.tc += 1
         self.t += self.dt
-  
 
     ### All the diagnostic stuff follows. ###
     def calc_cfl(self):
@@ -504,3 +505,16 @@ def spec_var(self,ph):
     var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2.
     return var_dens.sum()
 
+
+# general purpose timestepping routines
+def tendency_forward_euler(dt, dqdt):
+    """Compute tendency using forward euler timestepping."""
+    return dt * dqdt
+
+def tendency_ab2(dt, dqdt, dqdt_p):
+    """Compute tendency using Adams Bashforth 2nd order timestepping."""
+    return (1.5*dt) * dqdt + (-0.5*dt) * dqdt_p
+
+def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
+    """Compute tendency using Adams Bashforth 3nd order timestepping."""
+    return (23/12.*dt) * dqdt + (-16/12.*dt) * dqdt_p + (5/12.*dt) * dqdt_p 

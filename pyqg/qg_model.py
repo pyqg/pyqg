@@ -43,8 +43,8 @@ class QGModel(object):
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
-        fftw = False,               # fftw flag 
-        ntd = 3,                    # number of threads to use in fftw computations
+        use_fftw = False,               # fftw flag 
+        ntd = 1,                    # number of threads to use in fftw computations
         ):
         """Initialize the two-layer QG model.
         
@@ -117,7 +117,7 @@ class QGModel(object):
         self.tpickup = tpickup
         self.useAB2 = useAB2
         # fft 
-        self.fftw = fftw
+        self.use_fftw = use_fftw
         self.ntd = ntd
 
         # compute timestep stuff
@@ -126,6 +126,9 @@ class QGModel(object):
         self.x,self.y = np.meshgrid(
             np.arange(0.5,self.nx,1.)/self.nx*self.L,
             np.arange(0.5,self.ny,1.)/self.ny*self.W )
+        
+        # initialize fft
+        self.initialize_fft()
         
         # initial conditions: (PV anomalies)
         self.set_q1q2(
@@ -212,23 +215,69 @@ class QGModel(object):
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
+            
+    def initialize_fft(self):
+        # set up fft functions for use later
+        if self.use_fftw:
+            
+            ## drop in replacement for numpy fft
+            # more than twice as fast as the previous code
+            self.fft2 = (lambda x :
+                    pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd))
+            self.ifft2 = (lambda x :
+                    pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd))
+            
+            ## This does some weird stuff that I don't understand
+            ## and in the end does not work.
+            ## Have to better understand the whole byte align thing...
+            #aw = pyfftw.n_byte_align_empty(self.x.shape, 8, 'float64')
+            #fft2 = pyfftw.builders.rfft2(aw,threads=self.ntd)
+            #self.fft2 = (lambda g : fft2(g).copy())
+            ## get an example fourier representation
+            #ah = self.fft2(self.x)
+            
+            #awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
+            #ifft2 = pyfftw.builders.irfft2(awh,threads=self.ntd)
+            #self.ifft2 = (lambda g : ifft2(g).copy())
+            
+            ## this was very slow because it re-initializes the fft plan with every call
+            #def fftw_fft(a):
+            #    aw = pyfftw.n_byte_align_empty(a.shape, 8, 'float64')                 
+            #    aw[:] = a.copy()
+            #    return pyfftw.builders.rfft2(aw,threads=self.ntd)()
+            #def fftw_ifft(ah):
+            #    awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
+            #    awh[:]= ah.copy()
+            #    return pyfftw.builders.irfft2(awh,threads=self.ntd)()
+            #self.fft2 = fftw_fft
+            #self.ifft2 = fftw_ifft
+            
+        else:
+            self.fft2 = np.fft.rfft2
+            self.ifft2 = np.fft.irfft2
      
-    def set_q1q2(self, q1, q2):
+    def set_q1q2(self, q1, q2, check=False):
         self.q1 = q1
         self.q2 = q2
 
         # initialize spectral PV
-        self.qh1 = fft2(self, self.q1)
-        self.qh2 = fft2(self, self.q2) 
+        self.qh1 = self.fft2(self.q1)
+        self.qh2 = self.fft2(self.q2)
+        
+        # check that it works
+        if check:
+            np.testing.assert_allclose(self.q1, q1)
+            np.testing.assert_allclose(self.q1, self.ifft2(self.qh1))
+        
 
     # compute advection in grid space (returns qdot in fourier space)
     def advect(self, q, u, v):
-        return 1j*self.k*fft2(self, u*q) + 1j*self.l*fft2(self, v*q)
+        return 1j*self.k*self.fft2(u*q) + 1j*self.l*self.fft2(v*q)
         
     # compute grid space u and v from fourier streafunctions
     def caluv(self, ph):
-        u = ifft2(self, -1j*self.l*ph)
-        v = ifft2(self, 1j*self.k*ph)
+        u = self.ifft2(-1j*self.l*ph)
+        v = self.ifft2(1j*self.k*ph)
         return u, v
   
     # Invert PV for streamfunction
@@ -262,8 +311,8 @@ class QGModel(object):
     def _step_forward(self):
 
         # compute grid space qgpv
-        self.q1 = ifft2(self, self.qh1)
-        self.q2 = ifft2(self, self.qh2)
+        self.q1 = self.ifft2(self.qh1)
+        self.q2 = self.ifft2(self.qh2)
 
         # invert qgpv to find streamfunction and velocity
         self.ph1, self.ph2 = self.invph(self.qh1, self.qh2)
@@ -454,10 +503,10 @@ class QGModel(object):
            
     def _increment_diagnostics(self):
         # compute intermediate quantities needed for some diagnostics
-        self.p1 = ifft2(self, self.ph1)
-        self.p2 = ifft2(self, self.ph2)
-        self.xi1 = ifft2(self, -self.wv2*self.ph1)
-        self.xi2 = ifft2(self, -self.wv2*self.ph2)
+        self.p1 = self.ifft2( self.ph1)
+        self.p2 = self.ifft2( self.ph2)
+        self.xi1 =self.ifft2( -self.wv2*self.ph1)
+        self.xi2 =self.ifft2( -self.wv2*self.ph2)
         self.Jptpc = -self.advect(
                     (self.p1 - self.p2),
                     (self.del1*self.u1 + self.del2*self.u2),
@@ -481,21 +530,21 @@ class QGModel(object):
 
 
 # DFT functions
-def fft2(self, a):
-    if self.fftw:
-        aw = pyfftw.n_byte_align_empty(a.shape, 8, 'float64')
-        aw[:]= a.copy()
-        return pyfftw.builders.rfft2(aw,threads=self.ntd)()
-    else:
-        return np.fft.rfft2(a)
-
-def ifft2(self, ah):
-    if self.fftw:
-        awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
-        awh[:]= ah.copy()
-        return pyfftw.builders.irfft2(awh,threads=self.ntd)()
-    else:
-        return np.fft.irfft2(ah)
+# def fft2(self, a):
+#     if self.fftw:
+#         aw = pyfftw.n_byte_align_empty(a.shape, 8, 'float64')
+#         aw[:]= a.copy()
+#         return pyfftw.builders.rfft2(aw,threads=self.ntd)()
+#     else:
+#         return np.fft.rfft2(a)
+#
+# def ifft2(self, ah):
+#     if self.fftw:
+#         awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
+#         awh[:]= ah.copy()
+#         return pyfftw.builders.irfft2(awh,threads=self.ntd)()
+#     else:
+#         return np.fft.irfft2(ah)
 
 # some off-class diagnostics 
 def spec_var(self,ph):

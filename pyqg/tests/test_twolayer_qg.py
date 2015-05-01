@@ -24,6 +24,7 @@ def test_the_model(rtol=1e-15):
             tavestart=1*year,     # start time for averaging
             taveint=12800.,
             useAB2=True,
+            #use_fftw=True,
             # diagnostics parameters
             diagnostics_list='all'      # which diagnostics to output)
             )

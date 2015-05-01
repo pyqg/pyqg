@@ -11,7 +11,7 @@ def test_parseval(rtol=1.e-15):
     p1 = np.random.randn(m.nx,m.ny)
     m.p1 = p1 - p1.mean()
 
-    m.ph1 = qg_model.fft2(m,m.p1)
+    m.ph1 = m.fft2(m.p1)
 
     # var(P) from Fourier coefficients
     P_var_spec = qg_model.spec_var(m,m.ph1) 

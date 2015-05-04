@@ -151,6 +151,9 @@ class QGModel(object):
         self.kk = self.dk*np.arange(0.,self.nx/2+1)
 
         self.k, self.l = np.meshgrid(self.kk, self.ll)
+        # complex versions, speeds up computations to precompute
+        self.kj = 1j*self.k
+        self.lj = 1j*self.l
         # physical grid spacing
         self.dx = self.L / self.nx
         self.dy = self.W / self.ny
@@ -165,7 +168,11 @@ class QGModel(object):
         # the meridional PV gradients in each layer
         self.beta1 = self.beta + self.F1*(self.U1 - self.U2)
         self.beta2 = self.beta - self.F2*(self.U1 - self.U2)
+        # complex versions, multiplied by k, speeds up computations to precompute
+        self.beta1jk = self.beta1 * 1j * self.k
+        self.beta2jk = self.beta2 * 1j * self.k
 
+        # layer spacing
         self.del1 = self.delta/(self.delta+1.)
         self.del2 = (self.delta+1.)**-1
 
@@ -199,6 +206,14 @@ class QGModel(object):
         # initialize timestep
         self.t=0        # actual time
         self.tc=0       # timestep number
+        
+        # initialize tendencies to zero
+        self.dqh1dt_adv = np.zeros_like(self.wv2)
+        self.dqh2dt_adv = np.zeros_like(self.wv2)
+        self.dqh1dt_forc = np.zeros_like(self.wv2)
+        self.dqh2dt_forc = np.zeros_like(self.wv2)
+        self.dqh1dt = np.zeros_like(self.wv2)
+        self.dqh2dt = np.zeros_like(self.wv2)
 
         # Set time-stepping parameters for very first timestep (forward Euler stepping).
         # Second-order Adams Bashford (AB2) is used at the second setep
@@ -221,7 +236,7 @@ class QGModel(object):
         if self.use_fftw:
             
             ## drop in replacement for numpy fft
-            # more than twice as fast as the previous code
+            ## more than twice as fast as the previous code
             self.fft2 = (lambda x :
                     pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd))
             self.ifft2 = (lambda x :
@@ -255,6 +270,14 @@ class QGModel(object):
         else:
             self.fft2 = np.fft.rfft2
             self.ifft2 = np.fft.irfft2
+     
+    ### list of all the variables that get transformed
+    ### FFT:
+    ###      self.q1, self.q2, u*q, v*q
+    ### IFFT:
+    ###     -1j*self.l*ph, 1j*self.k*ph, self.qh1, self.qh2
+    ###     (for diagnostics):
+    ###      self.ph1, self.ph2, -self.wv2*self.ph1, -self.wv2*self.ph2
      
     def set_q1q2(self, q1, q2, check=False):
         self.q1 = q1
@@ -310,44 +333,110 @@ class QGModel(object):
 
     def _step_forward(self):
 
-        # compute grid space qgpv
+        # the basic steps are
+        
+        self.invert()
+        # find streamfunction from pv
+        
+        self.advection_tendency()
+        # use streamfunction to calculate advection tendency
+        
+        self.forcing_tendency()
+        # apply friction and external forcing
+        
+        self.calc_diagnostics()
+        # do what has to be done with diagnostics
+        
+        self.forward_timestep()
+        # apply tendencies to step the model forward
+        # (filter gets called here)
+
+
+    def invert(self):
+        """invert qgpv to find streamfunction."""
+        # this matrix multiplication is an obvious target for optimization
+        self.ph1, self.ph2 = self.invph(self.qh1, self.qh2)
+        np.add(
+            np.multiply(self.a11, self.qh1),
+            np.multiply(self.a12, self.qh2),
+            self.ph1 # output to this variable
+        )
+        np.add(
+            np.multiply(self.a21, self.qh1),
+            np.multiply(self.a22, self.qh2),
+            self.ph2 # output to this variable
+        )
+                        
+    def advection_tendency(self):
+        """Calculate tendency due to advection."""
+        # compute real space qgpv and velocity
         self.q1 = self.ifft2(self.qh1)
         self.q2 = self.ifft2(self.qh2)
+        self.u1 = self.ifft2(-1j*self.l * self.ph1)
+        self.v1 = self.ifft2(1j*self.k * self.ph1)
+        self.u2 = self.ifft2(-1j*self.l * self.ph2)
+        self.v2 = self.ifft2(1j*self.k * self.ph2)
+        
+        # multiply velocity and qgpv to get fluxes
+        uq1 = np.multiply(self.q1, self.u1 + self.U1)
+        vq1 = np.multiply(self.q1, self.v1)        
+        uq2 = np.multiply(self.q2, self.u2 + self.U2)
+        vq2 = np.multiply(self.q2, self.v2)
+        
+        # derivatives in spectral space (including background advection)
+        ddx_uq1 = 1j * self.k * self.fft2(uq1)
+        ddy_vq1 = 1j * self.l * self.fft2(vq1) + (self.beta1jk * self.ph1)
+        ddx_uq2 = 1j * self.k * self.fft2(uq2)
+        ddy_vq2 = 1j * self.l * self.fft2(vq2) + (self.beta2jk * self.ph2)
+        
+        # divergence of advective flux
+        self.dqh1dt_adv = -(ddx_uq1 + ddy_vq1)
+        self.dqh2dt_adv = -(ddx_uq2 + ddy_vq2)        
 
-        # invert qgpv to find streamfunction and velocity
-        self.ph1, self.ph2 = self.invph(self.qh1, self.qh2)
-        self.u1, self.v1 = self.caluv(self.ph1)
-        self.u2, self.v2 = self.caluv(self.ph2)
-
-        if self.tc==0:
-            assert self.calc_cfl()<1., " *** time-step too large "
-            # initialize ke and time arrays
-            self.ke = np.array([self.calc_ke()])
-            self.eddy_time = np.array([self.calc_eddy_time()])
-            self.time = np.array([0.])
+    def forcing_tendency(self):
+        """Calculate tendency due to forcing."""
+        #self.dqh1dt_forc = # just leave blank
+        self.dqh2dt_forc = self.rek * self.wv2 * self.ph2
 
 
+        # this is stuff the Cesar added
+        
+        # if self.tc==0:
+        #     assert self.calc_cfl()<1., " *** time-step too large "
+        #     # initialize ke and time arrays
+        #     self.ke = np.array([self.calc_ke()])
+        #     self.eddy_time = np.array([self.calc_eddy_time()])
+        #     self.time = np.array([0.])
+        
+        
+        ## write out
+        # if (self.tc % self.twrite)==0:
+        #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
+        #            self.t, self.tc, self.calc_cfl(), \
+        #                    self.ke[-1], self.eddy_time[-1] )
+        #
+        #     # append ke and time
+        #     if self.tc > 0.:
+        #         self.ke = np.append(self.ke,self.calc_ke())
+        #         self.eddy_time = np.append(self.eddy_time,self.calc_eddy_time())
+        #         self.time = np.append(self.time,self.t)
+
+
+    def calc_diagnostics(self):
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-        # write out
-        if (self.tc % self.twrite)==0:
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
-                   self.t, self.tc, self.calc_cfl(), \
-                           self.ke[-1], self.eddy_time[-1] )
-        
-            # append ke and time
-            if self.tc > 0.:
-                self.ke = np.append(self.ke,self.calc_ke())
-                self.eddy_time = np.append(self.eddy_time,self.calc_eddy_time())
-                self.time = np.append(self.time,self.t)
 
-        # compute tendency from advection and bottom drag:  
-        self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
-                  -self.beta1*1j*self.k*self.ph1)
-        self.dqh2dt = (-self.advect(self.q2, self.u2 + self.U2, self.v2)
-                  -self.beta2*1j*self.k*self.ph2 + self.rek*self.wv2*self.ph2)
+    def forward_timestep(self):
+        """Step forward based on tendencies"""
+        self.dqh1dt = self.dqh1dt_adv + self.dqh1dt_forc
+        self.dqh2dt = self.dqh2dt_adv + self.dqh2dt_forc
+        
+        #self.dqh1dt = (-self.advect(self.q1, self.u1 + self.U1, self.v1)
+        #          -self.beta1*1j*self.k*self.ph1)
+        #self.dqh2dt = (-self.advect(self.q2, self.u2 + self.U2, self.v2)
+        #          -self.beta2*1j*self.k*self.ph2 + self.rek*self.wv2*self.ph2)
               
         # Note that Adams-Bashforth is not self-starting
         if self.tc==0:

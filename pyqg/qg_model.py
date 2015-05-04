@@ -372,10 +372,10 @@ class QGModel(object):
         # compute real space qgpv and velocity
         self.q1 = self.ifft2(self.qh1)
         self.q2 = self.ifft2(self.qh2)
-        self.u1 = self.ifft2(-1j*self.l * self.ph1)
-        self.v1 = self.ifft2(1j*self.k * self.ph1)
-        self.u2 = self.ifft2(-1j*self.l * self.ph2)
-        self.v2 = self.ifft2(1j*self.k * self.ph2)
+        self.u1 = self.ifft2(-self.lj* self.ph1)
+        self.v1 = self.ifft2(self.kj * self.ph1)
+        self.u2 = self.ifft2(-self.lj * self.ph2)
+        self.v2 = self.ifft2(self.kj * self.ph2)
         
         # multiply velocity and qgpv to get fluxes
         uq1 = np.multiply(self.q1, self.u1 + self.U1)
@@ -384,10 +384,10 @@ class QGModel(object):
         vq2 = np.multiply(self.q2, self.v2)
         
         # derivatives in spectral space (including background advection)
-        ddx_uq1 = 1j * self.k * self.fft2(uq1)
-        ddy_vq1 = 1j * self.l * self.fft2(vq1) + (self.beta1jk * self.ph1)
-        ddx_uq2 = 1j * self.k * self.fft2(uq2)
-        ddy_vq2 = 1j * self.l * self.fft2(vq2) + (self.beta2jk * self.ph2)
+        ddx_uq1 = self.kj * self.fft2(uq1)
+        ddy_vq1 = self.lj * self.fft2(vq1) + (self.beta1jk * self.ph1)
+        ddx_uq2 = self.kj * self.fft2(uq2)
+        ddy_vq2 = self.lj * self.fft2(vq2) + (self.beta2jk * self.ph2)
         
         # divergence of advective flux
         self.dqh1dt_adv = -(ddx_uq1 + ddy_vq1)

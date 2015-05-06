@@ -373,7 +373,7 @@ class QGModel(object):
         """Set background zonal flow"""
         self.U1 = U1
         self.U2 = U2
-        self.Uvec = np.array([U1,U1])[:,np.newaxis,np.newaxis]
+        self.Uvec = np.array([U1,U2])[:,np.newaxis,np.newaxis]
 
     # compute advection in grid space (returns qdot in fourier space)
     def advect(self, q, u, v):
@@ -476,6 +476,8 @@ class QGModel(object):
     def advection_tendency_old(self):    
         q1 = self.ifft2(self.qh[0])
         q2 = self.ifft2(self.qh[1])
+        self.q = np.vstack([q1[np.newaxis,...], 
+                            q2[np.newaxis,...]])
         u1 = self.ifft2(-self.lj* self.ph[0])
         v1 = self.ifft2(self.kj * self.ph[0])
         u2 = self.ifft2(-self.lj * self.ph[1])

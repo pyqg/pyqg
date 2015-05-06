@@ -417,11 +417,12 @@ class QGModel(object):
 
         # the basic steps are
         
-        self.invert()
+        #self.invert()
+        self.invert_old()
         # find streamfunction from pv
         
-        self.advection_tendency()
-        #self.advection_tendency_old()
+        #self.advection_tendency()
+        self.advection_tendency_old()
         # use streamfunction to calculate advection tendency
         
         self.forcing_tendency()
@@ -441,17 +442,22 @@ class QGModel(object):
         self.ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
         self.u = self.ifft2(-self.lj* self.ph)
         self.v = self.ifft2(self.kj * self.ph)
-        
-        # np.add(
-        #     np.multiply(self.a11, self.qh1),
-        #     np.multiply(self.a12, self.qh2),
-        #     self.ph1 # output to this variable
-        # )
-        # np.add(
-        #     np.multiply(self.a21, self.qh1),
-        #     np.multiply(self.a22, self.qh2),
-        #     self.ph2 # output to this variable
-        # )
+    
+    def invert_old(self):
+        ph1 = np.add(
+            np.multiply(self.a11, self.qh[0]),
+            np.multiply(self.a12, self.qh[1]),
+        )
+        ph2 = np.add(
+            np.multiply(self.a21, self.qh[0]),
+            np.multiply(self.a22, self.qh[1]),
+        )
+        self.ph[0] = ph1
+        self.ph[1] = ph2
+        self.u[0] = self.ifft2(-self.lj * ph1)
+        self.v[0] = self.ifft2(self.kj * ph1)
+        self.u[1] = self.ifft2(-self.lj * ph2)
+        self.v[1] = self.ifft2(self.kj * ph2)
                         
     def advection_tendency(self):
         """Calculate tendency due to advection."""

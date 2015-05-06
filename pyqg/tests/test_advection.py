@@ -31,7 +31,7 @@ def test_advect(rtol=1.e-13):
 
         # compute advection
         jacobh = m.advect(m.q1,m.u1,m.v1)
-        jacob = qg_model.ifft2(m,jacobh)
+        jacob = m.ifft2(jacobh)
 
         # residual
         res = np.abs(jacob).std()

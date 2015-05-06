@@ -417,12 +417,12 @@ class QGModel(object):
 
         # the basic steps are
         
-        #self.invert()
-        self.invert_old()
+        self.invert()
+        #self.invert_old()
         # find streamfunction from pv
         
-        #self.advection_tendency()
-        self.advection_tendency_old()
+        self.advection_tendency()
+        #self.advection_tendency_old()
         # use streamfunction to calculate advection tendency
         
         self.forcing_tendency()

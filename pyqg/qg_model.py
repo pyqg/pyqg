@@ -190,17 +190,6 @@ class QGModel(object):
         # determine inversion matrix: psi = A q (i.e. A=M_2**(-1) where q=M_2*psi)
         self._initialize_inversion_matrix()
         
-        # old way
-        self.a11 = np.zeros(self.wv2.shape)
-        self.a12,self.a21 = self.a11.copy(), self.a11.copy()
-        self.a22 = self.a11.copy()
-        #
-        det = self.wv2 * (self.wv2 + self.F1 + self.F2)
-        self.a11[iwv2] = -((self.wv2[iwv2] + self.F2)/det[iwv2])
-        self.a12[iwv2] = -((self.F1)/det[iwv2])
-        self.a21[iwv2] = -((self.F2)/det[iwv2])
-        self.a22[iwv2] = -((self.wv2[iwv2] + self.F1)/det[iwv2])
-
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
@@ -376,6 +365,7 @@ class QGModel(object):
         self.Uvec = np.array([U1,U2])[:,np.newaxis,np.newaxis]
 
     # compute advection in grid space (returns qdot in fourier space)
+    # *** don't remove! needed for diagnostics (but not forward model) ***
     def advect(self, q, u, v):
         return 1j*self.k*self.fft2(u*q) + 1j*self.l*self.fft2(v*q)
         
@@ -416,6 +406,7 @@ class QGModel(object):
     def _step_forward(self):
 
         # the basic steps are
+        self.print_status()
         
         self.invert()
         #self.invert_old()
@@ -428,7 +419,7 @@ class QGModel(object):
         self.forcing_tendency()
         # apply friction and external forcing
         
-        #self.calc_diagnostics()
+        self.calc_diagnostics()
         # do what has to be done with diagnostics
         
         self.forward_timestep()
@@ -518,8 +509,14 @@ class QGModel(object):
         #     self.time = np.array([0.])
         
         
-        ## write out
-        # if (self.tc % self.twrite)==0:
+    def print_status(self):
+        """Output some basic stats."""
+        if (self.tc % self.twrite)==0:
+            ke = self.calc_ke()
+            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
+                   self.t, self.tc, self.calc_cfl(), self.calc_ke())
+            assert self.calc_cfl()<1., "CFL condition violated"
+            
         #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
         #            self.t, self.tc, self.calc_cfl(), \
         #                    self.ke[-1], self.eddy_time[-1] )
@@ -588,14 +585,15 @@ class QGModel(object):
 
     ### All the diagnostic stuff follows. ###
     def calc_cfl(self):
-        return np.abs(np.hstack([self.u1 + self.U1, self.v1,
-                          self.u2 + self.U2, self.v2])).max()*self.dt/self.dx
+        return np.abs(
+            np.hstack([self.u + self.Uvec, self.v])
+        ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
     def calc_ke(self):
-        ke1 = .5*self.H1*spec_var(self, self.wv*self.ph1)
-        ke2 = .5*self.H2*spec_var(self, self.wv*self.ph2) 
+        ke1 = .5*self.H1*spec_var(self, self.wv*self.ph[0])
+        ke2 = .5*self.H2*spec_var(self, self.wv*self.ph[1]) 
         return ( ke1.sum() + ke2.sum() ) / self.H
 
     # calculate eddy turn over time 
@@ -620,74 +618,74 @@ class QGModel(object):
         self.add_diagnostic('entspec',
             description='barotropic enstrophy spectrum',
             function= (lambda self:
-                      np.abs(self.del1*self.qh1 + self.del2*self.qh2)**2.)
+                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
         )
             
         self.add_diagnostic('APEflux',
             description='spectral flux of available potential energy',
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
-              np.real((self.ph1-self.ph2)*np.conj(self.Jptpc)) )
+              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
 
         )
         
         self.add_diagnostic('KEflux',
             description='spectral flux of kinetic energy',
             function= (lambda self:
-              np.real(self.del1*self.ph1*np.conj(self.Jp1xi1)) + 
-              np.real(self.del2*self.ph2*np.conj(self.Jp2xi2)) )
+              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[1])) + 
+              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[0])) )
         )
 
         self.add_diagnostic('KE1spec',
             description='upper layer kinetic energy spectrum',
-            function=(lambda self: 0.5*self.wv2*np.abs(self.ph1)**2)
+            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[0])**2)
         )
         
         self.add_diagnostic('KE2spec',
             description='lower layer kinetic energy spectrum',
-            function=(lambda self: 0.5*self.wv2*np.abs(self.ph2)**2)
+            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[1])**2)
         )
         
         self.add_diagnostic('q1',
             description='upper layer QGPV',
-            function= (lambda self: self.q1)
+            function= (lambda self: self.q[0])
         )
 
         self.add_diagnostic('q2',
             description='lower layer QGPV',
-            function= (lambda self: self.q2)
+            function= (lambda self: self.q[1])
         )
 
         self.add_diagnostic('EKE1',
             description='mean upper layer eddy kinetic energy',
-            function= (lambda self: 0.5*(self.v1**2 + self.u1**2).mean())
+            function= (lambda self: 0.5*(self.v[0]**2 + self.u[0]**2).mean())
         )
 
         self.add_diagnostic('EKE2',
             description='mean lower layer eddy kinetic energy',
-            function= (lambda self: 0.5*(self.v2**2 + self.u2**2).mean())
+            function= (lambda self: 0.5*(self.v[1]**2 + self.u[1]**2).mean())
         )
         
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function= (lambda self:
                        (self.del2*self.rek*self.wv2*
-                        np.abs(self.ph2)**2./(self.nx*self.ny)).sum())
+                        np.abs(self.ph[1])**2./(self.nx*self.ny)).sum())
         )
         
         self.add_diagnostic('APEgenspec',
             description='spectrum of APE generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real(1j*self.k*(self.del1*self.ph1 + self.del2*self.ph2) *
-                                  np.conj(self.ph1 - self.ph2)) )
+                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
+                                  np.conj(self.ph[0] - self.ph[1])) )
         )
         
         self.add_diagnostic('APEgen',
             description='total APE generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*
-                           (self.del1*self.ph1 + self.del2*self.ph2) *
-                            np.conj(self.ph1 - self.ph2)).sum() / 
+                           (self.del1*self.ph[0] + self.del2*self.ph[1]) *
+                            np.conj(self.ph[0] - self.ph[1])).sum() / 
                             (self.nx*self.ny) )
         )
 
@@ -710,17 +708,15 @@ class QGModel(object):
            
     def _increment_diagnostics(self):
         # compute intermediate quantities needed for some diagnostics
-        self.p1 = self.ifft2( self.ph1)
-        self.p2 = self.ifft2( self.ph2)
-        self.xi1 =self.ifft2( -self.wv2*self.ph1)
-        self.xi2 =self.ifft2( -self.wv2*self.ph2)
+        
+        self.p = self.ifft2( self.ph)
+        self.xi =self.ifft2( -self.wv2*self.ph)
         self.Jptpc = -self.advect(
-                    (self.p1 - self.p2),
-                    (self.del1*self.u1 + self.del2*self.u2),
-                    (self.del1*self.v1 + self.del2*self.v2))
+                    (self.p[0] - self.p[1]),
+                    (self.del1*self.u[0] + self.del2*self.u[1]),
+                    (self.del1*self.v[0] + self.del2*self.v[1]))
         # fix for delta.neq.1
-        self.Jp1xi1 = self.advect(self.xi1, self.u1, self.v1)
-        self.Jp2xi2 = self.advect(self.xi2, self.u2, self.v2)
+        self.Jpxi = self.advect(self.xi, self.u, self.v)
         
         for dname in self.diagnostics:
             if self.diagnostics[dname]['active']:

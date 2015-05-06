@@ -81,7 +81,7 @@ class PyqgModelTester(unittest.TestCase):
                 v = k**-1 * np.sin(k * self.m.x)
         
                 self.m.set_q1q2(q, q)
-                self.m.invert()
+                self.m._invert()
         
                 for nz in range(self.m.nz):
                     np.testing.assert_allclose(self.m.u[nz], u, rtol,
@@ -115,7 +115,7 @@ class PyqgModelTester(unittest.TestCase):
                 self.m.set_U1U2(0.,0.)
         
                 # calculate tendency
-                self.m.advection_tendency()
+                self.m._advection_tendency()
         
                 # expected amplitude of RFFT
                 amp = (self.m.nx/2)**2 * self.m.ny**2
@@ -155,15 +155,15 @@ class PyqgModelTester(unittest.TestCase):
         # make sure we are at the zero timestep
         self.assertEqual(self.m.tc, 0)
         # step forward first time (should use forward Euler)
-        self.m.forward_timestep()
+        self.m._forward_timestep()
         np.testing.assert_allclose(self.m.qh, 1*self.m.dt*dqhdt,
             err_msg='First timestep incorrect')
         # step forward second time (should use AB2)
-        self.m.forward_timestep()
+        self.m._forward_timestep()
         np.testing.assert_allclose(self.m.qh, 2*self.m.dt*dqhdt,
             err_msg='Second timestep incorrect')
         # step forward third time (should use AB3)
-        self.m.forward_timestep()
+        self.m._forward_timestep()
         np.testing.assert_allclose(self.m.qh, 3*self.m.dt*dqhdt,
             err_msg='Third timestep incorrect')
         

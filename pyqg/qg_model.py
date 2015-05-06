@@ -120,22 +120,88 @@ class QGModel(object):
         self.use_fftw = use_fftw
         self.ntd = ntd
 
-        # compute timestep stuff
-        self.taveints = np.ceil(taveint/dt)      
+        self._initialize_grid()
+        self._initialize_fft()
+        self._initialize_background()
+        self._initialize_forcing()
+        self._initialize_inversion_matrix()
+        self._initialize_state_variables()
+        self._initialize_time()        
+        
+        # initial conditions: (PV anomalies)
+        self.set_q1q2(
+            1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
+                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
+                np.zeros_like(self.x) )   
+        
+        
+        self._initialize_diagnostics()
+        if diagnostics_list == 'all':
+            pass # by default, all diagnostics are active
+        elif diagnostics_list == 'none':
+            self.set_active_diagnostics([])
+        else:
+            self.set_active_diagnostics(diagnostics_list)
+    
+    def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
+        """ Run the model forward until the next snapshot, then yield."""
+        
+        tsnapints = np.ceil(tsnapint/self.dt)
+        nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
+        
+        while(self.t < self.tmax):
+            self._step_forward()
+            if self.t>=tsnapstart and (self.tc%tsnapints)==0:
+                yield self.t
+        return
+                
+    def run(self):
+        """ Run the model forward without stopping until the end."""
+        while(self.t < self.tmax): 
+            self._step_forward()
 
+            if np.isnan(self.qh[0,0,0]):
+                print " *** Blow up  "
+                break
+                
+    ### PRIVATE METHODS - not meant to be called by user ###
+
+    def _step_forward(self):
+
+        # the basic steps are
+        
+        self._print_status()
+        
+        self._invert()
+        # find streamfunction from pv
+        
+        self._advection_tendency()
+        # use streamfunction to calculate advection tendency
+        
+        self._forcing_tendency()
+        # apply friction and external forcing
+        
+        self._calc_diagnostics()
+        # do what has to be done with diagnostics
+        
+        self._forward_timestep()
+        # apply tendencies to step the model forward
+        # (filter gets called here)
+        
+    def _initialize_time(self):
+        """Set up timestep stuff"""
+        self.t=0        # actual time
+        self.tc=0       # timestep number
+        self.taveints = np.ceil(self.taveint/self.dt)      
+        
+    ### initialization routines, only called once at the beginning ###
+    def _initialize_grid(self):
+        """Set up spatial and spectral grids and related constants"""
         self.x,self.y = np.meshgrid(
             np.arange(0.5,self.nx,1.)/self.nx*self.L,
             np.arange(0.5,self.ny,1.)/self.ny*self.W )
-        
-        # initialize fft
-        self.initialize_fft()
-        
-
-        # Background zonal flow (m/s):
-        self.U = self.U1 - self.U2
 
         # Notice: at xi=1 U=beta*rd^2 = c for xi>1 => U>c
-
         # wavenumber one (equals to dkx/dky)
         self.dk = 2.*pi/self.L
         self.dl = 2.*pi/self.W
@@ -156,7 +222,23 @@ class QGModel(object):
         self.dy = self.W / self.ny
 
         # constant for spectral normalizations
-        self.M = nx*ny
+        self.M = self.nx*self.ny
+        
+        # isotropic wavenumber^2 grid
+        # the inversion is not defined at kappa = 0 
+        # it is better to be explicit and not compute
+        self.wv2 = self.k**2 + self.l**2
+        self.wv = np.sqrt( self.wv2 )
+
+        iwv2 = self.wv2 != 0.
+        self.wv2i = np.zeros(self.wv2.shape)
+        self.wv2i[iwv2] = self.wv2[iwv2]**-2
+        
+    def _initialize_background(self):
+        """Set up background state (zonal flow and PV gradients)."""
+        
+        # Background zonal flow (m/s):
+        self.U = self.U1 - self.U2        
 
         # the F parameters
         self.F1 = self.rd**-2 / (1.+self.delta)
@@ -176,47 +258,7 @@ class QGModel(object):
         # layer spacing
         self.del1 = self.delta/(self.delta+1.)
         self.del2 = (self.delta+1.)**-1
-
-        # isotropic wavenumber^2 grid
-        # the inversion is not defined at kappa = 0 
-        # it is better to be explicit and not compute
-        self.wv2 = self.k**2 + self.l**2
-        self.wv = np.sqrt( self.wv2 )
-
-        iwv2 = self.wv2 != 0.
-        self.wv2i = np.zeros(self.wv2.shape)
-        self.wv2i[iwv2] = self.wv2[iwv2]**-2
         
-        # determine inversion matrix: psi = A q (i.e. A=M_2**(-1) where q=M_2*psi)
-        self._initialize_inversion_matrix()
-        
-        # this defines the spectral filter (following Arbic and Flierl, 2003)
-        cphi=0.65*pi
-        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
-        self.filtr[wvx<=cphi] = 1.  
-
-        # initialize timestep
-        self.t=0        # actual time
-        self.tc=0       # timestep number
-        
-        self._initialize_state_variables()
-        
-        # initial conditions: (PV anomalies)
-        self.set_q1q2(
-            1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
-                np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
-                np.zeros_like(self.x) )   
-        
-        
-        self._initialize_diagnostics()
-        if diagnostics_list == 'all':
-            pass # by default, all diagnostics are active
-        elif diagnostics_list == 'none':
-            self.set_active_diagnostics([])
-        else:
-            self.set_active_diagnostics(diagnostics_list)
-
     def _initialize_inversion_matrix(self):
         
         # The matrix multiplication will look like this
@@ -234,16 +276,13 @@ class QGModel(object):
         
         self.a = np.ma.masked_invalid(a).filled(0.)
         
-        
-        # self.a11 = np.zeros(self.wv2.shape)
-        # self.a12,self.a21 = self.a11.copy(), self.a11.copy()
-        # self.a22 = self.a11.copy()
-        #
-        # det = self.wv2 * (self.wv2 + self.F1 + self.F2)
-        # self.a11[iwv2] = -((self.wv2[iwv2] + self.F2)/det[iwv2])
-        # self.a12[iwv2] = -((self.F1)/det[iwv2])
-        # self.a21[iwv2] = -((self.F2)/det[iwv2])
-        # self.a22[iwv2] = -((self.wv2[iwv2] + self.F1)/det[iwv2])
+    def _initialize_forcing(self):
+        """Set up frictional filter."""
+        # this defines the spectral filter (following Arbic and Flierl, 2003)
+        cphi=0.65*pi
+        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
+        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
+        self.filtr[wvx<=cphi] = 1.
             
     def _initialize_state_variables(self):
         
@@ -270,26 +309,8 @@ class QGModel(object):
         # also need to save previous tendencies for Adams Bashforth
         self.dqhdt_p = np.zeros(shape_cplx, dtype_cplx)
         self.dqhdt_pp = np.zeros(shape_cplx, dtype_cplx)
-        
-        # initialize tendencies to zero
-        self.dqh1dt_adv = np.zeros_like(self.wv2)
-        self.dqh2dt_adv = np.zeros_like(self.wv2)
-        self.dqh1dt_forc = np.zeros_like(self.wv2)
-        self.dqh2dt_forc = np.zeros_like(self.wv2)
-        self.dqh1dt = np.zeros_like(self.wv2)
-        self.dqh2dt = np.zeros_like(self.wv2)
-
-        # Set time-stepping parameters for very first timestep (forward Euler stepping).
-        # Second-order Adams Bashford (AB2) is used at the second setep
-        #   and  third-order AB (AB3) is used thereafter
-        self.dqh1dt_p, self.dqh1dt_p = np.zeros(self.wv2.shape), np.zeros(self.wv2.shape) 
-        self.dqh2dt_p, self.dqh2dt_p = self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
-        self.dqh1dt_pp, self.dqh1dt_pp = self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
-        self.dqh2dt_pp, self.dqh2dt_pp =  self.dqh1dt_p.copy(), self.dqh1dt_p.copy()
-
-
             
-    def initialize_fft(self):
+    def _initialize_fft(self):
         # set up fft functions for use later
         if self.use_fftw:
             
@@ -328,14 +349,6 @@ class QGModel(object):
         else:
             self.fft2 = np.fft.rfft2
             self.ifft2 = np.fft.irfft2
-     
-    ### list of all the variables that get transformed
-    ### FFT:
-    ###      self.q1, self.q2, u*q, v*q
-    ### IFFT:
-    ###     -1j*self.l*ph, 1j*self.k*ph, self.qh1, self.qh2
-    ###     (for diagnostics):
-    ###      self.ph1, self.ph2, -self.wv2*self.ph1, -self.wv2*self.ph2
     
     def set_q(self, q):
         self.q = q
@@ -345,13 +358,9 @@ class QGModel(object):
         """Set upper and lower layer PV anomalies."""
         self.q[0] = q1
         self.q[1] = q2
-        #self.q1 = q1
-        #self.q2 = q2
 
         # initialize spectral PV
         self.qh = self.fft2(self.q)
-        #self.qh1 = self.fft2(self.q1)
-        #self.qh2 = self.fft2(self.q2)
         
         # check that it works
         if check:
@@ -367,90 +376,22 @@ class QGModel(object):
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
     def advect(self, q, u, v):
-        return 1j*self.k*self.fft2(u*q) + 1j*self.l*self.fft2(v*q)
+        return self.kj*self.fft2(u*q) + self.lj*self.fft2(v*q)
         
     # compute grid space u and v from fourier streafunctions
     def caluv(self, ph):
         u = self.ifft2(-1j*self.l*ph)
         v = self.ifft2(1j*self.k*ph)
         return u, v
-  
-    # Invert PV for streamfunction
-    def invph(self, zh1, zh2):
-        """ From q_i compute psi_i, i= 1,2"""
-        ph1 = self.a11*zh1 + self.a12*zh2
-        ph2 = self.a21*zh1 + self.a22*zh2
-        return ph1, ph2
-    
-    def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
-        """ Run the model forward until the next snapshot, then yield."""
-        
-        tsnapints = np.ceil(tsnapint/self.dt)
-        nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
-        
-        while(self.t < self.tmax):
-            self._step_forward()
-            if self.t>=tsnapstart and (self.tc%tsnapints)==0:
-                yield self.t
-        return
-                
-    def run(self):
-        """ Run the model forward without stopping until the end."""
-        while(self.t < self.tmax): 
-            self._step_forward()
 
-            if np.isnan(self.qh[0,0,0]):
-                print " *** Blow up  "
-                break
-
-    def _step_forward(self):
-
-        # the basic steps are
-        self.print_status()
-        
-        self.invert()
-        #self.invert_old()
-        # find streamfunction from pv
-        
-        self.advection_tendency()
-        #self.advection_tendency_old()
-        # use streamfunction to calculate advection tendency
-        
-        self.forcing_tendency()
-        # apply friction and external forcing
-        
-        self.calc_diagnostics()
-        # do what has to be done with diagnostics
-        
-        self.forward_timestep()
-        # apply tendencies to step the model forward
-        # (filter gets called here)
-
-
-    def invert(self):
+    def _invert(self):
         """invert qgpv to find streamfunction."""
         # this matrix multiplication is an obvious target for optimization
         self.ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
         self.u = self.ifft2(-self.lj* self.ph)
         self.v = self.ifft2(self.kj * self.ph)
-    
-    def invert_old(self):
-        ph1 = np.add(
-            np.multiply(self.a11, self.qh[0]),
-            np.multiply(self.a12, self.qh[1]),
-        )
-        ph2 = np.add(
-            np.multiply(self.a21, self.qh[0]),
-            np.multiply(self.a22, self.qh[1]),
-        )
-        self.ph[0] = ph1
-        self.ph[1] = ph2
-        self.u[0] = self.ifft2(-self.lj * ph1)
-        self.v[0] = self.ifft2(self.kj * ph1)
-        self.u[1] = self.ifft2(-self.lj * ph2)
-        self.v[1] = self.ifft2(self.kj * ph2)
                         
-    def advection_tendency(self):
+    def _advection_tendency(self):
         """Calculate tendency due to advection."""
         # compute real space qgpv and velocity
         self.q = self.ifft2(self.qh)
@@ -464,35 +405,7 @@ class QGModel(object):
         # convergence of advective flux
         self.dqhdt_adv = -(ddx_uq + ddy_vq)
 
-    def advection_tendency_old(self):    
-        q1 = self.ifft2(self.qh[0])
-        q2 = self.ifft2(self.qh[1])
-        self.q = np.vstack([q1[np.newaxis,...], 
-                            q2[np.newaxis,...]])
-        u1 = self.ifft2(-self.lj* self.ph[0])
-        v1 = self.ifft2(self.kj * self.ph[0])
-        u2 = self.ifft2(-self.lj * self.ph[1])
-        v2 = self.ifft2(self.kj * self.ph[1])
-
-        # multiply velocity and qgpv to get fluxes
-        uq1 = np.multiply(q1, u1 + self.U1)
-        vq1 = np.multiply(q1, v1)
-        uq2 = np.multiply(q2, u2 + self.U2)
-        vq2 = np.multiply(q2, v2)
-
-        # derivatives in spectral space (including background advection)
-        ddx_uq1 = self.kj * self.fft2(uq1)
-        ddy_vq1 = self.lj * self.fft2(vq1) + (self.beta1jk * self.ph[0])
-        ddx_uq2 = self.kj * self.fft2(uq2)
-        ddy_vq2 = self.lj * self.fft2(vq2) + (self.beta2jk * self.ph[1])
-
-        # divergence of advective flux
-        dqh1dt_adv = -(ddx_uq1 + ddy_vq1)
-        dqh2dt_adv = -(ddx_uq2 + ddy_vq2)
-        self.dqhdt_adv = np.vstack([dqh1dt_adv[np.newaxis,...], 
-                                    dqh2dt_adv[np.newaxis,...]])
-
-    def forcing_tendency(self):
+    def _forcing_tendency(self):
         """Calculate tendency due to forcing."""
         #self.dqh1dt_forc = # just leave blank
         # apply only in bottom layer
@@ -509,13 +422,14 @@ class QGModel(object):
         #     self.time = np.array([0.])
         
         
-    def print_status(self):
+    def _print_status(self):
         """Output some basic stats."""
         if (self.tc % self.twrite)==0:
-            ke = self.calc_ke()
+            ke = self._calc_ke()
+            cfl = self._calc_cfl()
             print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
-                   self.t, self.tc, self.calc_cfl(), self.calc_ke())
-            assert self.calc_cfl()<1., "CFL condition violated"
+                   self.t, self.tc, cfl, ke)
+            assert cfl<1., "CFL condition violated"
             
         #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
         #            self.t, self.tc, self.calc_cfl(), \
@@ -528,13 +442,13 @@ class QGModel(object):
         #         self.time = np.append(self.time,self.t)
 
 
-    def calc_diagnostics(self):
+    def _calc_diagnostics(self):
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
 
-    def forward_timestep(self):
+    def _forward_timestep(self):
         """Step forward based on tendencies"""
         
         self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
@@ -584,21 +498,21 @@ class QGModel(object):
         self.t += self.dt
 
     ### All the diagnostic stuff follows. ###
-    def calc_cfl(self):
+    def _calc_cfl(self):
         return np.abs(
             np.hstack([self.u + self.Uvec, self.v])
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
-    def calc_ke(self):
+    def _calc_ke(self):
         ke1 = .5*self.H1*spec_var(self, self.wv*self.ph[0])
         ke2 = .5*self.H2*spec_var(self, self.wv*self.ph[1]) 
         return ( ke1.sum() + ke2.sum() ) / self.H
 
     # calculate eddy turn over time 
     # (perhaps should change to fraction of year...)
-    def calc_eddy_time(self):
+    def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
 
         ens = .5*self.H1 * spec_var(self, self.wv2*self.ph1) + \
@@ -607,7 +521,7 @@ class QGModel(object):
         return 2.*pi*np.sqrt( self.H / ens ) / 86400
 
 
-    def set_active_diagnostics(self, diagnostics_list):
+    def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 

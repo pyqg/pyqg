@@ -69,6 +69,10 @@ class PyqgModelTester(unittest.TestCase):
         #                 $\hat{q} = -(k^2 + l^2) \hat \psi$
         #
         # velocity: u = -dpsi/dy, v = dpsi/dx
+        
+        # set U1 and U2 to zero, since they are now part of the inverted velocity
+        self.m.set_U1U2(0.,0.)
+        
         for kwave in range(1, self.kwavemax):
             for lwave in range(1, self.lwavemax):
 

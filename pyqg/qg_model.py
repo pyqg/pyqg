@@ -181,16 +181,7 @@ class QGModel(model.Model):
         # apply only in bottom layer
         self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
 
-        
-    def _print_status(self):
-        """Output some basic stats."""
-        if (self.tc % self.twrite)==0:
-            ke = self._calc_ke()
-            cfl = self._calc_cfl()
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
-                   self.t, self.tc, cfl, ke)
-            assert cfl<1., "CFL condition violated"
-            
+                    
         #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
         #            self.t, self.tc, self.calc_cfl(), \
         #                    self.ke[-1], self.eddy_time[-1] )

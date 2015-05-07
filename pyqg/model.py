@@ -36,6 +36,7 @@ class Model(object):
         # fft parameters
         use_fftw = False,               # fftw flag 
         ntd = 1,                    # number of threads to use in fftw computations
+        quiet = False,
         ):
         """Initialize the two-layer QG model.
         
@@ -86,6 +87,7 @@ class Model(object):
         self.tavestart = tavestart
         self.taveint = taveint
         self.tpickup = tpickup
+        self.quiet = quiet
         self.useAB2 = useAB2
         # fft 
         self.use_fftw = use_fftw
@@ -322,7 +324,7 @@ class Model(object):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (self.tc % self.twrite)==0:
+        if (not self.quiet) and ((self.tc % self.twrite)==0):
             ke = self._calc_ke()
             cfl = self._calc_cfl()
             print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (

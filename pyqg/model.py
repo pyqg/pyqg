@@ -322,7 +322,7 @@ class Model(object):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (not self.quiet) and ((self.tc % self.twrite)==0):
+        if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
             ke = self._calc_ke()
             cfl = self._calc_cfl()
             print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (

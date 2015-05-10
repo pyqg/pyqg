@@ -100,7 +100,7 @@ class Model(object):
         self._initialize_inversion_matrix()
         self._initialize_state_variables()
         self._initialize_time()                
-        
+       
         self._initialize_diagnostics()
         if diagnostics_list == 'all':
             pass # by default, all diagnostics are active
@@ -108,7 +108,7 @@ class Model(object):
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
-    
+   
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """ Run the model forward until the next snapshot, then yield."""
         
@@ -131,12 +131,11 @@ class Model(object):
     def _step_forward(self):
 
         # the basic steps are
-        
-        self._print_status()
-        
+        self._print_status() 
+
         self._invert()
         # find streamfunction from pv
-        
+
         self._advection_tendency()
         # use streamfunction to calculate advection tendency
         
@@ -192,8 +191,8 @@ class Model(object):
         self.wv = np.sqrt( self.wv2 )
 
         iwv2 = self.wv2 != 0.
-        self.wv2i = np.zeros(self.wv2.shape)
-        self.wv2i[iwv2] = self.wv2[iwv2]**-2
+        self.wv2i = np.zeros_like(self.wv2)
+        self.wv2i[iwv2] = self.wv2[iwv2]**-1
         
     def _initialize_background(self):        
         raise NotImplementedError(
@@ -286,7 +285,6 @@ class Model(object):
     # *** don't remove! needed for diagnostics (but not forward model) ***
     def advect(self, q, u, v):
         return self.kj*self.fft2(u*q) + self.lj*self.fft2(v*q)
-        
 
     def _invert(self):
         """invert qgpv to find streamfunction."""
@@ -324,7 +322,7 @@ class Model(object):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (not self.quiet) and ((self.tc % self.twrite)==0):
+        if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
             ke = self._calc_ke()
             cfl = self._calc_cfl()
             print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
@@ -338,7 +336,8 @@ class Model(object):
 
     def _forward_timestep(self):
         """Step forward based on tendencies"""
-        
+       
+
         self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
               
         # Note that Adams-Bashforth is not self-starting

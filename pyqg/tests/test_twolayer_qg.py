@@ -37,7 +37,12 @@ def test_the_model(rtol=1e-15):
                 
     m.run()
 
-    q1norm = (m.q1**2).sum()
+    try:
+        q1 = m.q1 # old syntax
+    except AttributeError:
+        q1 = m.q[0] # new syntax
+        
+    q1norm = (q1**2).sum()
 
     print 'time:       %g' % m.t
     assert m.t == 93312000.0

@@ -14,19 +14,19 @@ except ImportError:
     pass
 
 class BTModel(model.Model):
-    """A class that represents the single-layer QG model."""
+    """A subclass that represents the single-layer QG model."""
     
     def __init__(
         self,
-        beta=1.5e-11,               # gradient of coriolis parameter
-        rek=5.787e-7,               # linear drag in lower layer
-        rd=15000.0,                 # deformation radius
-        H = 4000,                   # depth of layer 1 (H)
+        beta=0.,                    # gradient of coriolis parameter
+        rek=0.,                     # linear drag in lower layer
+        rd=0.,                      # deformation radius
+        H = 1.,                     # depth of layer
         U=0.,                       # max vel. of base-state
-        filterfac=23.6,             # the factor for use in the exponential filter
+        filterfac = 23.6,           # the factor for use in the exponential filter
         **kwargs
         ):
-        """Initialize the single-layer QG model.
+        """Initialize the single-layer (barotropic) QG model.
 
         beta -- gradient of coriolis parameter, units m^-1 s^-1
         rek -- linear drag in lower layer, units seconds^-1
@@ -46,12 +46,18 @@ class BTModel(model.Model):
         self.filterfac = filterfac
         
         self.nz = 1
-        
+       
+        # deformation wavenumber
+        if rd:
+            self.kd2 = rd**-2
+        else:
+            self.kd2 = 0.
+    
         super(BTModel, self).__init__(**kwargs)
-        
+     
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(self.ny,self.nx))
-     
+ 
     ### PRIVATE METHODS - not meant to be called by user ###
         
     def _initialize_background(self):
@@ -63,16 +69,15 @@ class BTModel(model.Model):
         # background vel.
         self.set_U(self.U)        
 
-        # complex versions, multiplied by k, speeds up computations to precompute
+        # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
         
         self.ilQx = 0.
-    
 
     def _initialize_inversion_matrix(self):
         """ the inversion """ 
-        # The bt model is diagonal. The inversions is simply qh = -kappa**2 ph
-        self.a = np.ma.masked_invalid(-self.wv2i).filled(0.)
+        # The bt model is diagonal. The inversion is simply qh = -kappa**2 ph
+        self.a = -(self.wv2i+self.kd2)
 
     def _initialize_forcing(self):
         """Set up frictional filter."""
@@ -110,8 +115,7 @@ class BTModel(model.Model):
         # also need to save previous tendencies for Adams Bashforth
         self.dqhdt_p = np.zeros(shape_cplx, dtype_cplx)
         self.dqhdt_pp = np.zeros(shape_cplx, dtype_cplx)
-                
-     
+                 
     def set_q(self, q, check=False):
         """ Set PV anomaly """
         self.q = q
@@ -130,22 +134,20 @@ class BTModel(model.Model):
 
     def _invert(self):
         """ invert qgpv to find streamfunction. """
-        # this matrix multiplication is an obvious target for optimization
         self.ph = self.a*self.qh
         self.u = self.ifft2(-self.lj* self.ph) + self.Ubg
         self.v = self.ifft2(self.kj * self.ph)
 
     def _forcing_tendency(self):
         """Calculate tendency due to forcing."""
-        #self.dqh1dt_forc = # just leave blank
         # apply only in bottom layer
         self.dqhdt_forc = self.rek * self.wv2 * self.ph
 
-#    def _calc_diagnostics(self):
-#        # here is where we calculate diagnostics
-#        if (self.t>=self.dt) and (self.tc%self.taveints==0):
-#            self._increment_diagnostics()
-#
+    def _calc_diagnostics(self):
+        # here is where we calculate diagnostics
+        if (self.t>=self.dt) and (self.tc%self.taveints==0):
+            self._increment_diagnostics()
+
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
@@ -153,7 +155,6 @@ class BTModel(model.Model):
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}
-    #   (should also multiply by H1 and H2...)
     def _calc_ke(self):
         ke = .5*spec_var(self, self.wv*self.ph)
         return ke.sum()
@@ -163,99 +164,44 @@ class BTModel(model.Model):
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
 
-        ens = .5*self.H * spec_var(self, self.wv2*self.ph1)
+        ens = .5*self.H * spec_var(self, self.wv2*self.ph)
 
-        return 2.*pi*np.sqrt( self.H / ens ) / 86400
+        return 2.*pi*np.sqrt( self.H / ens ) / year
 
-#    def _calc_derived_fields(self):
-#        self.p = self.ifft2( self.ph)
-#        self.xi =self.ifft2( -self.wv2*self.ph)
-#        self.Jptpc = -self.advect(
-#                    (self.p[0] - self.p[1]),
-#                    (self.del1*self.u[0] + self.del2*self.u[1]),
-#                    (self.del1*self.v[0] + self.del2*self.v[1]))
-#        # fix for delta.neq.1
-#        self.Jpxi = self.advect(self.xi, self.u, self.v)
-#
-#    def _initialize_diagnostics(self):
-#        # Initialization for diagnotics
-#        self.diagnostics = dict()
-#
-#        self.add_diagnostic('entspec',
-#            description='barotropic enstrophy spectrum',
-#            function= (lambda self:
-#                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
-#        )
-#            
-#        self.add_diagnostic('APEflux',
-#            description='spectral flux of available potential energy',
-#            function= (lambda self:
-#              self.rd**-2 * self.del1*self.del2 *
-#              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
-#
-#        )
-#        
-#        self.add_diagnostic('KEflux',
-#            description='spectral flux of kinetic energy',
-#            function= (lambda self:
-#              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[1])) + 
-#              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[0])) )
-#        )
-#
-#        self.add_diagnostic('KE1spec',
-#            description='upper layer kinetic energy spectrum',
-#            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[0])**2)
-#        )
-#        
-#        self.add_diagnostic('KE2spec',
-#            description='lower layer kinetic energy spectrum',
-#            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[1])**2)
-#        )
-#        
-#        self.add_diagnostic('q1',
-#            description='upper layer QGPV',
-#            function= (lambda self: self.q[0])
-#        )
-#
-#        self.add_diagnostic('q2',
-#            description='lower layer QGPV',
-#            function= (lambda self: self.q[1])
-#        )
-#
-#        self.add_diagnostic('EKE1',
-#            description='mean upper layer eddy kinetic energy',
-#            function= (lambda self: 0.5*(self.v[0]**2 + self.u[0]**2).mean())
-#        )
-#
-#        self.add_diagnostic('EKE2',
-#            description='mean lower layer eddy kinetic energy',
-#            function= (lambda self: 0.5*(self.v[1]**2 + self.u[1]**2).mean())
-#        )
-#        
-#        self.add_diagnostic('EKEdiss',
-#            description='total energy dissipation by bottom drag',
-#            function= (lambda self:
-#                       (self.del2*self.rek*self.wv2*
-#                        np.abs(self.ph[1])**2./(self.nx*self.ny)).sum())
-#        )
-#        
-#        self.add_diagnostic('APEgenspec',
-#            description='spectrum of APE generation',
-#            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-#                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
-#                                  np.conj(self.ph[0] - self.ph[1])) )
-#        )
-#        
-#        self.add_diagnostic('APEgen',
-#            description='total APE generation',
-#            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-#                       np.real(1j*self.k*
-#                           (self.del1*self.ph[0] + self.del2*self.ph[1]) *
-#                            np.conj(self.ph[0] - self.ph[1])).sum() / 
-#                            (self.nx*self.ny) )
-#        )
-#
+    def _calc_derived_fields(self):
+        self.p = self.ifft2( self.ph)
+        self.xi =self.ifft2( -self.wv2*self.ph)
+        self.Jptpc = -self.advect(self.p,self.u,self.v)
+        self.Jpxi = self.advect(self.xi, self.u, self.v)
 
+
+    def _initialize_diagnostics(self):
+        # Initialization for diagnotics
+        self.diagnostics = dict()
+
+        self.add_diagnostic('Ensspec',
+            description='enstrophy spectrum',
+            function= (lambda self: np.abs(self.qh)**2/self.M**2)
+            )
+            
+        self.add_diagnostic('KEspec',
+            description=' kinetic energy spectrum',
+            function=(lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
+            )  # factor of 2 to account for the fact that we have only half of 
+               #    the Fourier coefficients.
+
+        self.add_diagnostic('q',
+            description='QGPV',
+            function= (lambda self: self.q)
+        )
+
+        self.add_diagnostic('EKEdiss',
+            description='total energy dissipation by bottom drag',
+            function= (lambda self:
+                       (self.rek*self.wv2*
+                        np.abs(self.ph)**2./(self.M**2)).sum())
+        )
+        
 # some off-class diagnostics
 def spec_var(self,ph):
     """ compute variance of p from Fourier coefficients ph """

@@ -35,6 +35,7 @@ class Model(object):
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
         use_fftw = False,               # fftw flag 
+        teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
         ):
@@ -65,6 +66,7 @@ class Model(object):
         tsnapint -- time interval for snapshots, units seconds 
         tpickup -- time interval for writing pickup files, units seconds
         (NOTE: all time intervals will be rounded to nearest dt interval)
+        use_fftw  -- if True fftw is used with "estimate" planner to get reproducibility (hopefully)
         useAB2 -- use second order Adams Bashforth timestepping instead of third
         """
 
@@ -91,6 +93,7 @@ class Model(object):
         self.useAB2 = useAB2
         # fft 
         self.use_fftw = use_fftw
+        self.teststyle= teststyle
         self.ntd = ntd
 
         self._initialize_grid()
@@ -240,12 +243,19 @@ class Model(object):
         # set up fft functions for use later
         if self.use_fftw:
             
-            ## drop in replacement for numpy fft
-            ## more than twice as fast as the previous code
-            self.fft2 = (lambda x :
-                    pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd))
-            self.ifft2 = (lambda x :
-                    pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd))
+            if self.teststyle:
+                ## drop in replacement for numpy fft
+                ## more than twice as fast as the previous code
+                self.fft2 = (lambda x :
+                        pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd, planner_effort='FFTW_ESTIMATE'))
+                self.ifft2 = (lambda x :
+                        pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd, planner_effort='FFTW_ESTIMATE'))
+            else:
+                self.fft2 = (lambda x :
+                        pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd))
+                self.ifft2 = (lambda x :
+                        pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd))
+             
             
             ## This does some weird stuff that I don't understand
             ## and in the end does not work.

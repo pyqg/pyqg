@@ -25,6 +25,7 @@ def test_the_model(rtol=1e-15):
             taveint=12800.,
             useAB2=True,
             use_fftw=True,
+            teststyle=True,
             # diagnostics parameters
             diagnostics_list='all'      # which diagnostics to output)
             )
@@ -53,7 +54,7 @@ def test_the_model(rtol=1e-15):
     #old value
     #np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol)
     # This value is from Malte's iMac using fftw:
-    np.testing.assert_allclose(q1norm, 9.557023878260622e-08, rtol)
+    np.testing.assert_allclose(q1norm, 9.55790786669029e-08, rtol)
     
     
     # just skip all the other tests for now

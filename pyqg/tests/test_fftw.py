@@ -3,7 +3,7 @@ from numpy import pi
 import time
 import pyfftw
 
-def test_fftw_rfft2(Nx = 64, Ny = None, n = 100000):
+def test_fftw_rfft2(Nx = 64, Ny = None, n = 7200):
     """ A verification of rfft2/irfft2 pyfftw accuracy lost... """
 
     # settings
@@ -58,6 +58,6 @@ if __name__ == "__main__":
 #    for n in N:
 #        test_fftw_rfft(Nx = n)
 
-    N = 2**np.arange(6,8)
+    N = 2**np.arange(5,8)
     for n in N:
         test_fftw_rfft2(Nx = n)

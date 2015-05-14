@@ -1,4 +1,5 @@
 import numpy as np
+import spectral_kernel
 from numpy import pi
 try:   
     import mkl
@@ -12,7 +13,13 @@ try:
 except ImportError:
     pass
 
-class Model(object):
+
+# shape and datatype of data
+dtype_real = np.dtype('float64')            
+dtype_cplx = np.dtype('complex128')
+
+
+class Model(spectral_kernel.PseudoSpectralKernel):
     """A class that represents a generic pseudo-spectral inversion model."""
     
     def __init__(
@@ -97,11 +104,12 @@ class Model(object):
         self.ntd = ntd
 
         self._initialize_grid()
-        self._initialize_fft()
+        #self._initialize_fft()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_inversion_matrix()
-        self._initialize_state_variables()
+        #self._initialize_state_variables()
+        self._initialize_kernel()
         self._initialize_time()                
        
         self._initialize_diagnostics()
@@ -198,8 +206,8 @@ class Model(object):
         self.wv2i[iwv2] = self.wv2[iwv2]**-1
         
     def _initialize_background(self):        
-        raise NotImplementedError(
-            'needs to be implemented by Model subclass')
+        self.Ubg = np.zeros(self.Nz, dtype_real)
+        self.Qy = np.zeros(self.Nz, dtype_real)
         
     def _initialize_inversion_matrix(self):
         raise NotImplementedError(
@@ -209,12 +217,16 @@ class Model(object):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
             
+    def _initialize_kernel(self):
+        super(BTModel, self).__init__(
+            self.nz, self.ny, self.nx,
+            self.a, self.kk, self.ll,
+            self.Ubg, self.Qy
+        )
+            
     def _initialize_state_variables(self):
         """Set up model basic state variables.
         This is universal. All models should store their state this way."""
-        # shape and datatype of data
-        dtype_real = np.dtype('float64')            
-        dtype_cplx = np.dtype('complex128')
         if self.nz > 1:
             shape_real = (self.nz, self.ny, self.nx)
             shape_cplx = (self.nz, self.nl, self.nk)

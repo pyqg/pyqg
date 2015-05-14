@@ -31,8 +31,10 @@ m.set_q(qi,check=True)
 # run the model and plot some figs
 plt.rcParams['image.cmap'] = 'RdBu'
 
+plt.ion()
 
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=15*m.dt):
+
     plt.clf()
     p1 = plt.imshow(m.q + m.beta * m.y)
     plt.clim([-30., 30.])
@@ -40,7 +42,10 @@ for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=15*m.dt):
     
     plt.xticks([])
     plt.yticks([])
-    plt.show()
 
     plt.pause(0.01)
 
+    plt.draw()
+
+plt.show()
+plt.ion()

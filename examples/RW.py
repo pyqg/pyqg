@@ -33,6 +33,9 @@ m.set_q(qi,check=False)
 # run the model
 plt.rcParams['image.cmap'] = 'RdBu'
 
+plt.ion()
+
+
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clf()
     plt.imshow(m.q)
@@ -42,4 +45,6 @@ for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.show()
 
     plt.pause(0.01)
+    plt.ioff()
+    
 

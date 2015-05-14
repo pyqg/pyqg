@@ -5,7 +5,7 @@ from pyqg import bt_model
 
 # the model object
 year = 1.
-m = bt_model.BTModel(L=2.*pi,nx=256, tmax = 5*year,
+m = bt_model.BTModel(L=2.*pi,nx=128, tmax = 1*year,
         beta = 20., H = 1., rek = 0., rd = None, dt = 0.001,
                      taveint=year, use_fftw=True, ntd=4)
 
@@ -29,11 +29,17 @@ qih = -m.wv2*pih
 qi = m.ifft2(qih)
 m.set_q(qi,check=False)
 
+
 # run the model
+plt.rcParams['image.cmap'] = 'RdBu'
+
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clf()
     plt.imshow(m.q)
-    #plt.clim([-55., 55.])
+    plt.clim([-20., 20.])
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
+
     plt.pause(0.01)
 

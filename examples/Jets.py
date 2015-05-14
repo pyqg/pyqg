@@ -6,7 +6,7 @@ from pyqg import bt_model
 # the model object
 year = 1.
 m = bt_model.BTModel(L=2.*pi,nx=256, tmax = 50*year,
-        beta = 20., H = 1., rek = 0., rd = None, dt = 0.001,
+        beta = 21., H = 1., rek = 0., rd = None, dt = 0.001,
                      taveint=year, use_fftw=True, ntd=4)
 
 fk = m.wv != 0
@@ -30,10 +30,13 @@ qi = m.ifft2(qih)
 m.set_q(qi,check=False)
 
 # run the model
+plt.rcParams['image.cmap'] = 'YlOrRd_r'
+
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=200*m.dt):
     plt.clf()
     plt.imshow(m.q + m.beta * m.y)
-    #plt.clim([-55., 55.])
+    plt.clim([-20., 130.])
     plt.show()
+    #plt.title(str(m.t))
     plt.pause(0.01)
 

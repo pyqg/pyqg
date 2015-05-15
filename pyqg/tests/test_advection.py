@@ -24,13 +24,14 @@ def test_advect(rtol=1.e-13):
                 np.zeros_like(m.x) )
 
         # compute psi
-        m.ph1,m.ph2 = m.invph(m.qh1,m.qh2)
+        m._invert()
+        #m.ph1,m.ph2 = m.invph(m.qh1,m.qh2)
 
         # diagnose vel.
-        m.u1,m.v1 = m.caluv(m.ph1)
+        #m.u1,m.v1 = m.caluv(m.ph1)
 
         # compute advection
-        jacobh = m.advect(m.q1,m.u1,m.v1)
+        jacobh = m.advect(m.q[0],m.u[0],m.v[0])
         jacob = m.ifft2(jacobh)
 
         # residual

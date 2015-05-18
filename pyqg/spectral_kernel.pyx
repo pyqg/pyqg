@@ -38,6 +38,12 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :, :] uqh
     cdef DTYPE_com_t [:, :, :] vqh
     
+    # dummy variables for diagnostic ffts
+    cdef DTYPE_real_t [:, :, :] _dummy_fft_in
+    cdef DTYPE_com_t [:, :, :] _dummy_fft_out
+    cdef DTYPE_real_t [:, :, :] _dummy_ifft_out
+    cdef DTYPE_com_t [:, :, :] _dummy_ifft_in
+    
     # the variables needed for inversion and advection
     # store a as complex so we don't have to typecast in inversion
     cdef DTYPE_com_t [:, :, :, :] a
@@ -56,6 +62,8 @@ cdef class PseudoSpectralKernel:
     cdef object ifft_vh_to_v
     cdef object fft_uq_to_uqh
     cdef object fft_vq_to_vqh
+    cdef object _dummy_fft
+    cdef object _dummy_ifft
         
     def _kernel_init(self, int Nz, int Ny, int Nx, 
                     np.ndarray[DTYPE_real_t, ndim=4] a,
@@ -64,7 +72,8 @@ cdef class PseudoSpectralKernel:
                     np.ndarray[DTYPE_real_t, ndim=1] Ubg,
                     #np.ndarray[DTYPE_real_t, ndim=1] Vbg,
                     #np.ndarray[DTYPE_real_t, ndim=1] Qx,
-                    np.ndarray[DTYPE_real_t, ndim=1] Qy,                                       
+                    np.ndarray[DTYPE_real_t, ndim=1] Qy,
+                    fftw_num_threads=1,                                       
     ):
         self.Nz = Nz
         self.Ny = Ny
@@ -94,44 +103,43 @@ cdef class PseudoSpectralKernel:
         self._ikQy = 1j * k[np.newaxis, :] * Qy[:, np.newaxis]
         
         # initialize FFT inputs / outputs as byte aligned by pyfftw
-        q = pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Ny),
-                         pyfftw.simd_alignment, dtype=DTYPE_real)
-        self.q = q
-        qh = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        q = self._byte_align_empty_real()
+        self.q = q # assign to memory view
+        qh = self._byte_align_empty_com()
         self.qh = qh
         
-        ph = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        ph = self._byte_align_empty_com()
         self.ph = ph
         
-        u = pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Nx),
-                         pyfftw.simd_alignment, dtype=DTYPE_real)
+        u = self._byte_align_empty_real()
         self.u = u
-        uh = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        uh = self._byte_align_empty_com()
         self.uh = uh
         
-        v = pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Nx),
-                         pyfftw.simd_alignment, dtype=DTYPE_real)
+        v = self._byte_align_empty_real()
         self.v = v
-        vh = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        vh = self._byte_align_empty_com()
         self.vh = vh
         
-        uq = pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Nx),
-                         pyfftw.simd_alignment, dtype=DTYPE_real)
+        uq = self._byte_align_empty_real()
         self.uq = uq
-        uqh = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        uqh = self._byte_align_empty_com()
         self.uqh = uqh
         
-        vq = pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Nx),
-                         pyfftw.simd_alignment, dtype=DTYPE_real)
+        vq = self._byte_align_empty_real()
         self.vq = vq
-        vqh = pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
-                         pyfftw.simd_alignment, dtype=DTYPE_com)
+        vqh = self._byte_align_empty_com()
         self.vqh = vqh
+        
+        # finally some dummy variables for diagnostic ffts
+        dfftin = self._byte_align_empty_real()
+        self._dummy_fft_in = dfftin
+        dfftout = self._byte_align_empty_com()
+        self._dummy_fft_out = dfftout
+        difftin = self._byte_align_empty_com()
+        self._dummy_ifft_in = difftin
+        difftout = self._byte_align_empty_real()
+        self._dummy_ifft_out = difftout
         
         # set up FFT plans
         # Note that the Backwards Real transform for the case
@@ -139,20 +147,56 @@ cdef class PseudoSpectralKernel:
         # will destroy the input array. This is inherent to FFTW and the only
         # general work-around for this is to copy the array prior to
         # performing the transform.
-        self.fft_q_to_qh = pyfftw.FFTW(q, qh, 
+        self.fft_q_to_qh = pyfftw.FFTW(q, qh, threads=fftw_num_threads,
                          direction='FFTW_FORWARD', axes=(-2,-1))
-        self.ifft_qh_to_q = pyfftw.FFTW(qh, q, 
+        self.ifft_qh_to_q = pyfftw.FFTW(qh, q, threads=fftw_num_threads,
                          direction='FFTW_BACKWARD', axes=(-2,-1))
-        self.ifft_uh_to_u = pyfftw.FFTW(uh, u, 
+        self.ifft_uh_to_u = pyfftw.FFTW(uh, u, threads=fftw_num_threads, 
                          direction='FFTW_BACKWARD', axes=(-2,-1))
-        self.ifft_vh_to_v = pyfftw.FFTW(vh, v, 
+        self.ifft_vh_to_v = pyfftw.FFTW(vh, v, threads=fftw_num_threads, 
                          direction='FFTW_BACKWARD', axes=(-2,-1))
-        self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, 
+        self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, threads=fftw_num_threads, 
                          direction='FFTW_FORWARD', axes=(-2,-1))
-        self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, 
+        self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, threads=fftw_num_threads, 
                          direction='FFTW_FORWARD', axes=(-2,-1))
+
+        # dummy ffts for diagnostics
+        self._dummy_fft = pyfftw.FFTW(dfftin, dfftout, threads=fftw_num_threads, 
+                         direction='FFTW_FORWARD', axes=(-2,-1))
+        self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads, 
+                         direction='FFTW_BACKWARD', axes=(-2,-1))
+        
     
+    def _byte_align_empty_real(self):
+        """Allocate a space-grid-sized variable for use with fftw transformations."""
+        return pyfftw.n_byte_align_empty((self.Nz, self.Ny, self.Ny),
+                                 pyfftw.simd_alignment, dtype=DTYPE_real)
+
+    def _byte_align_empty_com(self):
+        """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
+        return pyfftw.n_byte_align_empty((self.Nz, self.Nl, self.Nk),
+                                 pyfftw.simd_alignment, dtype=DTYPE_com)    
     
+    def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):
+        """"Generic FFT function for real grid-sized variables.
+        Not used for actual model ffs."""
+        cdef  DTYPE_real_t [:, :, :] v_view = v
+        # copy input into memory view
+        self._dummy_fft_in[:] = v_view
+        self._dummy_fft()
+        # return a copy of the output
+        return np.asarray(self._dummy_fft_out).copy()
+
+    def fft(self, np.ndarray[DTYPE_com_t, ndim=3] v):
+        """"Generic IFFT function for complex grid-sized variables.
+        Not used for actual model ffs."""
+        cdef  DTYPE_com_t [:, :, :] v_view = v
+        # copy input into memory view
+        self._dummy_ifft_in[:] = v_view
+        self._dummy_ifft()
+        # return a copy of the output
+        return np.asarray(self._dummy_ifft_out).copy()
+   
     # the only way to set q and qh
     def set_qh(self, np.ndarray[DTYPE_com_t, ndim=3] b):
         cdef  DTYPE_com_t [:, :, :] b_view = b

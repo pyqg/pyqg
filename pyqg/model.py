@@ -1,5 +1,5 @@
 import numpy as np
-import spectral_kernel
+from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
 try:   
     import mkl
@@ -13,7 +13,7 @@ try:
 except ImportError:
     pass
 
-class Model(spectral_kernel.PseudoSpectralKernel):
+class Model(PseudoSpectralKernel):
     """A class that represents a generic pseudo-spectral inversion model."""
     
     def __init__(
@@ -141,8 +141,7 @@ class Model(spectral_kernel.PseudoSpectralKernel):
         self._invert()
         # find streamfunction from pv
 
-        #self._advection_tendency()
-        self.dqhdt_adv = self._advection_tendency()
+        self._advection_tendency()
         # use streamfunction to calculate advection tendency
         
         self._forcing_tendency()
@@ -218,7 +217,7 @@ class Model(spectral_kernel.PseudoSpectralKernel):
         
         # still need to initialize a few state variables here, outside kernel
         # this is sloppy
-        self.dqhdt_forc = np.zeros_like(self.qh)
+        #self.dqhdt_forc = np.zeros_like(self.qh)
         self.dqhdt_p = np.zeros_like(self.qh)
         self.dqhdt_pp = np.zeros_like(self.qh)
         
@@ -365,8 +364,7 @@ class Model(spectral_kernel.PseudoSpectralKernel):
     def _forward_timestep(self):
         """Step forward based on tendencies"""
        
-
-        self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
+        #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
               
         # Note that Adams-Bashforth is not self-starting
         if self.tc==0:
@@ -386,6 +384,7 @@ class Model(spectral_kernel.PseudoSpectralKernel):
         # remember previous tendencies
         self.dqhdt_pp = self.dqhdt_p.copy()
         self.dqhdt_p = self.dqhdt.copy()
+        #self.dqhdt[:] = 0.
                 
         # augment timestep and current time
         self.tc += 1
@@ -461,15 +460,15 @@ class Model(spectral_kernel.PseudoSpectralKernel):
                 self.diagnostics[dname]['count'])
 
 
-# general purpose timestepping routines
-def tendency_forward_euler(dt, dqdt):
-    """Compute tendency using forward euler timestepping."""
-    return dt * dqdt
-
-def tendency_ab2(dt, dqdt, dqdt_p):
-    """Compute tendency using Adams Bashforth 2nd order timestepping."""
-    return (1.5*dt) * dqdt + (-0.5*dt) * dqdt_p
-
-def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
-    """Compute tendency using Adams Bashforth 3nd order timestepping."""
-    return (23/12.*dt) * dqdt + (-16/12.*dt) * dqdt_p + (5/12.*dt) * dqdt_pp 
+# # general purpose timestepping routines
+# def tendency_forward_euler(dt, dqdt):
+#     """Compute tendency using forward euler timestepping."""
+#     return dt * dqdt
+#
+# def tendency_ab2(dt, dqdt, dqdt_p):
+#     """Compute tendency using Adams Bashforth 2nd order timestepping."""
+#     return (1.5*dt) * dqdt + (-0.5*dt) * dqdt_p
+#
+# def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
+#     """Compute tendency using Adams Bashforth 3nd order timestepping."""
+#     return (23/12.*dt) * dqdt + (-16/12.*dt) * dqdt_p + (5/12.*dt) * dqdt_pp

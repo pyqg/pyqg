@@ -122,7 +122,8 @@ class PyqgModelTester(unittest.TestCase):
         
                 # calculate tendency
                 #self.m._advection_tendency()
-                dqhdt_adv = np.array(self.m._advection_tendency())
+                self.m._advection_tendency()
+                dqhdt_adv = self.m.dqhdt
         
                 # expected amplitude of RFFT
                 amp = (self.m.nx/2)**2 * self.m.ny**2

@@ -192,7 +192,8 @@ class QGModel(model.Model):
         """Calculate tendency due to forcing."""
         #self.dqh1dt_forc = # just leave blank
         # apply only in bottom layer
-        self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
+        #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
+        self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
 
                     
         #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (

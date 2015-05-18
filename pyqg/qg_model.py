@@ -81,6 +81,7 @@ class QGModel(model.Model):
         # the meridional PV gradients in each layer
         self.Qy1 = self.beta + self.F1*(self.U1 - self.U2)
         self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
+        self.Qy = np.array([self.Qy1, self.Qy2])
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy1 = self.Qy1 * 1j * self.k
         self.ikQy2 = self.Qy2 * 1j * self.k
@@ -151,11 +152,12 @@ class QGModel(model.Model):
      
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies."""
-        self.q[0] = q1
-        self.q[1] = q2
+        self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
+        #self.q[0] = q1
+        #self.q[1] = q2
 
         # initialize spectral PV
-        self.qh = self.fft2(self.q)
+        #self.qh = self.fft2(self.q)
         
         # check that it works
         if check:
@@ -166,14 +168,25 @@ class QGModel(model.Model):
         """Set background zonal flow"""
         self.U1 = U1
         self.U2 = U2
-        self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
+        #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
+        self.Ubg = np.array([U1,U2])
 
-    def _invert(self):
+    def _invert_old(self):
         """invert qgpv to find streamfunction."""
         # this matrix multiplication is an obvious target for optimization
         self.ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
         self.u = self.ifft2(-self.lj* self.ph) + self.Ubg
         self.v = self.ifft2(self.kj * self.ph)
+
+    def _invert_test(self):
+        """invert qgpv to find streamfunction."""
+        # this matrix multiplication is an obvious target for optimization
+        ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
+        u = self.ifft2(-self.lj* ph)
+        v = self.ifft2(self.kj * ph)
+        return ph, u, v
+        
+
 
     def _forcing_tendency(self):
         """Calculate tendency due to forcing."""
@@ -202,7 +215,7 @@ class QGModel(model.Model):
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
-            np.hstack([self.u + self.Ubg, self.v])
+            np.hstack([self.u + self.Ubg[:,np.newaxis,np.newaxis], self.v])
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}

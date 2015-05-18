@@ -5,7 +5,8 @@ from pyqg import qg_model
 class PyqgModelTester(unittest.TestCase):
     
     def setUp(self):
-        self.m = qg_model.QGModel()
+        # need to eliminate beta and U for tests
+        self.m = qg_model.QGModel(beta=0., U1=0., U2=0.)
         # the maximum wavelengths to use in tests
         # if we go to higher wavelengths, we don't get machine precision
         self.kwavemax = self.m.nx/8
@@ -69,10 +70,7 @@ class PyqgModelTester(unittest.TestCase):
         #                 $\hat{q} = -(k^2 + l^2) \hat \psi$
         #
         # velocity: u = -dpsi/dy, v = dpsi/dx
-        
-        # set U1 and U2 to zero, since they are now part of the inverted velocity
-        self.m.set_U1U2(0.,0.)
-        
+                
         for kwave in range(1, self.kwavemax):
             for lwave in range(1, self.lwavemax):
 
@@ -112,26 +110,31 @@ class PyqgModelTester(unittest.TestCase):
                 q2 =  np.sin(l * self.m.y )
                 self.m.set_q1q2(q1, q2)
                 # manually set velocity
-                self.m.u[0] = np.sin(k * self.m.x)
-                self.m.v[0] = np.zeros_like(self.m.y)
-                self.m.u[1] = np.zeros_like(self.m.x)
-                self.m.v[1] = np.cos(l * self.m.y)
+                u1 = np.sin(k * self.m.x)
+                v1 = np.zeros_like(self.m.y)
+                u2 = np.zeros_like(self.m.x)
+                v2 = np.cos(l * self.m.y)
+                self.m.u[0] = u1
+                self.m.v[0] = v1
+                self.m.u[1] = u2
+                self.m.v[1] = v2
                 self.m.set_U1U2(0.,0.)
         
                 # calculate tendency
-                self.m._advection_tendency()
+                #self.m._advection_tendency()
+                dqhdt_adv = np.array(self.m._advection_tendency())
         
                 # expected amplitude of RFFT
                 amp = (self.m.nx/2)**2 * self.m.ny**2
-                tabs = np.real(self.m.dqhdt_adv * self.m.dqhdt_adv.conj())
+                tabs = np.real(dqhdt_adv * dqhdt_adv.conj())
 
                 # these tests pass, but what about the factor of two?
                 np.testing.assert_allclose(tabs[0,0,2*kwave], k**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency')
+                    err_msg='Incorrect advection tendency k (%g,%g)' % (lwave,kwave))
                 np.testing.assert_allclose(tabs[1,2*lwave,0], l**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency')
+                    err_msg='Incorrect advection tendency +l (%g,%g)' % (lwave,kwave))
                 np.testing.assert_allclose(tabs[1,-2*lwave,0], l**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency')
+                    err_msg='Incorrect advection tendency -l (%g,%g)' % (lwave,kwave))
             
                 # now mask those components
                 tabs_mask = np.ma.masked_array(tabs, np.zeros_like(tabs))
@@ -141,7 +144,7 @@ class PyqgModelTester(unittest.TestCase):
                 # and make sure everything else is zero
                 np.testing.assert_allclose(tabs_mask.filled(0.), 0.,
                     rtol=0., atol=rtol,
-                    err_msg='Incorrect advection tendency')
+                    err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
                     
     def test_timestepping(self, rtol=1e-15):
         """Make sure timstepping works properly."""

@@ -19,7 +19,7 @@ class QGModel(model.Model):
     def __init__(
         self,
         beta=1.5e-11,               # gradient of coriolis parameter
-        rek=5.787e-7,               # linear drag in lower layer
+        #rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
         delta=0.25,                 # layer thickness ratio (H1/H2)
         H1 = 500,                   # depth of layer 1 (H1)
@@ -43,7 +43,7 @@ class QGModel(model.Model):
 
         # physical
         self.beta = beta
-        self.rek = rek
+        #self.rek = rek
         self.rd = rd
         self.delta = delta
         self.H1 = H1
@@ -186,7 +186,12 @@ class QGModel(model.Model):
         v = self.ifft2(self.kj * ph)
         return ph, u, v
         
-
+    def _do_friction(self):
+        """Calculate tendency due to forcing."""
+        #self.dqh1dt_forc = # just leave blank
+        # apply only in bottom layer
+        #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
+        self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
 
     def _forcing_tendency(self):
         """Calculate tendency due to forcing."""
@@ -246,7 +251,7 @@ class QGModel(model.Model):
         # fix for delta.neq.1
         self.Jpxi = self.advect(self.xi, self.u, self.v)
 
-    def _initialize_diagnostics(self):
+    def _initialize_diagnostics(self, diagnostics_list):
         # Initialization for diagnotics
         self.diagnostics = dict()
 

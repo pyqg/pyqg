@@ -52,11 +52,15 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :, :, :] a
     cdef DTYPE_com_t [:] _ik
     cdef DTYPE_com_t [:] _il
+    cdef DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
     cdef DTYPE_real_t [:] Ubg
     #cdef DTYPE_real_t [:] Vbg
     #cdef DTYPE_com_t [:, :] _ilQx
     cdef DTYPE_com_t [:, :] _ikQy
+    
+    # friction parameter
+    cdef DTYPE_real_t rek
         
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
@@ -76,6 +80,7 @@ cdef class PseudoSpectralKernel:
                     #np.ndarray[DTYPE_real_t, ndim=1] Vbg,
                     #np.ndarray[DTYPE_real_t, ndim=1] Qx,
                     np.ndarray[DTYPE_real_t, ndim=1] Qy,
+                    rek=0.0,
                     fftw_num_threads=1,                                       
     ):
         self.Nz = Nz
@@ -99,7 +104,12 @@ cdef class PseudoSpectralKernel:
         self.a = a.astype(DTYPE_com)
         self._ik = 1j*k
         self._il = 1j*l
-             
+        
+        self._k2l2 = np.zeros((self.Nl, self.Nk), DTYPE_real)
+        for j in range(self.Nl):
+            for i in range(self.Nk):
+                self._k2l2[j,i] = k[i]**2 + l[j]**2
+        
         # assign Ubg, Vbg, _ilQx, _ikQy
         self.Ubg = Ubg
         #self.Vbg = Vbg
@@ -193,7 +203,7 @@ cdef class PseudoSpectralKernel:
         # return a copy of the output
         return np.asarray(self._dummy_fft_out).copy()
 
-    def fft(self, np.ndarray[DTYPE_com_t, ndim=3] v):
+    def ifft(self, np.ndarray[DTYPE_com_t, ndim=3] v):
         """"Generic IFFT function for complex grid-sized variables.
         Not used for actual model ffs."""
         cdef  DTYPE_com_t [:, :, :] v_view = v
@@ -247,7 +257,7 @@ cdef class PseudoSpectralKernel:
         self.ifft_uh_to_u()
         self.ifft_vh_to_v()
     
-    def _advection_tendency(self):
+    def _do_advection(self):
         ### algorithm
         # uq, vq = (u+Ubg)*q, (v+Vbg)*q
         # uqh, vqh, = fft(uq), fft(vq)
@@ -275,6 +285,17 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = ( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
+                                    
+    # def _do_friction(self):
+    #     """Apply Ekman friction to lower layer tendency"""
+    #     if self.rek:
+    #         for j in range(self.Nl):
+    #             for i in range(self.Nk):
+    #                 self.dqhdt[-1,j,i] = (
+    #                  self.dqhdt[-1,j,i] +
+    #                          (self.rek *
+    #                          self._k2l2[j,i] *
+    #                          self.ph[-1,j,i]) )
                                     
                         
     # attribute aliases: return numpy ndarray views of memory views

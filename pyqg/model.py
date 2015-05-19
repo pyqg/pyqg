@@ -32,6 +32,8 @@ class Model(PseudoSpectralKernel):
         taveint=86400.,             # time interval used for summation in longterm average in seconds
         tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
+        # friction parameters
+        rek=0.,                     # linear drag in lower layer
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -52,6 +54,9 @@ class Model(PseudoSpectralKernel):
         W -- domain width in y direction, units meters (default: L)
         (WARNING: some parts of the model or diagnostics might
         actuallye assume nx=ny -- check before making different choice!)
+        
+        Friction Parameter Arguments:
+        rek -- linear drag in lower layer, units seconds^-1
                 
         Timestep-related Keyword Arguments:
         dt -- numerical timstep, units seconds
@@ -84,7 +89,6 @@ class Model(PseudoSpectralKernel):
 
         # timestepping
         self.dt = dt
-        self.tplot = tplot
         self.twrite = twrite
         self.tmax = tmax
         self.tavestart = tavestart
@@ -96,26 +100,23 @@ class Model(PseudoSpectralKernel):
         self.use_fftw = use_fftw
         self.teststyle= teststyle
         self.ntd = ntd
+        
+        # friction
+        self.rek = rek
 
         self._initialize_grid()
-        self._initialize_fft()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_inversion_matrix()
-        #self._initialize_state_variables()
-        self._initialize_kernel()
         self._initialize_time()                
+
+        # call the underlying cython kernel
+        self._initialize_kernel()
        
-        self._initialize_diagnostics()
-        if diagnostics_list == 'all':
-            pass # by default, all diagnostics are active
-        elif diagnostics_list == 'none':
-            self.set_active_diagnostics([])
-        else:
-            self.set_active_diagnostics(diagnostics_list)
+        self._initialize_diagnostics(diagnostics_list)
    
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
-        """ Run the model forward until the next snapshot, then yield."""
+        """Run the model forward until the next snapshot, then yield."""
         
         tsnapints = np.ceil(tsnapint/self.dt)
         nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
@@ -127,7 +128,7 @@ class Model(PseudoSpectralKernel):
         return
                 
     def run(self):
-        """ Run the model forward without stopping until the end."""
+        """Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
                 
@@ -141,11 +142,14 @@ class Model(PseudoSpectralKernel):
         self._invert()
         # find streamfunction from pv
 
-        self._advection_tendency()
+        self._do_advection()
         # use streamfunction to calculate advection tendency
         
-        self._forcing_tendency()
-        # apply friction and external forcing
+        self._do_friction()
+        # apply friction 
+        
+        self._do_external_forcing()
+        # apply external forcing
         
         #self._calc_diagnostics()
         # do what has to be done with diagnostics
@@ -180,9 +184,6 @@ class Model(PseudoSpectralKernel):
         self.kk = self.dk*np.arange(0.,self.nk)
 
         self.k, self.l = np.meshgrid(self.kk, self.ll)
-        # complex versions, speeds up computations to precompute
-        self.kj = 1j*self.k
-        self.lj = 1j*self.l
         # physical grid spacing
         self.dx = self.L / self.nx
         self.dy = self.W / self.ny
@@ -207,12 +208,20 @@ class Model(PseudoSpectralKernel):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
             
+    def _initialize_forcing(self):
+        raise NotImplementedError(
+            'needs to be implemented by Model subclass')
+            
+    def _do_external_forcing(self):
+        pass
+            
     def _initialize_kernel(self):
         #super(spectral_kernel.PseudoSpectralKernel, self).__init__(
         self._kernel_init(
             self.nz, self.ny, self.nx,
             self.a, self.kk, self.ll,
-            self.Ubg, self.Qy
+            self.Ubg, self.Qy,
+            rek=self.rek
         )
         
         # still need to initialize a few state variables here, outside kernel
@@ -221,92 +230,7 @@ class Model(PseudoSpectralKernel):
         self.dqhdt_p = np.zeros_like(self.qh)
         self.dqhdt_pp = np.zeros_like(self.qh)
         
-        
-    def _initialize_forcing(self):
-        raise NotImplementedError(
-            'needs to be implemented by Model subclass')
-            
-    def _initialize_state_variables(self):
-        """Set up model basic state variables.
-        This is universal. All models should store their state this way."""
-        # shape and datatype of data
-        dtype_real = np.dtype('float64')            
-        dtype_cplx = np.dtype('complex128')
-        if self.nz > 1:
-            shape_real = (self.nz, self.ny, self.nx)
-            shape_cplx = (self.nz, self.nl, self.nk)
-        else:
-            shape_real = (self.ny, self.nx)
-            shape_cplx = (self.nl, self.nk)
-            
-        # qgpv
-        self.q  = np.zeros(shape_real, dtype_real)
-        self.qh = np.zeros(shape_cplx, dtype_cplx)
-        # streamfunction
-        self.p  = np.zeros(shape_real, dtype_real)
-        self.ph = np.zeros(shape_cplx, dtype_cplx)
-        # velocity (only need real version)
-        self.u = np.zeros(shape_real, dtype_real)
-        self.v = np.zeros(shape_real, dtype_real)
-        # tendencies (only need complex version)
-        self.dqhdt_adv = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_forc = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt = np.zeros(shape_cplx, dtype_cplx)
-        # also need to save previous tendencies for Adams Bashforth
-        self.dqhdt_p = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_pp = np.zeros(shape_cplx, dtype_cplx)
-            
-    def _initialize_fft(self):
-        # set up fft functions for use later
-        if self.use_fftw:
-            
-            if self.teststyle:
-                ## drop in replacement for numpy fft
-                ## more than twice as fast as the previous code
-                self.fft2 = (lambda x :
-                        pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd, planner_effort='FFTW_ESTIMATE'))
-                self.ifft2 = (lambda x :
-                        pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd, planner_effort='FFTW_ESTIMATE'))
-            else:
-                self.fft2 = (lambda x :
-                        pyfftw.interfaces.numpy_fft.rfft2(x, threads=self.ntd))
-                self.ifft2 = (lambda x :
-                        pyfftw.interfaces.numpy_fft.irfft2(x, threads=self.ntd))
-             
-            
-            ## This does some weird stuff that I don't understand
-            ## and in the end does not work.
-            ## Have to better understand the whole byte align thing...
-            #aw = pyfftw.n_byte_align_empty(self.x.shape, 8, 'float64')
-            #fft2 = pyfftw.builders.rfft2(aw,threads=self.ntd)
-            #self.fft2 = (lambda g : fft2(g).copy())
-            ## get an example fourier representation
-            #ah = self.fft2(self.x)
-            
-            #awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
-            #ifft2 = pyfftw.builders.irfft2(awh,threads=self.ntd)
-            #self.ifft2 = (lambda g : ifft2(g).copy())
-            
-            ## this was very slow because it re-initializes the fft plan with every call
-            #def fftw_fft(a):
-            #    aw = pyfftw.n_byte_align_empty(a.shape, 8, 'float64')                 
-            #    aw[:] = a.copy()
-            #    return pyfftw.builders.rfft2(aw,threads=self.ntd)()
-            #def fftw_ifft(ah):
-            #    awh = pyfftw.n_byte_align_empty(ah.shape, 16, 'complex128')
-            #    awh[:]= ah.copy()
-            #    return pyfftw.builders.irfft2(awh,threads=self.ntd)()
-            #self.fft2 = fftw_fft
-            #self.ifft2 = fftw_ifft
-            
-        else:
-            self.fft2 = np.fft.rfft2
-            self.ifft2 = np.fft.irfft2
-    
-    # def set_q(self, q):
-    #     """This should work with all models."""
-    #     self.q = q
-    #     self.qh = self.fft2(self.q)
+
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
@@ -409,20 +333,19 @@ class Model(PseudoSpectralKernel):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')        
 
+    def _initialize_diagnostics(self, diagnostics_list):
+        # Initialization for diagnotics
+        self.diagnostics = dict()
+        if diagnostics_list == 'all':
+            pass # by default, all diagnostics are active
+        elif diagnostics_list == 'none':
+            self.set_active_diagnostics([])
+        else:
+            self.set_active_diagnostics(diagnostics_list)
+
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
-
-    def _initialize_diagnostics(self):
-        # Initialization for diagnotics
-        self.diagnostics = dict()
-
-        ## example diagnostics
-        #self.add_diagnostic('entspec',
-        #    description='barotropic enstrophy spectrum',
-        #    function= (lambda self:
-        #              np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
-        #)
             
     def add_diagnostic(self, diag_name, description=None, units=None, function=None):
         # create a new diagnostic dict and add it to the object array

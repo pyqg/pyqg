@@ -122,33 +122,6 @@ class QGModel(model.Model):
         
     def _filter(self, q):
         return self.filtr * q
-
-    def _initialize_state_variables(self):
-        
-        # shape and datatype of real data
-        dtype_real = np.dtype('float64')
-        shape_real = (self.nz, self.ny, self.nx)
-        # shape and datatype of complex (fourier space) data
-        dtype_cplx = np.dtype('complex128')
-        shape_cplx = (self.nz, self.nl, self.nk)
-        
-        # qgpv
-        self.q  = np.zeros(shape_real, dtype_real)
-        self.qh = np.zeros(shape_cplx, dtype_cplx)
-        # streamfunction
-        self.p  = np.zeros(shape_real, dtype_real)
-        self.ph = np.zeros(shape_cplx, dtype_cplx)
-        # velocity (only need real version)
-        self.u = np.zeros(shape_real, dtype_real)
-        self.v = np.zeros(shape_real, dtype_real)
-        # tendencies (only need complex version)
-        self.dqhdt_adv = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_forc = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt = np.zeros(shape_cplx, dtype_cplx)
-        # also need to save previous tendencies for Adams Bashforth
-        self.dqhdt_p = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_pp = np.zeros(shape_cplx, dtype_cplx)
-                
      
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies."""
@@ -170,47 +143,6 @@ class QGModel(model.Model):
         self.U2 = U2
         #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
         self.Ubg = np.array([U1,U2])
-
-    def _invert_old(self):
-        """invert qgpv to find streamfunction."""
-        # this matrix multiplication is an obvious target for optimization
-        self.ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
-        self.u = self.ifft2(-self.lj* self.ph) + self.Ubg
-        self.v = self.ifft2(self.kj * self.ph)
-
-    def _invert_test(self):
-        """invert qgpv to find streamfunction."""
-        # this matrix multiplication is an obvious target for optimization
-        ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
-        u = self.ifft2(-self.lj* ph)
-        v = self.ifft2(self.kj * ph)
-        return ph, u, v
-        
-    # def _do_friction(self):
-    #     """Calculate tendency due to forcing."""
-    #     #self.dqh1dt_forc = # just leave blank
-    #     # apply only in bottom layer
-    #     #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
-    #     self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
-
-    def _forcing_tendency(self):
-        """Calculate tendency due to forcing."""
-        #self.dqh1dt_forc = # just leave blank
-        # apply only in bottom layer
-        #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
-        self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
-
-                    
-        #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
-        #            self.t, self.tc, self.calc_cfl(), \
-        #                    self.ke[-1], self.eddy_time[-1] )
-        #
-        #     # append ke and time
-        #     if self.tc > 0.:
-        #         self.ke = np.append(self.ke,self.calc_ke())
-        #         self.eddy_time = np.append(self.eddy_time,self.calc_eddy_time())
-        #         self.time = np.append(self.time,self.t)
-
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

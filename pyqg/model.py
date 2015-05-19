@@ -237,32 +237,6 @@ class Model(PseudoSpectralKernel):
     def advect(self, q, u, v):
         return self.kj*self.fft2(u*q) + self.lj*self.fft2(v*q)
 
-    def _invert_old(self):
-        """invert qgpv to find streamfunction."""
-        raise NotImplementedError(
-            'needs to be implemented by Model subclass')
-                        
-    def _advection_tendency_old(self):
-        """Calculate tendency due to advection."""
-        # this is actually the same for all Models
-        
-        # compute real space qgpv and velocity
-        self.q = self.ifft2(self.qh)
-        # multiply velocity and qgpv to get fluxes
-        uq = np.multiply(self.q, self.u)
-        vq = np.multiply(self.q, self.v)
-        ddx_uq = self.kj * self.fft2(uq)
-        # derivatives in spectral space (including background advection)
-        ddx_uq = self.kj * self.fft2(uq) + (self.ilQx * self.ph)
-        ddy_vq = self.lj * self.fft2(vq) + (self.ikQy * self.ph)
-        # convergence of advective flux
-        self.dqhdt_adv = -(ddx_uq + ddy_vq)
-
-    def _forcing_tendency(self):
-        """Calculate tendency due to forcing."""
-        raise NotImplementedError(
-            'needs to be implemented by Model subclass')
-
     def _filter(self, q):
         """Apply filter to field q."""
         return q

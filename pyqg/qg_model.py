@@ -186,12 +186,12 @@ class QGModel(model.Model):
         v = self.ifft2(self.kj * ph)
         return ph, u, v
         
-    def _do_friction(self):
-        """Calculate tendency due to forcing."""
-        #self.dqh1dt_forc = # just leave blank
-        # apply only in bottom layer
-        #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
-        self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
+    # def _do_friction(self):
+    #     """Calculate tendency due to forcing."""
+    #     #self.dqh1dt_forc = # just leave blank
+    #     # apply only in bottom layer
+    #     #self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
+    #     self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
 
     def _forcing_tendency(self):
         """Calculate tendency due to forcing."""

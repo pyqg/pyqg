@@ -97,7 +97,7 @@ class PyqgModelTester(unittest.TestCase):
         # need to think about how to implement this
         pass
         
-    def test_advection_tendency(self, rtol=1e-15):
+    def test_advection(self, rtol=1e-15):
         """Check whether calculating advection tendency gives the descired result."""
         # sin(2 a) = 2 sin(a) cos(a)
         
@@ -122,7 +122,7 @@ class PyqgModelTester(unittest.TestCase):
         
                 # calculate tendency
                 #self.m._advection_tendency()
-                self.m._advection_tendency()
+                self.m._do_advection()
                 dqhdt_adv = self.m.dqhdt
         
                 # expected amplitude of RFFT
@@ -146,6 +146,32 @@ class PyqgModelTester(unittest.TestCase):
                 np.testing.assert_allclose(tabs_mask.filled(0.), 0.,
                     rtol=0., atol=rtol,
                     err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
+
+    def test_friction(self, rtol=1e-15):
+        """Check whether calculating advection tendency gives the descired result."""
+        # sin(2 a) = 2 sin(a) cos(a)
+        
+        for kwave in range(1, self.kwavemax):
+            for lwave in range(1, self.lwavemax):
+                k = 2*np.pi*kwave/self.m.L
+                l = 2*np.pi*lwave/self.m.W
+        
+                q1 =  np.cos(k * self.m.x )
+                q2 =  np.sin(l * self.m.y )
+                self.m.set_q1q2(q1, q2)
+                self.m._invert()
+                # make sure tendency is zero
+                self.m.dqhdt[:] = 0.
+                self.m._do_friction()
+                
+                # from code 
+                #self.dqhdt[-1] += self.rek * self.wv2 * self.ph[-1]
+                expected = self.m.rek * self.m.wv2 * self.m.ph[-1]
+                np.testing.assert_allclose(self.m.dqhdt[-1], expected, rtol,
+                        err_msg='Ekman friction was wrong.')
+                np.testing.assert_allclose(self.m.dqhdt[:-1], 0., rtol,
+                        err_msg='Nonzero friction found in upper layers.')
+
                     
     def test_timestepping(self, rtol=1e-15):
         """Make sure timstepping works properly."""

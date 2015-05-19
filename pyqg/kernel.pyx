@@ -52,7 +52,7 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :, :, :] a
     cdef DTYPE_com_t [:] _ik
     cdef DTYPE_com_t [:] _il
-    cdef DTYPE_real_t [:,:] _k2l2
+    cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
     cdef DTYPE_real_t [:] Ubg
     #cdef DTYPE_real_t [:] Vbg
@@ -60,7 +60,7 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :] _ikQy
     
     # friction parameter
-    cdef DTYPE_real_t rek
+    cdef public DTYPE_real_t _rek
         
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
@@ -80,7 +80,7 @@ cdef class PseudoSpectralKernel:
                     #np.ndarray[DTYPE_real_t, ndim=1] Vbg,
                     #np.ndarray[DTYPE_real_t, ndim=1] Qx,
                     np.ndarray[DTYPE_real_t, ndim=1] Qy,
-                    rek=0.0,
+                    DTYPE_real_t rek=0.0,
                     fftw_num_threads=1,                                       
     ):
         self.Nz = Nz
@@ -88,6 +88,8 @@ cdef class PseudoSpectralKernel:
         self.Nx = Nx
         self.Nl = Ny
         self.Nk = Nx/2 + 1
+        
+        self._rek = rek
         
         print 'Inside Kernel'
         
@@ -286,16 +288,16 @@ cdef class PseudoSpectralKernel:
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
                                     
-    # def _do_friction(self):
-    #     """Apply Ekman friction to lower layer tendency"""
-    #     if self.rek:
-    #         for j in range(self.Nl):
-    #             for i in range(self.Nk):
-    #                 self.dqhdt[-1,j,i] = (
-    #                  self.dqhdt[-1,j,i] +
-    #                          (self.rek *
-    #                          self._k2l2[j,i] *
-    #                          self.ph[-1,j,i]) )
+    def _do_friction(self):
+        """Apply Ekman friction to lower layer tendency"""
+        if self.rek:
+            for j in range(self.Nl):
+                for i in range(self.Nk):
+                    self.dqhdt[-1,j,i] = (
+                     self.dqhdt[-1,j,i] +
+                             (self._rek *
+                             self._k2l2[j,i] *
+                             self.ph[-1,j,i]) )
                                     
                         
     # attribute aliases: return numpy ndarray views of memory views

@@ -33,7 +33,7 @@ class Model(PseudoSpectralKernel):
         tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
-        rek=0.,                     # linear drag in lower layer
+        rek=5.787e-7,               # linear drag in lower layer
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters

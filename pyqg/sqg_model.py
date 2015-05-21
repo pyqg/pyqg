@@ -71,7 +71,7 @@ class SQGModel(model.Model):
     def _initialize_inversion_matrix(self):
         """ the inversion """ 
         # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph
-        self.a = self.wv/self.Nb
+        self.a = self.Nb*np.sqrt(self.wv2i)
 
     def _initialize_forcing(self):
         """Set up frictional filter."""

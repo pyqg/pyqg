@@ -7,7 +7,8 @@ def test_advect(rtol=1.e-13):
         a double precision accuracy when the plane wave is 
         slanted (kx != 0 and ky !=0 ) """
 
-    m = qg_model.QGModel(L=2.*np.pi,nx=256)
+    #m = bt_model.BTModel(L=2.*np.pi,nx=256)
+    m = qg_model.QGModel(L=2.*np.pi,nx=256,U1=0)
 
     # there are some magic combinations that
     #   fails the test...try kx=12,ky=24
@@ -16,9 +17,13 @@ def test_advect(rtol=1.e-13):
     kx = np.array([1.,5.,10.,0.,24.,2.])
     ky = np.array([2.,0.,10.,21.,12.,49.])
 
+
     for i in range(kx.size):
 
         # set plane wave PV
+        #m.set_q(
+        #        np.cos( kx[i] * m.x + ky[i] * m.y ))
+        
         m.set_q1q2(
                 np.cos( kx[i] * m.x + ky[i] * m.y ),
                 np.zeros_like(m.x) )
@@ -32,10 +37,12 @@ def test_advect(rtol=1.e-13):
 
         # compute advection
         jacobh = m.advect(m.q[0],m.u[0],m.v[0])
+        #jacobh = m.advect(m.q,m.u,m.v)
         jacob = m.ifft2(jacobh)
 
-        # residual
-        res = np.abs(jacob).std()
+        # residual -- the L2-norm of the jacobian
+        res = np.abs(jacob).sum()*m.dx*m.dy/(m.L**2)
+
         print "residual = %1.5e" %res
 
         assert res<rtol, " *** Jacobian residual is larger than %1.1e" %rtol

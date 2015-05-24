@@ -19,7 +19,6 @@ nhx,nhy = m.wv2.shape
 R = pi/6.
 Pi = -np.exp(-((m.x-3*pi/2)**2 + (m.y-pi)**2)/R**2)
 
-
 Pi = Pi - Pi.mean()
 Pi_hat = m.fft2( Pi )
 KEaux = bt_model.spec_var( m, m.wv*Pi_hat )
@@ -29,9 +28,10 @@ qih = -m.wv2*pih
 qi = m.ifft2(qih)
 m.set_q(qi,check=False)
 
-
 # run the model
 plt.rcParams['image.cmap'] = 'RdBu'
+
+plt.ion()
 
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clf()
@@ -42,4 +42,6 @@ for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.show()
 
     plt.pause(0.01)
+    plt.ioff()
+    
 

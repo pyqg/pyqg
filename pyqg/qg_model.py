@@ -19,7 +19,7 @@ class QGModel(model.Model):
     def __init__(
         self,
         beta=1.5e-11,               # gradient of coriolis parameter
-        rek=5.787e-7,               # linear drag in lower layer
+        #rek=5.787e-7,               # linear drag in lower layer
         rd=15000.0,                 # deformation radius
         delta=0.25,                 # layer thickness ratio (H1/H2)
         H1 = 500,                   # depth of layer 1 (H1)
@@ -43,7 +43,7 @@ class QGModel(model.Model):
 
         # physical
         self.beta = beta
-        self.rek = rek
+        #self.rek = rek
         self.rd = rd
         self.delta = delta
         self.H1 = H1
@@ -81,6 +81,7 @@ class QGModel(model.Model):
         # the meridional PV gradients in each layer
         self.Qy1 = self.beta + self.F1*(self.U1 - self.U2)
         self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
+        self.Qy = np.array([self.Qy1, self.Qy2])
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy1 = self.Qy1 * 1j * self.k
         self.ikQy2 = self.Qy2 * 1j * self.k
@@ -121,41 +122,15 @@ class QGModel(model.Model):
         
     def _filter(self, q):
         return self.filtr * q
-
-    def _initialize_state_variables(self):
-        
-        # shape and datatype of real data
-        dtype_real = np.dtype('float64')
-        shape_real = (self.nz, self.ny, self.nx)
-        # shape and datatype of complex (fourier space) data
-        dtype_cplx = np.dtype('complex128')
-        shape_cplx = (self.nz, self.nl, self.nk)
-        
-        # qgpv
-        self.q  = np.zeros(shape_real, dtype_real)
-        self.qh = np.zeros(shape_cplx, dtype_cplx)
-        # streamfunction
-        self.p  = np.zeros(shape_real, dtype_real)
-        self.ph = np.zeros(shape_cplx, dtype_cplx)
-        # velocity (only need real version)
-        self.u = np.zeros(shape_real, dtype_real)
-        self.v = np.zeros(shape_real, dtype_real)
-        # tendencies (only need complex version)
-        self.dqhdt_adv = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_forc = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt = np.zeros(shape_cplx, dtype_cplx)
-        # also need to save previous tendencies for Adams Bashforth
-        self.dqhdt_p = np.zeros(shape_cplx, dtype_cplx)
-        self.dqhdt_pp = np.zeros(shape_cplx, dtype_cplx)
-                
      
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies."""
-        self.q[0] = q1
-        self.q[1] = q2
+        self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
+        #self.q[0] = q1
+        #self.q[1] = q2
 
         # initialize spectral PV
-        self.qh = self.fft2(self.q)
+        #self.qh = self.fft2(self.q)
         
         # check that it works
         if check:
@@ -166,32 +141,8 @@ class QGModel(model.Model):
         """Set background zonal flow"""
         self.U1 = U1
         self.U2 = U2
-        self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
-
-    def _invert(self):
-        """invert qgpv to find streamfunction."""
-        # this matrix multiplication is an obvious target for optimization
-        self.ph = np.einsum('ijkl,jkl->ikl', self.a, self.qh)
-        self.u = self.ifft2(-self.lj* self.ph) + self.Ubg
-        self.v = self.ifft2(self.kj * self.ph)
-
-    def _forcing_tendency(self):
-        """Calculate tendency due to forcing."""
-        #self.dqh1dt_forc = # just leave blank
-        # apply only in bottom layer
-        self.dqhdt_forc[-1] = self.rek * self.wv2 * self.ph[-1]
-
-                    
-        #     print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f, T_e=%9.9f' % (
-        #            self.t, self.tc, self.calc_cfl(), \
-        #                    self.ke[-1], self.eddy_time[-1] )
-        #
-        #     # append ke and time
-        #     if self.tc > 0.:
-        #         self.ke = np.append(self.ke,self.calc_ke())
-        #         self.eddy_time = np.append(self.eddy_time,self.calc_eddy_time())
-        #         self.time = np.append(self.time,self.t)
-
+        #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
+        self.Ubg = np.array([U1,U2])
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics
@@ -202,7 +153,7 @@ class QGModel(model.Model):
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
-            np.hstack([self.u + self.Ubg, self.v])
+            np.hstack([self.u + self.Ubg[:,np.newaxis,np.newaxis], self.v])
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}
@@ -232,7 +183,7 @@ class QGModel(model.Model):
         # fix for delta.neq.1
         self.Jpxi = self.advect(self.xi, self.u, self.v)
 
-    def _initialize_diagnostics(self):
+    def _initialize_diagnostics(self, diagnostics_list):
         # Initialization for diagnotics
         self.diagnostics = dict()
 

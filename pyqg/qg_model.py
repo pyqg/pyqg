@@ -149,7 +149,6 @@ class QGModel(model.Model):
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
@@ -159,8 +158,8 @@ class QGModel(model.Model):
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
     def _calc_ke(self):
-        ke1 = .5*self.H1*spec_var(self, self.wv*self.ph[0])
-        ke2 = .5*self.H2*spec_var(self, self.wv*self.ph[1]) 
+        ke1 = .5*self.H1*self.spec_var(self.wv*self.ph[0])
+        ke2 = .5*self.H2*self.spec_var(self.wv*self.ph[1]) 
         return ( ke1.sum() + ke2.sum() ) / self.H
 
     # calculate eddy turn over time 
@@ -168,8 +167,8 @@ class QGModel(model.Model):
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
 
-        ens = .5*self.H1 * spec_var(self, self.wv2*self.ph1) + \
-            .5*self.H2 * spec_var(self, self.wv2*self.ph2)
+        ens = .5*self.H1 * self.spec_var(self.wv2*self.ph1) + \
+            .5*self.H2 * self.spec_var(self.wv2*self.ph2)
 
         return 2.*pi*np.sqrt( self.H / ens ) / 86400
 
@@ -262,11 +261,4 @@ class QGModel(model.Model):
         )
 
 
-# some off-class diagnostics
-def spec_var(self,ph):
-    """ compute variance of p from Fourier coefficients ph """
-    var_dens = 2. * np.abs(ph)**2 / self.M**2
-    # only half of coefs [0] and [nx/2+1] due to symmetry in real fft2
-    var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2.
-    return var_dens.sum()
 

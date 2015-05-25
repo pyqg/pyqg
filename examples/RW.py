@@ -20,13 +20,13 @@ R = pi/6.
 Pi = -np.exp(-((m.x-3*pi/2)**2 + (m.y-pi)**2)/R**2)
 
 Pi = Pi - Pi.mean()
-Pi_hat = m.fft2( Pi )
-KEaux = bt_model.spec_var( m, m.wv*Pi_hat )
+Pi_hat = m.fft( Pi[np.newaxis,:,:] )
+KEaux = m.spec_var(m.wv*Pi_hat )
 
 pih = ( Pi_hat/np.sqrt(KEaux) )
 qih = -m.wv2*pih
-qi = m.ifft2(qih)
-m.set_q(qi,check=False)
+qi = m.ifft(qih)
+m.set_q(qi)
 
 # run the model
 plt.rcParams['image.cmap'] = 'RdBu'
@@ -35,7 +35,7 @@ plt.ion()
 
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clf()
-    plt.imshow(m.q)
+    plt.imshow(m.q.squeeze())
     plt.clim([-20., 20.])
     plt.xticks([])
     plt.yticks([])

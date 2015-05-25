@@ -181,8 +181,7 @@ class PyqgModelTester(unittest.TestCase):
         
         # create a random tendency
         dqhdt = np.random.rand(*self.m.dqhdt.shape) + 1j*np.random.rand(*self.m.dqhdt.shape)
-        # overwrite model tendency
-        self.m.dqhdt_adv = dqhdt
+        self.m.dqhdt[:] = dqhdt
         # hack filter to be constant
         self.m.filtr = 1.
         

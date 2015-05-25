@@ -173,8 +173,8 @@ class QGModel(model.Model):
         return 2.*pi*np.sqrt( self.H / ens ) / 86400
 
     def _calc_derived_fields(self):
-        self.p = self.ifft2( self.ph)
-        self.xi =self.ifft2( -self.wv2*self.ph)
+        self.p = self.ifft(self.ph)
+        self.xi =self.ifft(-self.wv2*self.ph)
         self.Jptpc = -self.advect(
                     (self.p[0] - self.p[1]),
                     (self.del1*self.u[0] + self.del2*self.u[1]),
@@ -182,9 +182,8 @@ class QGModel(model.Model):
         # fix for delta.neq.1
         self.Jpxi = self.advect(self.xi, self.u, self.v)
 
-    def _initialize_diagnostics(self, diagnostics_list):
-        # Initialization for diagnotics
-        self.diagnostics = dict()
+    def _initialize_model_diagnostics(self):
+        """Extra diagnostics for two-layer model"""
 
         self.add_diagnostic('entspec',
             description='barotropic enstrophy spectrum',
@@ -197,51 +196,13 @@ class QGModel(model.Model):
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
-
         )
         
         self.add_diagnostic('KEflux',
             description='spectral flux of kinetic energy',
             function= (lambda self:
-              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[1])) + 
-              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[0])) )
-        )
-
-        self.add_diagnostic('KE1spec',
-            description='upper layer kinetic energy spectrum',
-            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[0])**2)
-        )
-        
-        self.add_diagnostic('KE2spec',
-            description='lower layer kinetic energy spectrum',
-            function=(lambda self: 0.5*self.wv2*np.abs(self.ph[1])**2)
-        )
-        
-        self.add_diagnostic('q1',
-            description='upper layer QGPV',
-            function= (lambda self: self.q[0])
-        )
-
-        self.add_diagnostic('q2',
-            description='lower layer QGPV',
-            function= (lambda self: self.q[1])
-        )
-
-        self.add_diagnostic('EKE1',
-            description='mean upper layer eddy kinetic energy',
-            function= (lambda self: 0.5*(self.v[0]**2 + self.u[0]**2).mean())
-        )
-
-        self.add_diagnostic('EKE2',
-            description='mean lower layer eddy kinetic energy',
-            function= (lambda self: 0.5*(self.v[1]**2 + self.u[1]**2).mean())
-        )
-        
-        self.add_diagnostic('EKEdiss',
-            description='total energy dissipation by bottom drag',
-            function= (lambda self:
-                       (self.del2*self.rek*self.wv2*
-                        np.abs(self.ph[1])**2./(self.nx*self.ny)).sum())
+              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) + 
+              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
         )
         
         self.add_diagnostic('APEgenspec',
@@ -259,6 +220,43 @@ class QGModel(model.Model):
                             np.conj(self.ph[0] - self.ph[1])).sum() / 
                             (self.nx*self.ny) )
         )
-
+        
+        ### These generic diagnostics are now calculated in model.py ###
+        # self.add_diagnostic('KE1spec',
+        #     description='upper layer kinetic energy spectrum',
+        #     function=(lambda self: 0.5*self.wv2*np.abs(self.ph[0])**2)
+        # )
+        #
+        # self.add_diagnostic('KE2spec',
+        #     description='lower layer kinetic energy spectrum',
+        #     function=(lambda self: 0.5*self.wv2*np.abs(self.ph[1])**2)
+        # )
+        #
+        # self.add_diagnostic('q1',
+        #     description='upper layer QGPV',
+        #     function= (lambda self: self.q[0])
+        # )
+        #
+        # self.add_diagnostic('q2',
+        #     description='lower layer QGPV',
+        #     function= (lambda self: self.q[1])
+        # )
+        #
+        # self.add_diagnostic('EKE1',
+        #     description='mean upper layer eddy kinetic energy',
+        #     function= (lambda self: 0.5*(self.v[0]**2 + self.u[0]**2).mean())
+        # )
+        #
+        # self.add_diagnostic('EKE2',
+        #     description='mean lower layer eddy kinetic energy',
+        #     function= (lambda self: 0.5*(self.v[1]**2 + self.u[1]**2).mean())
+        # )
+        #
+        # self.add_diagnostic('EKEdiss',
+        #     description='total energy dissipation by bottom drag',
+        #     function= (lambda self:
+        #                (self.del2*self.rek*self.wv2*
+        #                 np.abs(self.ph[1])**2./(self.nx*self.ny)).sum())
+        # )
 
 

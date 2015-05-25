@@ -98,42 +98,5 @@ class SQGModel(model.Model):
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
-
         ens = .5*self.H * spec_var(self, self.wv2*self.ph)
-
         return 2.*pi*np.sqrt( self.H / ens ) / year
-
-    def _calc_derived_fields(self):
-        self.p = self.ifft2( self.ph)
-        self.xi =self.ifft2( -self.wv2*self.ph)
-        self.Jptpc = -self.advect(self.p,self.u,self.v)
-        self.Jpxi = self.advect(self.xi, self.u, self.v)
-
-
-    def _initialize_diagnostics(self, diagnostics_list):
-        # Initialization for diagnotics
-        self.diagnostics = dict()
-
-        self.add_diagnostic('Ensspec',
-            description='enstrophy spectrum',
-            function= (lambda self: np.abs(self.qh)**2/self.M**2)
-            )
-            
-        self.add_diagnostic('KEspec',
-            description=' kinetic energy spectrum',
-            function=(lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
-            )  # factor of 2 to account for the fact that we have only half of 
-               #    the Fourier coefficients.
-
-        self.add_diagnostic('q',
-            description='QGPV',
-            function= (lambda self: self.q)
-        )
-
-        self.add_diagnostic('EKEdiss',
-            description='total energy dissipation by bottom drag',
-            function= (lambda self:
-                       (self.rek*self.wv2*
-                        np.abs(self.ph)**2./(self.M**2)).sum())
-        )
-

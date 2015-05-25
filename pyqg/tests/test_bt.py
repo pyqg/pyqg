@@ -16,17 +16,18 @@ def test_the_model(rtol=1e-14):
     p = np.exp(-(2.*(m.x-1.75*pi/2))**2.-(2.*(m.y-pi))**2) +\
             np.exp(-(2.*(m.x-2.25*pi/2))**2.-(2.*(m.y-pi))**2)
 
-    ph = m.fft2(p)
-    KEaux = bt_model.spec_var( m, m.filtr*m.wv*ph )/2.
+    ph = m.fft(p[np.newaxis,...])
+    KEaux = m.spec_var(m.filtr*m.wv*ph )/2.
     pih = ( ph/np.sqrt(KEaux) )
     qih = -m.wv2*pih
-    qi = m.ifft2(qih)
-    m.set_q(qi,check=False)
+    qi = m.ifft(qih)
+    m.set_q(qi)
 
     m.run()
 
     qnorm = (m.q**2).sum()
-    pnorm = (m.p**2).sum()
+    mp = m.ifft(m.ph)
+    pnorm = (mp**2).sum()
     ke = m._calc_ke()
 
     print 'time:       %g' % m.t

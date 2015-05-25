@@ -222,7 +222,8 @@ class Model(PseudoSpectralKernel):
             self.nz, self.ny, self.nx,
             self.a, self.kk, self.ll,
             self.Ubg, self.Qy,
-            rek=self.rek
+            rek=self.rek,
+            fftw_num_threads=self.ntd
         )
         
         # still need to initialize a few state variables here, outside kernel

@@ -150,7 +150,7 @@ class Model(PseudoSpectralKernel):
         self._do_external_forcing()
         # apply external forcing
         
-        #self._calc_diagnostics()
+        self._calc_diagnostics()
         # do what has to be done with diagnostics
         
         self._forward_timestep()
@@ -183,6 +183,8 @@ class Model(PseudoSpectralKernel):
         self.kk = self.dk*np.arange(0.,self.nk)
 
         self.k, self.l = np.meshgrid(self.kk, self.ll)
+        self.ik = 1j*self.k
+        self.il = 1j*self.l
         # physical grid spacing
         self.dx = self.L / self.nx
         self.dy = self.W / self.ny
@@ -230,19 +232,28 @@ class Model(PseudoSpectralKernel):
         self.dqhdt_pp = np.zeros_like(self.qh)
         
 
-
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
     def advect(self, q, u, v):
-        return self.kj*self.fft2(u*q) + self.lj*self.fft2(v*q)
+        """Given real inputs q, u, v, returns the advective tendency for
+        q in spectal space."""
+        uq = u*q
+        vq = v*q
+        # this is a hack, since fft now requires input to have shape (nz,ny,nx)
+        # it does an extra unnecessary fft
+        is_2d = (uq.ndim==2) 
+        if is_2d:
+            uq = np.tile(uq[np.newaxis,:,:], (self.nz,1,1))
+            vq = np.tile(vq[np.newaxis,:,:], (self.nz,1,1))
+        tend = self.ik*self.fft(uq) + self.il*self.fft(vq)
+        if is_2d:
+            return tend[0]
+        else:
+            return tend
 
     def _filter(self, q):
         """Apply filter to field q."""
         return q
-        
-    def _calc_derived_fields(self):
-        """For use by diagnostics."""
-        pass
         
     def _print_status(self):
         """Output some basic stats."""
@@ -309,13 +320,55 @@ class Model(PseudoSpectralKernel):
     def _initialize_diagnostics(self, diagnostics_list):
         # Initialization for diagnotics
         self.diagnostics = dict()
+        
+        self._initialize_core_diagnostics()
+        self._initialize_model_diagnostics()
+        
         if diagnostics_list == 'all':
             pass # by default, all diagnostics are active
         elif diagnostics_list == 'none':
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
+            
+    def _initialize_core_diagnostics(self):
+        """Diagnostics common to all models."""
+        self.add_diagnostic('Ensspec',
+            description='enstrophy spectrum',
+            function= (lambda self: np.abs(self.qh)**2/self.M**2)
+        )
+        
+        self.add_diagnostic('KEspec',
+            description=' kinetic energy spectrum',
+            function=(lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
+        )      # factor of 2 to account for the fact that we have only half of 
+               #    the Fourier coefficients.
 
+        self.add_diagnostic('q',
+            description='QGPV',
+            function= (lambda self: self.q)
+        )
+
+        self.add_diagnostic('EKEdiss',
+            description='total energy dissipation by bottom drag',
+            function= (lambda self:
+                       (self.rek*self.wv2*
+                        np.abs(self.ph[-1])**2./(self.M**2)).sum())
+        ) 
+        
+        self.add_diagnostic('EKE',
+            description='mean eddy kinetic energy',
+            function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1))
+        )
+
+    def _calc_derived_fields(self):
+        """Should be implemented by subclass."""
+        pass        
+                 
+    def _initialize_model_diagnostics(self):
+        """Should be implemented by subclass."""
+        pass
+            
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
@@ -355,7 +408,6 @@ class Model(PseudoSpectralKernel):
         return (self.diagnostics[dname]['value'] / 
                 self.diagnostics[dname]['count'])
 
-
     def spec_var(self, ph):
         """ compute variance of p from Fourier coefficients ph """
         var_dens = 2. * np.abs(ph)**2 / self.M**2
@@ -364,15 +416,3 @@ class Model(PseudoSpectralKernel):
         var_dens[...,-1] = var_dens[...,-1]/2.
         return var_dens.sum()
 
-# # general purpose timestepping routines
-# def tendency_forward_euler(dt, dqdt):
-#     """Compute tendency using forward euler timestepping."""
-#     return dt * dqdt
-#
-# def tendency_ab2(dt, dqdt, dqdt_p):
-#     """Compute tendency using Adams Bashforth 2nd order timestepping."""
-#     return (1.5*dt) * dqdt + (-0.5*dt) * dqdt_p
-#
-# def tendency_ab3(dt, dqdt, dqdt_p, dqdt_pp):
-#     """Compute tendency using Adams Bashforth 3nd order timestepping."""
-#     return (23/12.*dt) * dqdt + (-16/12.*dt) * dqdt_p + (5/12.*dt) * dqdt_pp

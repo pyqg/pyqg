@@ -91,8 +91,6 @@ cdef class PseudoSpectralKernel:
         
         self._rek = rek
         
-        print 'Inside Kernel'
-        
         ### none of this shape checking works
         #assert a.shape == (self.Nz, self.Nz self.Nl, self.Nk):
         #assert k.shape == (self.Nk,):

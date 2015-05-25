@@ -149,7 +149,6 @@ class QGModel(model.Model):
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(

@@ -17,24 +17,24 @@ nhx,nhy = m.wv2.shape
 
 Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa
 
-Pi = m.ifft2( Pi_hat )
+Pi = m.ifft( Pi_hat[np.newaxis,:,:] )
 Pi = Pi - Pi.mean()
 
 Pi = Pi - Pi.mean()
-Pi_hat = m.fft2( Pi )
-KEaux = bt_model.spec_var( m, m.wv*Pi_hat )
+Pi_hat = m.fft( Pi )
+KEaux = m.spec_var( m.wv*Pi_hat )
 
 pih = ( Pi_hat/np.sqrt(KEaux) )
 qih = -m.wv2*pih
-qi = m.ifft2(qih)
-m.set_q(qi,check=False)
+qi = m.ifft(qih)
+m.set_q(qi)
 
 # run the model
 plt.rcParams['image.cmap'] = 'YlOrRd_r'
 
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=200*m.dt):
     plt.clf()
-    plt.imshow(m.q + m.beta * m.y)
+    plt.imshow(m.q.squeeze() + m.beta * m.y)
     plt.clim([-20., 130.])
     plt.show()
     #plt.title(str(m.t))

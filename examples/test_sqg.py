@@ -18,14 +18,14 @@ x = np.linspace(m.dx/2,2*np.pi,m.nx) - np.pi
 y = np.linspace(m.dy/2,2*np.pi,m.ny) - np.pi
 x,y = np.meshgrid(x,y)
 
-qi = 0.01*np.exp(-(x**2 + (4.0*y)**2)/(m.L/6.0)**2);
-m.set_q(qi,check=False)
+qi = 0.01*np.exp(-(x**2 + (4.0*y)**2)/(m.L/6.0)**2)
+m.set_q(qi[np.newaxis,:,:])
 
 plt.ion()
 
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=100*m.dt):
     plt.clf()
-    p1 = plt.imshow(m.q + m.beta * m.y)
+    p1 = plt.imshow(m.q.squeeze() + m.beta * m.y)
     #plt.clim([-30., 30.])
     plt.title('t='+str(m.t))
     plt.colorbar()

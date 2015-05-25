@@ -1,17 +1,7 @@
 import numpy as np
 import model
 from numpy import pi
-try:   
-    import mkl
-    np.use_fastnumpy = True
-except ImportError:
-    pass
 
-try:
-    import pyfftw
-    pyfftw.interfaces.cache.enable() 
-except ImportError:
-    pass
 
 class BTModel(model.Model):
     """A subclass that represents the single-layer QG model."""

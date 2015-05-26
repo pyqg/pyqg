@@ -1,13 +1,14 @@
 #cython: profile=True
 #cython: boundscheck=False
+#cython: wraparound=False
+#cython: nonecheck=False 
 #from __future__ import division
-# #define printf PySys_WriteStdout
 import numpy as np
 cimport numpy as np
 from cython.parallel import prange, threadid
 #from libc.stdio cimport printf
 import pyfftw
-pyfftw.interfaces.cache.enable() 
+pyfftw.interfaces.cache.enable()  
 
 cdef extern from "stdio.h" nogil:
     int printf(const char* format, ...);
@@ -70,7 +71,8 @@ cdef class PseudoSpectralKernel:
     
     # threading
     cdef int num_threads
-
+    # number of elements per work group in the y / l direction
+    cdef int chunksize
 
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
@@ -191,7 +193,10 @@ cdef class PseudoSpectralKernel:
                          direction='FFTW_FORWARD', axes=(-2,-1))
         self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads, 
                          direction='FFTW_BACKWARD', axes=(-2,-1))
+                         
+        # for threading
         self.num_threads = fftw_num_threads
+        self.chunksize = self.Nl/self.num_threads
     
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
@@ -237,37 +242,51 @@ cdef class PseudoSpectralKernel:
         self.fft_q_to_qh()
 
     def _invert(self):
+        self.__invert()
+
+    cdef void __invert(self) nogil:
         ### algorithm
         # invert ph = a * qh
         # uh, vh = -_il * ph, _ik * ph
         # u, v, = ifft(uh), ifft(vh)
-          
+
+        cdef Py_ssize_t k, k1, k2, j, i
         # set ph to zero
         for k in range(self.Nz):
-            for j in range(self.Nl):
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
                 for i in range(self.Nk):
                     self.ph[k,j,i] = (0. + 0.*1j) 
                     
         # invert qh to find ph
         for k2 in range(self.Nz):
             for k1 in range(self.Nz):
-                for j in range(self.Nl):
+                for j in prange(self.Nl, nogil=True, schedule='static',
+                          chunksize=self.chunksize,  
+                          num_threads=self.num_threads):
                     for i in range(self.Nk):
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
                             self.a[k2,k1,j,i] * self.qh[k1,j,i] )
 
         # calculate spectral velocityies
         for k in range(self.Nz):
-            for j in range(self.Nl):
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
                 for i in range(self.Nk):
                     self.uh[k,j,i] = -self._il[j] * self.ph[k,j,i]
                     self.vh[k,j,i] =  self._ik[i] * self.ph[k,j,i]
 
         # transform to get u and v
-        self.ifft_uh_to_u()
-        self.ifft_vh_to_v()
+        with gil:
+            self.ifft_uh_to_u()
+            self.ifft_vh_to_v()
     
     def _do_advection(self):
+        self.__do_advection()
+    
+    cdef void __do_advection(self) nogil:
         ### algorithm
         # uq, vq = (u+Ubg)*q, (v+Vbg)*q
         # uqh, vqh, = fft(uq), fft(vq)
@@ -276,20 +295,27 @@ cdef class PseudoSpectralKernel:
         # the output array: spectal representation of advective tendency
         #cdef np.ndarray tend = np.zeros((self.Nz, self.Nl, self.Nk), dtype=DTYPE_com)
 
+        cdef Py_ssize_t k, j, i
+
         # multiply to get advective flux in space
         for k in range(self.Nz):
-            for j in range(self.Ny):
+            for j in prange(self.Ny, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
                 for i in range(self.Nx):
                     self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
                     self.vq[k,j,i] = self.v[k,j,i] * self.q[k,j,i]
 
         # transform to get spectral advective flux
-        self.fft_uq_to_uqh()
-        self.fft_vq_to_vqh()
+        with gil:
+            self.fft_uq_to_uqh()
+            self.fft_vq_to_vqh()
 
         # spectral divergence
         for k in range(self.Nz):
-            for j in range(self.Nl):
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
                 for i in range(self.Nk):
                     # overwrite the tendency, since the forcing gets called after
                     self.dqhdt[k,j,i] = ( self._ik[i] * self.uqh[k,j,i] +
@@ -303,19 +329,11 @@ cdef class PseudoSpectralKernel:
         """Apply Ekman friction to lower layer tendency"""
         cdef Py_ssize_t k = self.Nz-1
         cdef Py_ssize_t j, i
-        cdef int tid
-        cdef int chunksize = self.Nl/self.num_threads
-        #cdef DTYPE_com_t dqhdt_dummy
-        cdef char* text = "hello from __do_friction, chunksize=%d, num_threads=%d\n"
-        #printf(text, chunksize, self.num_threads)
         if self._rek:
-            for j in prange(self.Nl, nogil=True,
-                      chunksize=chunksize,  
-                      num_threads=self.num_threads, schedule='static'):
-                tid = threadid()
-                #printf('tid: %d   j: %d\n', tid, j)
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
                 for i in range(self.Nk):
-                    #dqhdt_dummy = (
                     self.dqhdt[k,j,i] = (
                      self.dqhdt[k,j,i] +
                              (self._rek *

@@ -34,6 +34,7 @@ class Model(PseudoSpectralKernel):
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
+        filterfac=23.6,             # the factor for use in the exponential filter
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -57,6 +58,8 @@ class Model(PseudoSpectralKernel):
         
         Friction Parameter Arguments:
         rek -- linear drag in lower layer, units seconds^-1
+        filterfac -- amplitdue of the spectral spherical filter
+                     (originally 18.4, later changed to 23.6)
                 
         Timestep-related Keyword Arguments:
         dt -- numerical timstep, units seconds
@@ -102,10 +105,12 @@ class Model(PseudoSpectralKernel):
         
         # friction
         self.rek = rek
+        self.filterfac = filterfac
 
         self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
+        self._initialize_filter()
         self._initialize_inversion_matrix()
         self._initialize_time()                
 
@@ -159,9 +164,9 @@ class Model(PseudoSpectralKernel):
         
     def _initialize_time(self):
         """Set up timestep stuff"""
-        self.t=0        # actual time
-        self.tc=0       # timestep number
-        self.taveints = np.ceil(self.taveint/self.dt)      
+        #self.t=0        # actual time
+        #self.tc=0       # timestep number
+        self.taveints = np.ceil(self.taveint/self.dt)    
         
     ### initialization routines, only called once at the beginning ###
     def _initialize_grid(self):
@@ -212,7 +217,18 @@ class Model(PseudoSpectralKernel):
     def _initialize_forcing(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
-            
+
+    def _initialize_filter(self):
+        """Set up frictional filter."""
+        # this defines the spectral filter (following Arbic and Flierl, 2003)
+        cphi=0.65*pi
+        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
+        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
+        self.filtr[wvx<=cphi] = 1.
+
+    def _filter(self, q):
+        return self.filtr * q
+
     def _do_external_forcing(self):
         pass
             
@@ -222,6 +238,8 @@ class Model(PseudoSpectralKernel):
             self.nz, self.ny, self.nx,
             self.a, self.kk, self.ll,
             self.Ubg, self.Qy,
+            self.filtr,
+            dt=self.dt,
             rek=self.rek,
             fftw_num_threads=self.ntd
         )
@@ -229,8 +247,8 @@ class Model(PseudoSpectralKernel):
         # still need to initialize a few state variables here, outside kernel
         # this is sloppy
         #self.dqhdt_forc = np.zeros_like(self.qh)
-        self.dqhdt_p = np.zeros_like(self.qh)
-        self.dqhdt_pp = np.zeros_like(self.qh)
+        #self.dqhdt_p = np.zeros_like(self.qh)
+        #self.dqhdt_pp = np.zeros_like(self.qh)
         
 
     # compute advection in grid space (returns qdot in fourier space)
@@ -252,9 +270,9 @@ class Model(PseudoSpectralKernel):
         else:
             return tend
 
-    def _filter(self, q):
-        """Apply filter to field q."""
-        return q
+    # def _filter(self, q):
+    #     """Apply filter to field q."""
+    #     return q
         
     def _print_status(self):
         """Output some basic stats."""
@@ -270,34 +288,34 @@ class Model(PseudoSpectralKernel):
         if (self.t>=self.dt) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-    def _forward_timestep(self):
-        """Step forward based on tendencies"""
-       
-        #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
-              
-        # Note that Adams-Bashforth is not self-starting
-        if self.tc==0:
-            # forward Euler at the first step
-            qtend = tendency_forward_euler(self.dt, self.dqhdt)
-        elif (self.tc==1) or (self.useAB2):
-            # AB2 at step 2
-            qtend = tendency_ab2(self.dt, self.dqhdt, self.dqhdt_p)
-        else:
-            # AB3 from step 3 on
-            qtend = tendency_ab3(self.dt, self.dqhdt,
-                        self.dqhdt_p, self.dqhdt_pp)
-            
-        # add tendency and filter
-        self.set_qh(self._filter(self.qh + qtend))
-        
-        # remember previous tendencies
-        self.dqhdt_pp = self.dqhdt_p.copy()
-        self.dqhdt_p = self.dqhdt.copy()
-        #self.dqhdt[:] = 0.
-                
-        # augment timestep and current time
-        self.tc += 1
-        self.t += self.dt
+    # def _forward_timestep(self):
+    #     """Step forward based on tendencies"""
+    #
+    #     #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
+    #
+    #     # Note that Adams-Bashforth is not self-starting
+    #     if self.tc==0:
+    #         # forward Euler at the first step
+    #         qtend = tendency_forward_euler(self.dt, self.dqhdt)
+    #     elif (self.tc==1) or (self.useAB2):
+    #         # AB2 at step 2
+    #         qtend = tendency_ab2(self.dt, self.dqhdt, self.dqhdt_p)
+    #     else:
+    #         # AB3 from step 3 on
+    #         qtend = tendency_ab3(self.dt, self.dqhdt,
+    #                     self.dqhdt_p, self.dqhdt_pp)
+    #
+    #     # add tendency and filter
+    #     self.set_qh(self._filter(self.qh + qtend))
+    #
+    #     # remember previous tendencies
+    #     self.dqhdt_pp[:] = self.dqhdt_p.copy()
+    #     self.dqhdt_p[:] = self.dqhdt.copy()
+    #     #self.dqhdt[:] = 0.
+    #
+    #     # augment timestep and current time
+    #     self.tc += 1
+    #     self.t += self.dt
 
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):

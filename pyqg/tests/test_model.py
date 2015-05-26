@@ -6,7 +6,7 @@ class PyqgModelTester(unittest.TestCase):
     
     def setUp(self):
         # need to eliminate beta and U for tests
-        self.m = qg_model.QGModel(beta=0., U1=0., U2=0.)
+        self.m = qg_model.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
         # the maximum wavelengths to use in tests
         # if we go to higher wavelengths, we don't get machine precision
         self.kwavemax = self.m.nx/8
@@ -183,7 +183,7 @@ class PyqgModelTester(unittest.TestCase):
         dqhdt = np.random.rand(*self.m.dqhdt.shape) + 1j*np.random.rand(*self.m.dqhdt.shape)
         self.m.dqhdt[:] = dqhdt
         # hack filter to be constant
-        self.m.filtr = 1.
+        #self.m.filtr = 1.
         
         # make sure we are at the zero timestep
         self.assertEqual(self.m.tc, 0)

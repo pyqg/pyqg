@@ -25,7 +25,6 @@ class QGModel(model.Model):
         H1 = 500,                   # depth of layer 1 (H1)
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
-        filterfac=23.6,             # the factor for use in the exponential filter
         **kwargs
         ):
         """Initialize the two-layer QG model.
@@ -37,8 +36,6 @@ class QGModel(model.Model):
         (NOTE: currently some diagnostics assume delta==1)
         U1 -- upper layer flow, units m/s
         U2 -- lower layer flow, units m/s
-        filterfac -- amplitdue of the spectral spherical filter
-                     (originally 18.4, later changed to 23.6)
         """
 
         # physical
@@ -50,7 +47,7 @@ class QGModel(model.Model):
         self.H2 = H1/delta
         self.U1 = U1
         self.U2 = U2
-        self.filterfac = filterfac
+        #self.filterfac = filterfac
         
         self.nz = 2
         
@@ -113,16 +110,14 @@ class QGModel(model.Model):
         self.a = np.ma.masked_invalid(a).filled(0.)
         
     def _initialize_forcing(self):
-        """Set up frictional filter."""
+        pass
+        #"""Set up frictional filter."""
         # this defines the spectral filter (following Arbic and Flierl, 2003)
-        cphi=0.65*pi
-        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
-        self.filtr[wvx<=cphi] = 1.
+        # cphi=0.65*pi
+        # wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
+        # self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
+        # self.filtr[wvx<=cphi] = 1.
         
-    def _filter(self, q):
-        return self.filtr * q
-     
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies."""
         self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))

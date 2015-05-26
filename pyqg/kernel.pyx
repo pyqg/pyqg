@@ -45,8 +45,10 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_real_t [:, :, :] vq
     cdef DTYPE_com_t [:, :, :] uqh
     cdef DTYPE_com_t [:, :, :] vqh
-    # the tendency
+    # the tendencies
     cdef DTYPE_com_t [:, :, :] dqhdt
+    cdef DTYPE_com_t [:, :, :] dqhdt_p
+    cdef DTYPE_com_t [:, :, :] dqhdt_pp
     
     # dummy variables for diagnostic ffts
     cdef DTYPE_real_t [:, :, :] _dummy_fft_in
@@ -62,12 +64,17 @@ cdef class PseudoSpectralKernel:
     cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
     cdef DTYPE_real_t [:] Ubg
-    #cdef DTYPE_real_t [:] Vbg
-    #cdef DTYPE_com_t [:, :] _ilQx
     cdef DTYPE_com_t [:, :] _ikQy
+    # spectral filter
+    cdef public DTYPE_real_t [:, :] _filtr
     
     # friction parameter
     cdef public DTYPE_real_t _rek
+    
+    # time
+    cdef public int tc
+    cdef public DTYPE_real_t _dt
+    cdef public DTYPE_real_t t
     
     # threading
     cdef int num_threads
@@ -89,9 +96,9 @@ cdef class PseudoSpectralKernel:
                     np.ndarray[DTYPE_real_t, ndim=1] k,
                     np.ndarray[DTYPE_real_t, ndim=1] l,
                     np.ndarray[DTYPE_real_t, ndim=1] Ubg,
-                    #np.ndarray[DTYPE_real_t, ndim=1] Vbg,
-                    #np.ndarray[DTYPE_real_t, ndim=1] Qx,
                     np.ndarray[DTYPE_real_t, ndim=1] Qy,
+                    np.ndarray[DTYPE_real_t, ndim=2] filtr,
+                    DTYPE_real_t dt=1.0,
                     DTYPE_real_t rek=0.0,
                     fftw_num_threads=1,                                       
     ):
@@ -156,7 +163,7 @@ cdef class PseudoSpectralKernel:
         vqh = self._empty_com()
         self.vqh = vqh
         
-        # finally some dummy variables for diagnostic ffts
+        # dummy variables for diagnostic ffts
         dfftin = self._empty_real()
         self._dummy_fft_in = dfftin
         dfftout = self._empty_com()
@@ -168,6 +175,16 @@ cdef class PseudoSpectralKernel:
         
         # the tendency
         self.dqhdt = self._empty_com()
+        self.dqhdt_p = self._empty_com()
+        self.dqhdt_pp = self._empty_com()
+        
+        # spectral filter
+        self._filtr = filtr
+        
+        # time stuff
+        self._dt = dt
+        self.tc = 0
+        self.t = 0.0
         
         # set up FFT plans
         # Note that the Backwards Real transform for the case
@@ -269,7 +286,7 @@ cdef class PseudoSpectralKernel:
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
                             self.a[k2,k1,j,i] * self.qh[k1,j,i] )
 
-        # calculate spectral velocityies
+        # calculate spectral velocities
         for k in range(self.Nz):
             for j in prange(self.Nl, nogil=True, schedule='static',
                       chunksize=self.chunksize,  
@@ -280,8 +297,11 @@ cdef class PseudoSpectralKernel:
 
         # transform to get u and v
         with gil:
+            #self.ifft_qh_to_q() # necessary now that timestepping is inside kernel
             self.ifft_uh_to_u()
             self.ifft_vh_to_v()
+            
+        return
     
     def _do_advection(self):
         self.__do_advection()
@@ -321,6 +341,7 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = ( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
+        return
 
     def _do_friction(self):
         self.__do_friction()
@@ -341,6 +362,69 @@ cdef class PseudoSpectralKernel:
                              self.ph[k,j,i]) )
         return                            
                         
+    def _forward_timestep(self):
+        """Step forward based on tendencies"""
+        self.__forward_timestep()
+
+    cdef void __forward_timestep(self) nogil:
+   
+        #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
+        cdef DTYPE_real_t dt1
+        cdef DTYPE_real_t dt2
+        cdef DTYPE_real_t dt3
+        cdef Py_ssize_t k, j, i
+        cdef DTYPE_com_t [:, :, :] qh_new
+        with gil:
+            qh_new = self.qh.copy()
+        
+        # Note that Adams-Bashforth is not self-starting
+        if self.tc==0:
+            # forward euler
+            dt1 = self._dt
+            dt2 = 0.0
+            dt3 = 0.0
+        elif self.tc==1:
+            # AB2 at step 2
+            dt1 = 1.5*self._dt
+            dt2 = -0.5*self._dt
+            dt3 = 0.0
+        else:
+            # AB3 from step 3 on
+            dt1 = 23./12.*self._dt
+            dt2 = -16./12.*self._dt
+            dt3 = 5./12.*self._dt
+            
+        for k in range(self.Nz):
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
+                for i in range(self.Nk):
+                    qh_new[k,j,i] = self._filtr[j,i] * (
+                        self.qh[k,j,i] +
+                        dt1 * self.dqhdt[k,j,i] +
+                        dt2 * self.dqhdt_p[k,j,i] +
+                        dt3 * self.dqhdt_pp[k,j,i]
+                    )
+                    self.qh[k,j,i] = qh_new[k,j,i]
+                    self.dqhdt_pp[k,j,i] = self.dqhdt_p[k,j,i]
+                    self.dqhdt_p[k,j,i] = self.dqhdt[k,j,i]
+                    #self.dqhdt[k,j,i] = 0.0
+        
+        # do FFT of new qh
+        with gil:
+            self.ifft_qh_to_q() # this destroys qh, need to assign again
+        
+        for k in range(self.Nz):
+            for j in prange(self.Nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,  
+                      num_threads=self.num_threads):
+                for i in range(self.Nk):
+                    self.qh[k,j,i] = qh_new[k,j,i]    
+
+        self.tc += 1
+        self.t += self._dt
+        return
+        
     # attribute aliases: return numpy ndarray views of memory views
     property q:
         def __get__(self):
@@ -351,6 +435,12 @@ cdef class PseudoSpectralKernel:
     property dqhdt:
         def __get__(self):
             return np.asarray(self.dqhdt)
+    property dqhdt_p:
+        def __get__(self):
+            return np.asarray(self.dqhdt_p)
+    property dqhdt_pp:
+        def __get__(self):
+            return np.asarray(self.dqhdt_pp)
     property ph:
         def __get__(self):
             return np.asarray(self.ph)

@@ -307,13 +307,13 @@ cdef class PseudoSpectralKernel:
         cdef int chunksize = self.Nl/self.num_threads
         #cdef DTYPE_com_t dqhdt_dummy
         cdef char* text = "hello from __do_friction, chunksize=%d, num_threads=%d\n"
-        printf(text, chunksize, self.num_threads)
+        #printf(text, chunksize, self.num_threads)
         if self._rek:
             for j in prange(self.Nl, nogil=True,
                       chunksize=chunksize,  
                       num_threads=self.num_threads, schedule='static'):
                 tid = threadid()
-                printf('tid: %d   j: %d\n', tid, j)
+                #printf('tid: %d   j: %d\n', tid, j)
                 for i in range(self.Nk):
                     #dqhdt_dummy = (
                     self.dqhdt[k,j,i] = (

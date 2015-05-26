@@ -1,9 +1,11 @@
 #cython: profile=True
+#cython: boundscheck=False
 #from __future__ import division
 
 import numpy as np
 cimport numpy as np
 import pyfftw
+from cython.parallel import prange
 pyfftw.interfaces.cache.enable() 
 
 # We now need to fix a datatype for our arrays. I've used the variable
@@ -285,17 +287,22 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = ( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
-                                    
+
     def _do_friction(self):
+        self.__do_friction()
+    
+    cdef void __do_friction(self) nogil:
         """Apply Ekman friction to lower layer tendency"""
-        if self.rek:
-            for j in range(self.Nl):
+        cdef Py_ssize_t k = self.Nz-1
+        cdef Py_ssize_t j, i
+        if self._rek:
+            for j in prange(self.Nl, nogil=True, schedule='static'):
                 for i in range(self.Nk):
-                    self.dqhdt[-1,j,i] = (
-                     self.dqhdt[-1,j,i] +
+                    self.dqhdt[k,j,i] = (
+                     self.dqhdt[k,j,i] +
                              (self._rek *
                              self._k2l2[j,i] *
-                             self.ph[-1,j,i]) )
+                             self.ph[k,j,i]) )
                                     
                         
     # attribute aliases: return numpy ndarray views of memory views

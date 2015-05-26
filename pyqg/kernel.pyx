@@ -1,12 +1,16 @@
 #cython: profile=True
 #cython: boundscheck=False
 #from __future__ import division
-
+# #define printf PySys_WriteStdout
 import numpy as np
 cimport numpy as np
+from cython.parallel import prange, threadid
+#from libc.stdio cimport printf
 import pyfftw
-from cython.parallel import prange
 pyfftw.interfaces.cache.enable() 
+
+cdef extern from "stdio.h" nogil:
+    int printf(const char* format, ...);
 
 # We now need to fix a datatype for our arrays. I've used the variable
 # DTYPE for this, which is assigned to the usual NumPy runtime
@@ -63,7 +67,11 @@ cdef class PseudoSpectralKernel:
     
     # friction parameter
     cdef public DTYPE_real_t _rek
-        
+    
+    # threading
+    cdef int num_threads
+
+
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
     cdef object ifft_qh_to_q
@@ -183,7 +191,7 @@ cdef class PseudoSpectralKernel:
                          direction='FFTW_FORWARD', axes=(-2,-1))
         self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads, 
                          direction='FFTW_BACKWARD', axes=(-2,-1))
-        
+        self.num_threads = fftw_num_threads
     
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
@@ -295,15 +303,21 @@ cdef class PseudoSpectralKernel:
         """Apply Ekman friction to lower layer tendency"""
         cdef Py_ssize_t k = self.Nz-1
         cdef Py_ssize_t j, i
+        cdef int tid
+        cdef char* text = "hello from __do_friction\n"
+        printf(text)
         if self._rek:
-            for j in prange(self.Nl, nogil=True, schedule='static'):
+            for j in prange(self.Nl, #nogil=True,
+                     num_threads=self.num_threads, schedule='guided'):
+                tid = threadid()
+                printf('tid: %d   j: %d\n', tid, j)
                 for i in range(self.Nk):
                     self.dqhdt[k,j,i] = (
                      self.dqhdt[k,j,i] +
                              (self._rek *
                              self._k2l2[j,i] *
                              self.ph[k,j,i]) )
-                                    
+        return                            
                         
     # attribute aliases: return numpy ndarray views of memory views
     property q:

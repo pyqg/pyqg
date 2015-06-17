@@ -12,6 +12,10 @@ If you are helping to develop the code, you might prefer to install it in [devel
 
 	python setup.py develop
 
+To build the cython kernel in place, do
+
+	python setup.py build_ext --inplace
+
 ## Usage ##
 
 We have an [example ipython notebook](http://nbviewer.ipython.org/github/rabernat/pyqg/blob/master/examples/pyqg_example.ipynb).

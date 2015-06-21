@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.interpolate import RectBivariateSpline
-from regulargrid.cartesiangrid import CartesianGrid
+#from regulargrid.cartesiangrid import CartesianGrid
+from scipy.ndimage import map_coordinates
 
 class LagrangianParticleArray2D(object):
     """A class for keeping track of a set of lagrangian particles
@@ -13,7 +14,6 @@ class LagrangianParticleArray2D(object):
                        periodic_in_y=False,
                        xmin=-np.inf, xmax=np.inf,
                        ymin=-np.inf, ymax=np.inf,
-                       xgrid=None, ygrid=None,
                        particle_dtype='f8'):
         """Initialize a set of particles with initial positions x0,y0.
 
@@ -27,7 +27,6 @@ class LagrangianParticleArray2D(object):
         periodic_in_y -- whether the domain 'wraps' in the y direction
         xmin, xmax -- maximum and minimum values of x coordinate
         ymin, ymax -- maximum and minimum values of y coordinate
-        xgrid, ygrid -- 1D arrays for use with gridded velocity data
         particle_dtype -- data type to use for particles
         """
         
@@ -47,43 +46,15 @@ class LagrangianParticleArray2D(object):
         self.ymax = ymax
         self.pix = periodic_in_x
         self.piy = periodic_in_y
-        
-        if xgrid is not None:
-            assert xgrid.ndim == 1
-            #assert np.testing.assert_allclose(0., np.diff(xgrid,2))
-        if ygrid is not None:
-            assert ygrid.ndim == 1
-            #assert np.testing.assert_allclose(0., np.diff(ygrid,2))
-        
-        self.xgrid = xgrid
-        self.ygrid = ygrid
-        
+                        
         self.Lx = self.xmax - self.xmin
         self.Ly = self.ymax - self.ymin
-    
-    def interpolate_scalar(self, x, y, C):
-        """Interpolate scalar C at points X, Y to points x,y"""
-        #return RectBivariateSpline(self.ygrid, self.xgrid,
-        #                           C, kx=1, ky=1).ev(y,x)
-        return CartesianGrid(
-                [(self.ygrid[0], self.ygrid[-1]),
-                 (self.xgrid[0], self.xgrid[-1])], C)(y,x)
-        # rewrite this directly using scipy.ndimage.map_coordinates
                  
     def step_forward_with_function(self, uv0fun, uv1fun, dt):
-        dx, dy = self.rk4_integrate(self.x, self.y, uv0fun, uv1fun, dt)
-        self.x = self.wrap_x(self.x + dx)
-        self.y = self.wrap_y(self.y + dy)
-        
-    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt):       
-        # create interpolation functions which return u and v
-        uv0fun = (lambda x, y : 
-                  (self.interpolate_scalar(x, y, U0),
-                  self.interpolate_scalar(x, y, V0)))
-        uv1fun = (lambda x, y :  
-                  (self.interpolate_scalar(x, y, U1),
-                  self.interpolate_scalar(x, y, V1)))
-      
+        """Advance particles using a function to determine u and v.
+        uv0fun(x,y) - function that returns the velocity field u,v at time t.
+        uv1fun(x,y) - function that returns the velocity field u,v at time t+1.
+        dt - timestep."""
         dx, dy = self.rk4_integrate(self.x, self.y, uv0fun, uv1fun, dt)
         self.x = self.wrap_x(self.x + dx)
         self.y = self.wrap_y(self.y + dy)
@@ -141,6 +112,91 @@ class LagrangianParticleArray2D(object):
             dy[ dy > self.Ly/2 ] -= self.Ly
             dy[ dy < -self.Ly/2 ] += self.Ly
         return dx, dy
+        
+        
+class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
+    """Lagrangian particles with velocities given on a regular cartesian grid.
+    """
+    
+    def __init__(self, x0, y0, Nx, Ny, grid_type='A', **kwargs):
+        """Initialize a set of particles with initial positions x0,y0.
+
+        x0 and y0 are arrays (same size) representing the particle
+        positions.
+
+        Keyword Arguments:
+        geometry -- the type of coordinate system being used
+                    (Only accepts 'cartesian' for now.)
+        periodic_in_x -- whether the domain 'wraps' in the x direction
+        periodic_in_y -- whether the domain 'wraps' in the y direction
+        xmin, xmax -- maximum and minimum values of x coordinate
+        ymin, ymax -- maximum and minimum values of y coordinate
+        particle_dtype -- data type to use for particles
+        """
+        
+        super(GriddedLagrangianParticleArray2D, self).__init__(x0, y0, **kwargs)
+        self.Nx = Nx
+        self.Ny = Ny
+        
+        if grid_type != 'A':
+            raise ValueError('Only A grid velocities supported at this time.')
+            
+        if not (self.pix and self.piy):
+            raise ValueError(
+              'Interpolation only works with doubly periodic grids at this time.')
+            
+        # figure out grid geometry, assuming velocities are located a cell centers
+        
+    # def xy_to_ij(self, x, y):
+    #     """Convert spatial coords x, y to grid coords i, j"""
+    #     i = x/self.Lx*self.Nx - 0.5
+    #     j = y/self.Ly*self.Ny - 0.5
+    #     return i, j
+    #
+    # def ij_to_xy(self, i, j):
+    #     """Convert grid coords i, j to spatial coords x, y"""
+    #     x = (i + 0.5)*self.Lx/self.Nx
+    #     y = (j + 0.5)*self.Ly/self.Ny
+    
+    def interpolate_gridded_scalar(self, x, y, c, order=3, pad=5):
+        """Interpolate scalar C to points x,y.
+        c is assumed to be defined on the known grid."""
+        
+        assert c.shape == (self.Ny, self.Nx), 'Shape of c needs to be (Ny,Nx)'
+        
+        # first pad the array to deal with the boundaries
+        # (map_coordinates can't seem to deal with this by itself)
+        # pad twice so cubic interpolation can be used
+        cp = np.pad(c, ((pad,pad),(pad,pad)), mode='wrap')
+        # now the shape is Nx+2, Nx+2
+        i = x/self.Lx*self.Nx + pad - 0.5
+        j = y/self.Ly*self.Ny + pad - 0.5
+        
+        # for some reason this still does not work with high precision near the boundaries
+        return map_coordinates(cp, [j,i],
+                mode='constant', order=order, cval=np.nan)
+           
+    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt):       
+        # create interpolation functions which return u and v
+        uv0fun = (lambda x, y : 
+                  (self.interpolate_gridded_scalar(x, y, U0),
+                  self.interpolate_gridded_scalar(x, y, V0)))
+        uv1fun = (lambda x, y :  
+                  (self.interpolate_scalar(x, y, U1),
+                  self.interpolate_scalar(x, y, V1)))
+        
+        self.step_forward_with_function(uv0fun, uv1fun, dt)
+        #dx, dy = self.rk4_integrate(self.x, self.y, uv0fun, uv1fun, dt)
+        #self.x = self.wrap_x(self.x + dx)
+        #self.y = self.wrap_y(self.y + dy)
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         

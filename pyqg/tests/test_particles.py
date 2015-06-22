@@ -151,14 +151,15 @@ class ParticleTester(unittest.TestCase):
             dt = T / nt
             
             uvfun = solid_body_rotation_velocity_function(om)
-            u_at_g, v_at_g = uvfun(xg, yg)
+            u_at_g, v_at_g = uvfun(xxg, yyg)
             glpa = particles.GriddedLagrangianParticleArray2D(
                  x0, y0, Nx, Ny,
                  xmin=-Lx/2, xmax=Lx/2, ymin=-Ly/2, ymax=Ly/2,
                  periodic_in_x=True, periodic_in_y=True)
                  
             for n in xrange(nt):
-                glpa.step_forward_with_function(uvfun, uvfun, dt)
+                glpa.step_forward_with_gridded_uv(
+                    u_at_g, v_at_g, u_at_g, v_at_g, dt)
                 
             # particles should be back to the same place
             np.testing.assert_allclose(

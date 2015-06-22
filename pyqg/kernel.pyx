@@ -450,6 +450,13 @@ cdef class PseudoSpectralKernel:
     property v:
         def __get__(self):
             return np.asarray(self.v)
+    property ufull:
+        def __get__(self):
+            return np.asarray(self.u) + \
+                np.asarray(self.Ubg)[:,np.newaxis,np.newaxis]
+    property vfull:
+        def __get__(self):
+            return np.asarray(self.v)
     property uh:
         def __get__(self):
             return np.asarray(self.uh)

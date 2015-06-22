@@ -158,32 +158,45 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
     #     x = (i + 0.5)*self.Lx/self.Nx
     #     y = (j + 0.5)*self.Ly/self.Ny
     
-    def interpolate_gridded_scalar(self, x, y, c, order=3, pad=5):
+    def interpolate_gridded_scalar(self, x, y, c, order=3, pad=5, offset=0):
         """Interpolate scalar C to points x,y.
         c is assumed to be defined on the known grid."""
         
-        assert c.shape == (self.Ny, self.Nx), 'Shape of c needs to be (Ny,Nx)'
+        ## no longer necessary because we accept pre-padded arrays
+        # assert c.shape == (self.Ny, self.Nx), 'Shape of c needs to be (Ny,Nx)'
         
         # first pad the array to deal with the boundaries
         # (map_coordinates can't seem to deal with this by itself)
         # pad twice so cubic interpolation can be used
-        cp = np.pad(c, ((pad,pad),(pad,pad)), mode='wrap')
+        if pad > 0:
+            cp = self._pad_field(c, pad=pad)
+        else:
+            cp = c
         # now the shape is Nx+2, Nx+2
-        i = x/self.Lx*self.Nx + pad - 0.5
-        j = y/self.Ly*self.Ny + pad - 0.5
+        i = (x - self.xmin)/self.Lx*self.Nx + pad + offset - 0.5
+        j = (y - self.ymin)/self.Ly*self.Ny + pad + offset - 0.5
         
         # for some reason this still does not work with high precision near the boundaries
         return map_coordinates(cp, [j,i],
                 mode='constant', order=order, cval=np.nan)
+    
+    def _pad_field(self, c, pad=5):
+        return np.pad(c, ((pad,pad),(pad,pad)), mode='wrap')
            
     def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt):       
         # create interpolation functions which return u and v
+        
+        # pre-pad arrays so it only has to be done once
+        pad = 5
+        [U0p, V0p, U1p, V1p] = [self._pad_field(c, pad=pad) for c in [U0, V0, U1, V1]]
+        
+        # pad u and v as necessary
         uv0fun = (lambda x, y : 
-                  (self.interpolate_gridded_scalar(x, y, U0),
-                  self.interpolate_gridded_scalar(x, y, V0)))
+                  (self.interpolate_gridded_scalar(x, y, U0p, pad=0, offset=pad),
+                   self.interpolate_gridded_scalar(x, y, V0p, pad=0, offset=pad)))
         uv1fun = (lambda x, y :  
-                  (self.interpolate_scalar(x, y, U1),
-                  self.interpolate_scalar(x, y, V1)))
+                  (self.interpolate_gridded_scalar(x, y, U1p, pad=0, offset=pad),
+                   self.interpolate_gridded_scalar(x, y, V1p, pad=0, offset=pad)))
         
         self.step_forward_with_function(uv0fun, uv1fun, dt)
         #dx, dy = self.rk4_integrate(self.x, self.y, uv0fun, uv1fun, dt)

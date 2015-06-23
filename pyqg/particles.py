@@ -158,7 +158,7 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
     #     x = (i + 0.5)*self.Lx/self.Nx
     #     y = (j + 0.5)*self.Ly/self.Ny
     
-    def interpolate_gridded_scalar(self, x, y, c, order=3, pad=5, offset=0):
+    def interpolate_gridded_scalar(self, x, y, c, order=1, pad=1, offset=0):
         """Interpolate scalar C to points x,y.
         c is assumed to be defined on the known grid."""
         
@@ -183,20 +183,25 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
     def _pad_field(self, c, pad=5):
         return np.pad(c, ((pad,pad),(pad,pad)), mode='wrap')
            
-    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt):       
+    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt, order=1):       
         # create interpolation functions which return u and v
         
         # pre-pad arrays so it only has to be done once
-        pad = 5
+        # for linear interpolation (default order=1), only one pad is necessary
+        pad = order
         [U0p, V0p, U1p, V1p] = [self._pad_field(c, pad=pad) for c in [U0, V0, U1, V1]]
         
         # pad u and v as necessary
         uv0fun = (lambda x, y : 
-                  (self.interpolate_gridded_scalar(x, y, U0p, pad=0, offset=pad),
-                   self.interpolate_gridded_scalar(x, y, V0p, pad=0, offset=pad)))
+                  (self.interpolate_gridded_scalar(x, y, U0p,
+                           pad=0, order=order, offset=pad),
+                   self.interpolate_gridded_scalar(x, y, V0p,
+                           pad=0, order=order, offset=pad)))
         uv1fun = (lambda x, y :  
-                  (self.interpolate_gridded_scalar(x, y, U1p, pad=0, offset=pad),
-                   self.interpolate_gridded_scalar(x, y, V1p, pad=0, offset=pad)))
+                  (self.interpolate_gridded_scalar(x, y, U1p, pad=0,
+                           order=order, offset=pad),
+                   self.interpolate_gridded_scalar(x, y, V1p, pad=0,
+                           order=order, offset=pad)))
         
         self.step_forward_with_function(uv0fun, uv1fun, dt)
         #dx, dy = self.rk4_integrate(self.x, self.y, uv0fun, uv1fun, dt)

@@ -106,18 +106,20 @@ class ParticleTester(unittest.TestCase):
         np.testing.assert_allclose(f_at_g, f_at_gi)
         
         # now try shifting everything
-        # for some reason this still does not work with high precision near the boundaries
-        np.testing.assert_allclose(f_at_c,
-            glpa.interpolate_gridded_scalar(xxc, yyc, f_at_g),
-            atol=1e-3
-        )
+        # used to use cubic interpolation by default
+        # that was slow and produced weird artifacts near boundaries
+        # now use linear interpolation
+        # this definitely produces errors in the approximation of sine and cosine
+        # neglect of curvature causes velocity to be systematically underestimated
+        f_at_ci = glpa.interpolate_gridded_scalar(xxc, yyc, f_at_g)
+        np.testing.assert_allclose(f_at_c, f_at_ci, atol=1e-1)
         
         # now try some random points
         # what sort of error do we expect
         ci = ffun(x0, y0)
         np.testing.assert_allclose(ci,
             glpa.interpolate_gridded_scalar(x0, y0, f_at_g),
-            atol=1e-4
+            atol=1e-1
         )
         
     def test_gridded_integration(self, atol=1e-10):

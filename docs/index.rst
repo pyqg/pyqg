@@ -21,4 +21,6 @@ Contents
    :maxdepth: 1
     
    installation 
+   notation_twolayer_model
+   notation_equivalent_barotropic
    development

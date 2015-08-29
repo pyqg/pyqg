@@ -14,7 +14,7 @@ class SQGModel(model.Model):
         rd=0.,                      # deformation radius
         H = 1.,                     # depth of layer
         U=0.,                       # max vel. of base-state
-        filterfac = 23.6,           # the factor for use in the exponential filter
+        #filterfac = 23.6,           # the factor for use in the exponential filter
         **kwargs
         ):
         """Initialize the surface QG model.
@@ -33,7 +33,7 @@ class SQGModel(model.Model):
         self.rd = rd
         self.H = H
         self.U = U
-        self.filterfac = filterfac
+        #self.filterfac = filterfac
         
         self.nz = 1
        
@@ -64,15 +64,7 @@ class SQGModel(model.Model):
         self.a = np.asarray(self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
-        """Set up frictional filter."""
-        # this defines the spectral filter (following Arbic and Flierl, 2003)
-        cphi=0.65*pi
-        wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
-        self.filtr[wvx<=cphi] = 1.
-        
-    def _filter(self, q):
-        return self.filtr * q
+        pass
     
     def set_U(self, U):
         """Set background zonal flow"""

@@ -36,9 +36,10 @@ def test_advect(rtol=1.e-13):
         #m.u1,m.v1 = m.caluv(m.ph1)
 
         # compute advection
-        jacobh = m.advect(m.q[0],m.u[0],m.v[0])
+        #jacobh = m.advect(m.q[0],m.u[0],m.v[0])
+        jacobh = m.advect(m.q,m.u,m.v)
         #jacobh = m.advect(m.q,m.u,m.v)
-        jacob = m.ifft2(jacobh)
+        jacob = m.ifft(jacobh)
 
         # residual -- the L2-norm of the jacobian
         res = np.abs(jacob).sum()*m.dx*m.dy/(m.L**2)

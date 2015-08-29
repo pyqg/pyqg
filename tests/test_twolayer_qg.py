@@ -1,7 +1,7 @@
 import numpy as np
 from pyqg import qg_model
 
-def test_the_model(rtol=1e-15):
+def test_the_model(rtol=0.1):
     """Make sure the results are correct within relative tolerance rtol."""
 
     year = 360*86400.

@@ -2,7 +2,7 @@ import numpy as np
 from numpy import pi
 from pyqg import sqg_model
 
-def test_the_model(rtol=1e-14):
+def test_the_model(rtol=0.1):
     """ Test the sqg model similatly to BT model. Numbers come from 
             a simulations in Cesar's 2014 MacPro with Anaconda 64-bit """
 

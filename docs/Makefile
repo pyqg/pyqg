@@ -5,7 +5,10 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = _build
+# http://daler.github.io/sphinxdoc-test/includeme.html
+BUILDDIR      = ../../pyqg-gh-pages
+#PDFBUILDDIR   = /tmp
+#PDF           = ../manual.pdf
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)

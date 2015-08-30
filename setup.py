@@ -1,8 +1,18 @@
-from setuptools import setup
+from setuptools import setup, Extension
+from Cython.Build import cythonize
+import numpy as np
 
 def readme():
     with open('README.md') as f:
         return f.read()
+
+ext_module = Extension(
+    "pyqg/kernel",
+    ["pyqg/kernel.pyx"],
+    extra_compile_args=['-fopenmp'],
+    extra_link_args=['-fopenmp'],
+)
+
 
 setup(name='pyqg',
       version='0.1',
@@ -15,5 +25,8 @@ setup(name='pyqg',
       install_requires=[
           'numpy',
       ],
+      #ext_modules = cythonize("pyqg/*.pyx"),
+      ext_modules = cythonize(ext_module),
+      include_dirs = [np.get_include()],
       test_suite = 'nose.collector',
       zip_safe=False)

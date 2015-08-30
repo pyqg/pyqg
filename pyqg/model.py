@@ -14,7 +14,23 @@ except ImportError:
     pass
 
 class Model(PseudoSpectralKernel):
-    """A generic pseudo-spectral inversion model."""
+    """A generic pseudo-spectral inversion model.
+    
+    Attributes
+    ----------
+    q : real array
+        potential vorticity in real space
+    qh : complex array
+        potential vorticity in spectral space
+    ph : complex array
+        streamfunction in spectral space
+    u, v: real arrays
+        velocity anomaly components in real space
+    ufull, vfull: real arrays
+        full velocity components in real space
+    uh, vh : complex arrays
+        velocity anomaly components in spectral space    
+    """
     
     def __init__(
         self,

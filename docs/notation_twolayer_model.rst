@@ -1,6 +1,6 @@
 
-The two-layer quasigeostrophic model
-====================================
+Equations For Two-Layer QG Model
+================================
 
 The two-layer quasigeostrophic evolution equations are (1)
 

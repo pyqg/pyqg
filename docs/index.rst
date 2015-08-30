@@ -10,9 +10,9 @@
 pyqg: Python Quasigeostrophic Model
 ===================================
 
-The pyqg team aims to build a "git generation" community quasi-geostrophic
-model in Python. Ideally, pyqg will be a tool that is easy-to-use, high-level,
-unit-tested, and community-based.
+The pyqg team aims to build a "git generation" community quasigeostrophic
+model in python, bringing modern programming and an open-source approach to
+a classic yet still widely-used tool in geophysical fluid dynamics.
 
 Contents
 --------
@@ -20,8 +20,7 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   motivation    
-   installation
+   installation    
    examples
    notation_twolayer_model
    notation_equivalent_barotropic

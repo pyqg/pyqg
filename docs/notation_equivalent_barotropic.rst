@@ -1,5 +1,5 @@
 
-Equivalent barotropic quasigeostrophic model
+Equations For Equivalent Barotropic QG Model
 ============================================
 
 The equivalent barotropic quasigeostrophy evolution equations is

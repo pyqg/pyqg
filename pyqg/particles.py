@@ -182,7 +182,12 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
         pad : int
             Number of pad cells added
         offset : int
-            ???    
+            ??? 
+            
+        Returns
+        -------
+        ci : array-like
+            The interpolated scalar
         """
         
         ## no longer necessary because we accept pre-padded arrays

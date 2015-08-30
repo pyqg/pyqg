@@ -429,6 +429,17 @@ class Model(PseudoSpectralKernel):
            'count': 0,
            'function': function, }
            
+    def describe_diagnostics(self):
+        """Print a human-readable summary of the available diagnostics."""
+        diag_names = self.diagnostics.keys()
+        diag_names.sort()
+        print('NAME       | DESCRIPTION')
+        print(80*'-')
+        for k in diag_names:
+            d = self.diagnostics[k]
+            print('{:<10} | {:<54}').format(
+                 *(k,  d['description']))
+           
     def _increment_diagnostics(self):
         # compute intermediate quantities needed for some diagnostics
         

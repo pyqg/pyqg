@@ -4,26 +4,28 @@ from numpy import pi
 
 
 class SQGModel(model.Model):
-    """A subclass that represents the Surface QG model."""
+    """Surface quasigeostrophic model."""
     
     def __init__(
         self,
         beta=0.,                    # gradient of coriolis parameter
         Nb = 1.,                    # Buoyancy frequency
-        #rek=0.,                     # linear drag in lower layer
         rd=0.,                      # deformation radius
         H = 1.,                     # depth of layer
         U=0.,                       # max vel. of base-state
-        #filterfac = 23.6,           # the factor for use in the exponential filter
         **kwargs
         ):
-        """Initialize the surface QG model.
+        """
+        Parameters
+        ----------
 
-        beta -- gradient of coriolis parameter, units m^-1 s^-1
-        (NOTE: currently some diagnostics assume delta==1)
-        U -- upper layer flow, units m/s
-        filterfac -- amplitdue of the spectral spherical filter
-                     (originally 18.4, later changed to 23.6)
+        beta : number
+            Gradient of coriolis parameter. Units: meters :sup:`-1`
+            seconds :sup:`-1`
+        Nb : number
+            Buoyancy frequency. Units: seconds :sup:`-1`.
+        U : number
+            Background zonal flow. Units: meters.
         """
 
         # physical

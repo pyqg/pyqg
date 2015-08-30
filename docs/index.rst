@@ -3,24 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pyqg: Open-Source Quasigeostrophic Model in Python
-=================================================
+pyqg: Python Quasigeostrophic Model
+===================================
 
-
-The PyQG team aims to build a "git generation" community quasi-geostrophic model in Python. Ideally, PyQG will be a tool that is easy-to-use, high-level and unit-tested.
-
-Please note the following about this project:
-
-* PyQG is in its birth, and its a side-project of its core developers.
-* ...
+The pyqg team aims to build a "git generation" community quasi-geostrophic
+model in Python. Ideally, pyqg will be a tool that is easy-to-use, high-level,
+unit-tested, and community-based.
 
 Contents
 --------
 
 .. toctree::
    :maxdepth: 1
-    
-   installation 
+
+   motivation    
+   installation
+   examples
    notation_twolayer_model
    notation_equivalent_barotropic
+   api
    development

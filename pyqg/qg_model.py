@@ -14,7 +14,47 @@ except ImportError:
     pass
 
 class QGModel(model.Model):
-    """A class that represents the two-layer QG model."""
+    r"""Two layer quasigeostrophic model.
+    
+    This model is meant to representflows driven by baroclinic instabilty of a
+    base-state shear :math:`U_1-U_2`. The upper and lower
+    layer potential vorticity anomalies :math:`q_1` and :math:`q_2` are
+    
+    .. math::
+    
+        q_1 &= \nabla^2\psi_1 + F_1(\psi_2 - \psi_1) \\
+        q_2 &= \nabla^2\psi_2 + F_2(\psi_1 - \psi_2)
+
+    with
+    
+    .. math::
+        F_1 &\equiv \frac{k_d^2}{1 + \delta^2} \\
+        F_2 &\equiv \delta F_1 \ .
+
+    The layer depth ratio is given by :math:`\delta = H_1 / H_2`.
+    The total depth is :math:`H = H_1 + H_2`.
+
+    The background potential vorticity gradients are
+
+    .. math::
+
+        \beta_1 &= \beta + F_1(U_1 - U_2) \\
+        \beta_2 &= \beta - F_2( U_1 - U_2) \ .
+    
+    The evolution equations for :math:`q_1` and :math:`q_2` are
+
+    .. math::
+
+        \partial_t\,{q_1} + J(\psi_1\,, q_1) + \beta_1\,
+        {\psi_1}_x &= \text{ssd} \\
+        \partial_t\,{q_2} + J(\psi_2\,, q_2)+ \beta_2\, {\psi_2}_x
+        &= -r_{ek}\nabla^2 \psi_2 + \text{ssd}\,.
+
+    where `ssd` represents small-scale dissipation and :math:`r_{ek}` is the
+    Ekman friction parameter.
+    
+    """
+
     
     def __init__(
         self,
@@ -27,15 +67,23 @@ class QGModel(model.Model):
         U2=0.0,                     # lower layer flow
         **kwargs
         ):
-        """Initialize the two-layer QG model.
+        """
+        Parameters
+        ----------
 
-        beta -- gradient of coriolis parameter, units m^-1 s^-1
-        rek -- linear drag in lower layer, units seconds^-1
-        rd -- deformation radius, units meters
-        delta -- layer thickness ratio (H1/H2)
-        (NOTE: currently some diagnostics assume delta==1)
-        U1 -- upper layer flow, units m/s
-        U2 -- lower layer flow, units m/s
+        beta : number
+            Gradient of coriolis parameter. Units: meters :sup:`-1`
+            seconds :sup:`-1`
+        rek : number
+            Linear drag in lower layer. Units: seconds :sup:`-1`
+        rd : number
+            Deformation radius. Units: meters.
+        delta : number
+            Layer thickness ratio (H1/H2)
+        U1 : number
+            Upper layer flow. Units: m/s
+        U2 : number
+            Lower layer flow. Units: m/s
         """
 
         # physical
@@ -119,7 +167,16 @@ class QGModel(model.Model):
         # self.filtr[wvx<=cphi] = 1.
         
     def set_q1q2(self, q1, q2, check=False):
-        """Set upper and lower layer PV anomalies."""
+        """Set upper and lower layer PV anomalies.
+        
+        Parameters
+        ----------
+        
+        q1 : array-like
+            Upper layer PV anomaly in spatial coordinates.
+        q1 : array-like
+            Lower layer PV anomaly in spatial coordinates.
+        """
         self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
         #self.q[0] = q1
         #self.q[1] = q2
@@ -133,7 +190,16 @@ class QGModel(model.Model):
             np.testing.assert_allclose(self.q1, self.ifft2(self.qh1))
     
     def set_U1U2(self, U1, U2):
-        """Set background zonal flow"""
+        """Set background zonal flow.
+        
+        Parameters
+        ----------
+        
+        U1 : number
+            Upper layer flow. Units: m/s
+        U2 : number
+            Lower layer flow. Units: m/s
+        """
         self.U1 = U1
         self.U2 = U2
         #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
@@ -170,12 +236,12 @@ class QGModel(model.Model):
     def _calc_derived_fields(self):
         self.p = self.ifft(self.ph)
         self.xi =self.ifft(-self.wv2*self.ph)
-        self.Jptpc = -self.advect(
+        self.Jptpc = -self._advect(
                     (self.p[0] - self.p[1]),
                     (self.del1*self.u[0] + self.del2*self.u[1]),
                     (self.del1*self.v[0] + self.del2*self.v[1]))
         # fix for delta.neq.1
-        self.Jpxi = self.advect(self.xi, self.u, self.v)
+        self.Jpxi = self._advect(self.xi, self.u, self.v)
 
     def _initialize_model_diagnostics(self):
         """Extra diagnostics for two-layer model"""

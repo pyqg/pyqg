@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
-from pyqg import particles
-
+import pyqg
 
 def constant_velocity_function(u, v):
     """Return a function that returns a constant velocity field."""
@@ -44,7 +43,7 @@ class ParticleTester(unittest.TestCase):
                 y1 = y0 + DT*v
                 
                 uvfun = constant_velocity_function(u, v)
-                lpa = particles.LagrangianParticleArray2D(x0, y0)
+                lpa = pyqg.LagrangianParticleArray2D(x0, y0)
                 for n in xrange(nt):
                     lpa.step_forward_with_function(uvfun, uvfun, dt)
                     
@@ -61,7 +60,7 @@ class ParticleTester(unittest.TestCase):
             dt = T / nt
             
             uvfun = solid_body_rotation_velocity_function(om)
-            lpa = particles.LagrangianParticleArray2D(x0, y0)
+            lpa = pyqg.LagrangianParticleArray2D(x0, y0)
             for n in xrange(nt):
                 lpa.step_forward_with_function(uvfun, uvfun, dt)
                 
@@ -96,7 +95,7 @@ class ParticleTester(unittest.TestCase):
         Npart = 10
         x0 = np.array(np.random.rand(Npart)*Lx)
         y0 = np.array(np.random.rand(Npart)*Ly)
-        glpa = particles.GriddedLagrangianParticleArray2D(
+        glpa = pyqg.GriddedLagrangianParticleArray2D(
              x0, y0, Nx, Ny,
              xmin=0, xmax=Lx, ymin=0, ymax=Ly,
              periodic_in_x=True, periodic_in_y=True)
@@ -154,7 +153,7 @@ class ParticleTester(unittest.TestCase):
             
             uvfun = solid_body_rotation_velocity_function(om)
             u_at_g, v_at_g = uvfun(xxg, yyg)
-            glpa = particles.GriddedLagrangianParticleArray2D(
+            glpa = pyqg.GriddedLagrangianParticleArray2D(
                  x0, y0, Nx, Ny,
                  xmin=-Lx/2, xmax=Lx/2, ymin=-Ly/2, ymax=Ly/2,
                  periodic_in_x=True, periodic_in_y=True)

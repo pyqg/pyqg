@@ -1,11 +1,11 @@
 import numpy as np
-from pyqg import qg_model
+import pyqg
 
 def test_the_model(rtol=0.1):
     """Make sure the results are correct within relative tolerance rtol."""
 
     year = 360*86400.
-    m = qg_model.QGModel(
+    m = pyqg.QGModel(
             nx=32,                      # grid resolution
             ny=None,
             L=1e6,                      # domain size 
@@ -24,7 +24,6 @@ def test_the_model(rtol=0.1):
             tavestart=1*year,     # start time for averaging
             taveint=12800.,
             useAB2=True,
-            use_fftw=True,
             # diagnostics parameters
             diagnostics_list='all'      # which diagnostics to output)
             )

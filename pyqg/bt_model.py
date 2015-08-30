@@ -4,36 +4,43 @@ from numpy import pi
 
 
 class BTModel(model.Model):
-    """A subclass that represents the single-layer QG model."""
+    r"""Single-layer (barotropic) quasigeostrophic model.
+    This class can represent both pure two-dimensional flow
+    and also single reduced-gravity layers with deformation
+    radius ``rd``.
     
-    def __init__(
-        self,
-        beta=0.,                    # gradient of coriolis parameter
-        #rek=0.,                     # linear drag in lower layer
-        rd=0.,                      # deformation radius
-        H = 1.,                     # depth of layer
-        U=0.,                       # max vel. of base-state
-        #filterfac = 23.6,           # the factor for use in the exponential filter
-        **kwargs
-        ):
-        """Initialize the single-layer (barotropic) QG model.
+    The equivalent-barotropic quasigeostrophic evolution equations is
 
-        beta -- gradient of coriolis parameter, units m^-1 s^-1
-        rek -- linear drag in lower layer, units seconds^-1
-        rd -- deformation radius, units meters
-        (NOTE: currently some diagnostics assume delta==1)
-        U -- upper layer flow, units m/s
-        filterfac -- amplitdue of the spectral spherical filter
-                     (originally 18.4, later changed to 23.6)
+    .. math::
+
+       \partial_t q + J(\psi, q ) + \beta \psi_x = \text{ssd}
+
+    The potential vorticity anomaly is
+
+    .. math::
+
+       q = \nabla^2 \psi - \kappa_d^2 \psi
+       
+    """
+    
+    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+        """
+        Parameters
+        ----------
+        
+        beta : number, optional
+            Gradient of coriolis parameter. Units: meters :sup:`-1`
+            seconds :sup:`-1`
+        rd : number, optional
+            Deformation radius. Units: meters.
+        U : number, optional
+            Upper layer flow. Units: meters.
         """
 
-        # physical
         self.beta = beta
-        #self.rek = rek
         self.rd = rd
         self.H = H
         self.U = U
-        #self.filterfac = filterfac
         
         self.nz = 1
        
@@ -48,8 +55,6 @@ class BTModel(model.Model):
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
  
-    ### PRIVATE METHODS - not meant to be called by user ###
-        
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
         
@@ -84,7 +89,14 @@ class BTModel(model.Model):
     #     return self.filtr * q
 
     def set_U(self, U):
-        """Set background zonal flow"""
+        """Set background zonal flow.
+        
+        Parameters
+        ----------
+        
+        U : number
+            Upper layer flow. Units meters.
+        """
         self.Ubg = np.asarray(U)[np.newaxis, ...]
 
     def _calc_diagnostics(self):

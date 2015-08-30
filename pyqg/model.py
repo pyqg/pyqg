@@ -14,7 +14,7 @@ except ImportError:
     pass
 
 class Model(PseudoSpectralKernel):
-    """A class that represents a generic pseudo-spectral inversion model."""
+    """A generic pseudo-spectral inversion model."""
     
     def __init__(
         self,
@@ -38,45 +38,56 @@ class Model(PseudoSpectralKernel):
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
-        use_fftw = False,               # fftw flag 
-        teststyle = False,            # use fftw with "estimate" planner to get reproducibility
+        # removed because fftw is now manditory
+        #use_fftw = False,               # fftw flag 
+        #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
         ):
-        """Initialize the two-layer QG model.
+        """
+        .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
+                  these parameters to be different.
+        .. note:: All time intervals will be rounded to nearest `dt` interval.
         
-        The model parameters are passed as keyword arguments.
-        They are grouped into the following categories
-        
-        Grid Parameter Keyword Arguments:
-        nx -- number of grid points in the x direction
-        ny -- number of grid points in the y direction (default: nx)
-        L -- domain length in x direction, units meters 
-        W -- domain width in y direction, units meters (default: L)
-        (WARNING: some parts of the model or diagnostics might
-        actuallye assume nx=ny -- check before making different choice!)
-        
-        Friction Parameter Arguments:
-        rek -- linear drag in lower layer, units seconds^-1
-        filterfac -- amplitdue of the spectral spherical filter
-                     (originally 18.4, later changed to 23.6)
-                
-        Timestep-related Keyword Arguments:
-        dt -- numerical timstep, units seconds
-        tplot -- interval for plotting, units number of timesteps
-        tcfl -- interval for cfl writeout, units number of timesteps
-        tmax -- total time of integration, units seconds
-        tavestart -- start time for averaging, units seconds
-        tsnapstart -- start time for snapshot writeout, units seconds
-        taveint -- time interval for summation in diagnostic averages,
-                   units seconds
-           (for performance purposes, averaging does not have to
+        Parameters
+        ----------
+
+        nx : int
+            Number of grid points in the x direction.
+        ny : int
+            Number of grid points in the y direction (default: nx).
+        L : number
+            Domain length in x direction. Units: meters.
+        W :
+            Domain width in y direction. Units: meters (default: L).    
+        rek : number
+            linear drag in lower layer. Units: seconds :sup:`-1`.
+        filterfac : number
+            amplitdue of the spectral spherical filter (originally 18.4, later
+            changed to 23.6).
+        dt : number
+            Numerical timstep. Units: seconds.
+        tplot : int
+            Unterval for plotting. Units: number of timesteps.
+        tcfl : int
+            Interval for cfl writeout. Units: number of timesteps.
+        tmax : number
+            Total time of integration. Units: seconds.
+        tavestart : number
+            Start time for averaging. Units: seconds.
+        tsnapstart : number
+            Start time for snapshot writeout. Units: seconds.
+        taveint : number
+            Time interval for accumulation of diagnostic averages.
+            Units: seconds. (For performance purposes, averaging does not have to
             occur every timestep)
-        tsnapint -- time interval for snapshots, units seconds 
-        tpickup -- time interval for writing pickup files, units seconds
-        (NOTE: all time intervals will be rounded to nearest dt interval)
-        use_fftw  -- if True fftw is used with "estimate" planner to get reproducibility (hopefully)
-        useAB2 -- use second order Adams Bashforth timestepping instead of third
+        tsnapint : number
+            Time interval for snapshots. Units: seconds. 
+        tpickup : number
+            Time interval for writing pickup files. Units: seconds.
+        ntd : int
+            Number of threads to use. Should not exceed the number of cores on
+            your machine.
         """
 
         if ny is None: ny = nx
@@ -99,8 +110,8 @@ class Model(PseudoSpectralKernel):
         self.quiet = quiet
         self.useAB2 = useAB2
         # fft 
-        self.use_fftw = use_fftw
-        self.teststyle= teststyle
+        #self.use_fftw = use_fftw
+        #self.teststyle= teststyle
         self.ntd = ntd
         
         # friction
@@ -120,7 +131,16 @@ class Model(PseudoSpectralKernel):
         self._initialize_diagnostics(diagnostics_list)
    
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
-        """Run the model forward until the next snapshot, then yield."""
+        """Run the model forward, yielding to user code at specified intervals.
+        
+        Parameters
+        ----------
+        
+        tsnapstart : int
+            The timestep at which to begin yielding.
+        tstapint : int
+            The interval at which to yield.
+        """
         
         tsnapints = np.ceil(tsnapint/self.dt)
         nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
@@ -253,7 +273,7 @@ class Model(PseudoSpectralKernel):
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
-    def advect(self, q, u, v):
+    def _advect(self, q, u, v):
         """Given real inputs q, u, v, returns the advective tendency for
         q in spectal space."""
         uq = u*q

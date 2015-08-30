@@ -1,5 +1,5 @@
 import numpy as np
-from pyqg import qg_model
+import pyqg
 
 def test_advect(rtol=1.e-13):
     """ Make sure advective term vanishes for plane wave 
@@ -8,7 +8,7 @@ def test_advect(rtol=1.e-13):
         slanted (kx != 0 and ky !=0 ) """
 
     #m = bt_model.BTModel(L=2.*np.pi,nx=256)
-    m = qg_model.QGModel(L=2.*np.pi,nx=256,U1=0)
+    m = pyqg.QGModel(L=2.*np.pi,nx=256,U1=0)
 
     # there are some magic combinations that
     #   fails the test...try kx=12,ky=24
@@ -37,7 +37,7 @@ def test_advect(rtol=1.e-13):
 
         # compute advection
         #jacobh = m.advect(m.q[0],m.u[0],m.v[0])
-        jacobh = m.advect(m.q,m.u,m.v)
+        jacobh = m._advect(m.q,m.u,m.v)
         #jacobh = m.advect(m.q,m.u,m.v)
         jacob = m.ifft(jacobh)
 

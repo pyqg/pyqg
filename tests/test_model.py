@@ -1,12 +1,12 @@
 import unittest
 import numpy as np
-from pyqg import qg_model
+import pyqg
 
 class PyqgModelTester(unittest.TestCase):
     
     def setUp(self):
         # need to eliminate beta and U for tests
-        self.m = qg_model.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
+        self.m = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
         # the maximum wavelengths to use in tests
         # if we go to higher wavelengths, we don't get machine precision
         self.kwavemax = self.m.nx/8

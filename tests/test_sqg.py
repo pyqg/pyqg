@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import pi
-from pyqg import sqg_model
+import pyqg
 
 def test_the_model(rtol=0.1):
     """ Test the sqg model similatly to BT model. Numbers come from 
@@ -8,9 +8,9 @@ def test_the_model(rtol=0.1):
 
     # the model object
     year = 1.
-    m = sqg_model.SQGModel(L=2.*pi,nx=128, tmax = 10*year,
+    m = pyqg.SQGModel(L=2.*pi,nx=128, tmax = 10*year,
             beta = 0., H = 1., rek = 0., rd = None, dt = 1.e-3,
-                         taveint=year, twrite=1000,use_fftw=True, ntd=1)
+                         taveint=year, twrite=1000, ntd=1)
 
     # a vortex merger IC with unit energy
     p = np.exp(-(2.*(m.x-1.75*pi/2))**2.-(2.*(m.y-pi))**2) +\

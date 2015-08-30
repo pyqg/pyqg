@@ -1,11 +1,11 @@
 import numpy as np
-from pyqg import bt_model
+import pyqg
 
 def test_parseval(rtol=1.e-15):
     """ Make sure 2D fft from QGModel satisfy Parseval's relation
             within machine double precision """
 
-    m = bt_model.BTModel(L=2.*np.pi)
+    m = pyqg.BTModel(L=2.*np.pi)
 
     # set random stream function
     p1 = np.random.randn(1,m.nx,m.ny)

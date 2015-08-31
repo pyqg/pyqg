@@ -85,7 +85,7 @@ class Model(PseudoSpectralKernel):
             Numerical timstep. Units: seconds.
         tplot : int
             Unterval for plotting. Units: number of timesteps.
-        tcfl : int
+        twrite : int
             Interval for cfl writeout. Units: number of timesteps.
         tmax : number
             Total time of integration. Units: seconds.

@@ -35,7 +35,7 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['pyfftw']
+MOCK_MODULES = ['pyfftw', 'scipy', 'scipy.ndimage']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 

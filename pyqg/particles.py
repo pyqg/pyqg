@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.interpolate import RectBivariateSpline
+#from scipy.interpolate import RectBivariateSpline
 #from regulargrid.cartesiangrid import CartesianGrid
 from scipy.ndimage import map_coordinates
 

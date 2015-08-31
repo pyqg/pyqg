@@ -1,7 +1,10 @@
 import numpy as np
 #from scipy.interpolate import RectBivariateSpline
 #from regulargrid.cartesiangrid import CartesianGrid
-from scipy.ndimage import map_coordinates
+#from scipy.ndimage import map_coordinates
+# works better with mock on readthedocs
+import scipy.ndimage
+
 
 class LagrangianParticleArray2D(object):
     """A class for keeping track of a set of lagrangian particles
@@ -205,7 +208,7 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
         j = (y - self.ymin)/self.Ly*self.Ny + pad + offset - 0.5
         
         # for some reason this still does not work with high precision near the boundaries
-        return map_coordinates(cp, [j,i],
+        return scipy.ndimage.map_coordinates(cp, [j,i],
                 mode='constant', order=order, cval=np.nan)
     
     def _pad_field(self, c, pad=5):

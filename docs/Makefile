@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 # http://daler.github.io/sphinxdoc-test/includeme.html
-BUILDDIR      = ../../pyqg-gh-pages
+BUILDDIR      = _build
 #PDFBUILDDIR   = /tmp
 #PDF           = ../manual.pdf
 

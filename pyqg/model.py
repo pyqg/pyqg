@@ -19,17 +19,43 @@ class Model(PseudoSpectralKernel):
     Attributes
     ----------
     q : real array
-        potential vorticity in real space
+        Potential vorticity in real space
     qh : complex array
-        potential vorticity in spectral space
+        Potential vorticity in spectral space
     ph : complex array
-        streamfunction in spectral space
-    u, v: real arrays
-        velocity anomaly components in real space
-    ufull, vfull: real arrays
-        full velocity components in real space
+        Streamfunction in spectral space
+    u, v : real arrays
+        Velocity anomaly components in real space
+    ufull, vfull : real arrays
+        Full velocity components in real space
     uh, vh : complex arrays
-        velocity anomaly components in spectral space    
+        Velocity anomaly components in spectral space
+    nx, ny : int
+        Number of grid points in the x and y directions
+    L, W : float
+        Domain length in x and y directions
+    rek : float
+        Linear drag in lower layer
+    filterfac : float
+        Amplitdue of the spectral spherical filter 
+    dt : float 
+        Numerical timstep
+    twrite : int
+        Interval for cfl writeout (units: number of timesteps)
+    tmax : float
+        Total time of integration (units: model time)
+    tavestart : float
+        Start time for averaging (units: model time)
+    tsnapstart : float
+        Start time for snapshot writeout (units: model time)
+    taveint : float
+        Time interval for accumulation of diagnostic averages.
+        (units: model time)
+    tsnapint : float
+        Time interval for snapshots (units: model time)
+    ntd : int
+        Number of threads to use. Should not exceed the number of cores on
+        your machine.
     """
     
     def __init__(
@@ -41,12 +67,10 @@ class Model(PseudoSpectralKernel):
         W=None,
         # timestepping parameters
         dt=7200.,                   # numerical timestep
-        tplot=10000.,               # interval for plots (in timesteps)
         twrite=1000.,               # interval for cfl and ke writeout (in timesteps)
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
-        tpickup=31536000.,          # time interval to write out pickup fields ("experimental")
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
@@ -67,7 +91,6 @@ class Model(PseudoSpectralKernel):
         
         Parameters
         ----------
-
         nx : int
             Number of grid points in the x direction.
         ny : int
@@ -83,8 +106,6 @@ class Model(PseudoSpectralKernel):
             changed to 23.6).
         dt : number
             Numerical timstep. Units: seconds.
-        tplot : int
-            Unterval for plotting. Units: number of timesteps.
         twrite : int
             Interval for cfl writeout. Units: number of timesteps.
         tmax : number
@@ -99,8 +120,6 @@ class Model(PseudoSpectralKernel):
             occur every timestep)
         tsnapint : number
             Time interval for snapshots. Units: seconds. 
-        tpickup : number
-            Time interval for writing pickup files. Units: seconds.
         ntd : int
             Number of threads to use. Should not exceed the number of cores on
             your machine.
@@ -122,7 +141,6 @@ class Model(PseudoSpectralKernel):
         self.tmax = tmax
         self.tavestart = tavestart
         self.taveint = taveint
-        self.tpickup = tpickup
         self.quiet = quiet
         self.useAB2 = useAB2
         # fft 

@@ -4,7 +4,6 @@
    contain the root `toctree` directive.
 
 .. image:: _static/vortex_rollup.png
-   :width: 673 px
    :align: center
 
 pyqg: Python Quasigeostrophic Model

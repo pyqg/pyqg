@@ -36,4 +36,9 @@ Lagrangian Particles
     
 .. autoclass:: GriddedLagrangianParticleArray2D
     :members:
-    
+
+Diagnostic Tools
+================
+
+.. automodule:: pyqg.diagnostic_tools
+    :members:  

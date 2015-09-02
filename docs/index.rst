@@ -19,9 +19,8 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   installation    
+   installation
+   equations    
    examples
-   notation_twolayer_model
-   notation_equivalent_barotropic
    api
    development

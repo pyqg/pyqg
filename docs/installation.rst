@@ -6,11 +6,25 @@ Installation
 Requirements
 ============
 
+The only requirements are
+
 - Python 2.7. (Python 3 support is in the works) 
-- `numpy <http://www.numpy.org/>`__ (1.6 or later)
+- numpy_ (1.6 or later)
+
+Because pyqg is a pseudo-spectral code, it realies heavily on fast-Fourier
+transforms (FFTs), which are the main performance bottlneck. For this reason,
+we try to use fftw_ (a fast, multithreaded, open source C library) and pyfftw_
+(a python wrapper around fftw). These packages are optional, but they are
+strongly recommended for anyone doing high-resolution, numerically demanding
+simulations.
+
 - fftw_ (3.3 or later)
 - pyfftw_ (0.9.2 or later)
 
+If pyqg can't import pyfftw at compile time, it will fall back on numpy_'s fft
+routines.
+
+.. _numpy:  http://www.numpy.org/
 .. _fftw: http://www.fftw.org/
 .. _pyfftw: http://github.com/hgomersall/pyFFTW
 
@@ -22,19 +36,16 @@ such as Anaconda_ (recommended) or Canopy_. These provide robust package
 management and come with many other useful packages for scientific computing.
 The pyqg developers are mostly using anaconda.
 
-Because pyqg is a pseudo-spectral code, it realies heavily on fast-Fourier
-transforms (FFTs), which are the main performance bottlneck. For this reason, we
-have made fftw_ (a fast, multithreaded, open source C library) and pyfftw_ (a
-python wrapper around fftw) core dependencies for pyqg. Installing fftw and
+.. note::
+    If you don't want to use pyfftw and are content with numpy's slower
+    performance, you can skip ahead to :ref:`install-pyqg`.
+
+Installing fftw and
 pyfftw can be slightly painful. Hopefully the instructions below are sufficient.
 If not, please `send feedback <http://github.com/pyqg/pyqg/issues>`__.
 
 .. _Anaconda: https://store.continuum.io/cshop/anaconda
 .. _Canopy: https://www.enthought.com/products/canopy
-
-.. note::
-    We would like to add compatibilty for numpy.fft in the near future,
-    eliminating the dependency on fftw and pyfftw.
 
 Installing fftw and pyfftw
 --------------------------

@@ -148,7 +148,7 @@ class PyqgModelTester(unittest.TestCase):
                     err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
 
     def test_friction(self, rtol=1e-15):
-        """Check whether calculating advection tendency gives the descired result."""
+        """Check whether calculating advection tendency gives the expected result."""
         # sin(2 a) = 2 sin(a) cos(a)
         
         for kwave in range(1, self.kwavemax):

@@ -59,7 +59,7 @@ CLASSIFIERS = [
 ### Dependency section ###
 install_requires = [
     'cython',
-    'numpy',
+    'numpy'
 ]
 
 # This hack tells cython whether pyfftw is present
@@ -117,9 +117,9 @@ else:
         
 # reathedocs can't and shouldn't build pyfftw
 # apparently setup.py overrides docs/requirements.txt
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
-    install_requires.remove('pyfftw')
+#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+#if on_rtd:
+#    install_requires.remove('pyfftw')
 
 tests_require = ['nose']
 

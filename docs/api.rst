@@ -1,5 +1,5 @@
-pyqg API
-########
+API
+###
 
 .. automodule:: pyqg
    :members:

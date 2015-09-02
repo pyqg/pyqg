@@ -18,11 +18,14 @@ def spec_var(model, ph):
     var_dens : float
         The variance of `ph`
     """
+
     var_dens = 2. * np.abs(ph)**2 / model.M**2
     # only half of coefs [0] and [nx/2+1] due to symmetry in real fft2
-    var_dens[:,0],var_dens[:,-1] = var_dens[:,0]/2.,var_dens[:,-1]/2.
-    return var_dens.sum()
-
+    var_dens[...,0] /= 2
+    var_dens[...,-1] /= 2
+    return var_dens.sum(axis=(-1,-2))
+    
+    
 def calc_ispec(model, ph):
     """Compute isotropic spectrum `phr` of `ph` from 2D spectrum.
     

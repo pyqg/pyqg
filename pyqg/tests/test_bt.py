@@ -22,6 +22,8 @@ def test_the_model(rtol=1e-5):
     qih = -m.wv2*pih
     qi = m.ifft(qih)
     m.set_q(qi)
+    
+    np.testing.assert_allclose(m.q, qi, rtol)
 
     m.run()
 

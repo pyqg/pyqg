@@ -16,9 +16,10 @@ pyqg supports a variety of different configurations using the same
 computational kernel. The different configurations are evolving and are
 described in detail in the documentation. The kernel, implement in cython,
 uses a pseudo-spectral method which is heavily dependent of the fast Fourier
-transform. For this reason, pyqg depends on pyfftw and the FFTW Fourier
-Transform library. The kernel is multi-threaded but does not support mpi.
-Optimal performance will be achieved on a single system with many cores.
+transform. For this reason, pyqg tries to use pyfftw and the FFTW Fourier
+Transform library. (If pyfftw is not available, it falls back on numpy.fft)
+With pyfftw, the kernel is multi-threaded but does not support mpi. Optimal
+performance will be achieved on a single system with many cores.
 
 Links
 -----
@@ -26,3 +27,4 @@ Links
 - HTML documentation: http://pyqg.readthedocs.org
 - Issue tracker: http://github.com/pyqg/pyqg/issues
 - Source code: http://github.com/pyqg/pyqg
+- pyfftw: http://github.com/hgomersall/pyFFTW

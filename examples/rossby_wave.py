@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import pi
-from pyqg import bt_model
+import pyqg
 
 # the model object
 year = 1.
-m = bt_model.BTModel(L=2.*pi,nx=128, tmax = 1*year,
+m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 1*year,
         beta = 20., H = 1., rek = 0., rd = None, dt = 0.001,
-                     taveint=year, use_fftw=True, ntd=4)
+                     taveint=year, ntd=4)
 
 # Gaussian IC
 fk = m.wv != 0
@@ -39,9 +39,9 @@ for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clim([-20., 20.])
     plt.xticks([])
     plt.yticks([])
-    plt.show()
 
     plt.pause(0.01)
+    plt.draw()
     plt.ioff()
     
 

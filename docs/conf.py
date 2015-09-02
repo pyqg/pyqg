@@ -56,11 +56,14 @@ import pyqg
 # ones.
 extensions = [
     'sphinx.ext.mathjax', 'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.extlinks',
+    'numpydoc',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
-    'sphinx.ext.autosummary',
-    'numpydoc'
 ]
+
+extlinks = {'issue': ('https://github.com/pyqg/pyqg/issues/%s', 'GH')}
 
 autosummary_generate = True
 numpydoc_class_members_toctree = True

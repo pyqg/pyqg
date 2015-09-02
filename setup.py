@@ -3,13 +3,15 @@ from Cython.Build import cythonize
 import numpy as np
 import os
 
-VERSION='0.1.0'
+VERSION='0.1'
 
 DISTNAME='pyqg'
-URL='http://github.com/pyqg/pyqg',
-AUTHOR='pyqg team',
-AUTHOR_EMAIL='pyqg-dev@googlegroups.com',
-LICENSE='GPLv3',
+URL='http://github.com/pyqg/pyqg'
+# how can we make download_url automatically get the right version?
+DOWNLOAD_URL='https://github.com/pyqg/pyqg/archive/v%s.tar.gz' % VERSION
+AUTHOR='pyqg team'
+AUTHOR_EMAIL='pyqg-dev@googlegroups.com'
+LICENSE='GPLv3'
 
 DESCRIPTION='python quasigeostrophic model'
 LONG_DESCRIPTION="""
@@ -79,7 +81,10 @@ CLASSIFIERS = [
 setup(name=DISTNAME,
       version=VERSION,
       description=DESCRIPTION,
+      classifiers=CLASSIFIERS,
+      long_description=LONG_DESCRIPTION,
       url=URL,
+      download_url=DOWNLOAD_URL,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       license=LICENSE,

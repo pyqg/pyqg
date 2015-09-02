@@ -19,8 +19,7 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose
   # can we make this optional?
-  - conda install -c mforbes pyfftw
-  - conda install --yes -c dan_blanchard python-coveralls nose-cov
+  - conda install --yes -c mforbes pyfftw
   - python setup.py install
 
 # Run test

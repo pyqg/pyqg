@@ -1,6 +1,7 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
 import numpy as np
+import os
 
 VERSION='0.1.0'
 
@@ -43,6 +44,12 @@ install_requires = [
     'numpy',
     'pyfftw'
 ]
+
+# reathedocs can't and shouldn't build pyfftw
+# apparently setup.py overrides docs/requirements.txt
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
+    install_requires.remove('pyfftw')
 
 tests_require = ['nose']
 

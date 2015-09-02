@@ -1,10 +1,16 @@
+import warnings
 import numpy as np
 #from scipy.interpolate import RectBivariateSpline
 #from regulargrid.cartesiangrid import CartesianGrid
 #from scipy.ndimage import map_coordinates
 # works better with mock on readthedocs
-import scipy.ndimage
 
+try:
+    import scipy.ndimage
+except ImportError:
+    warnings.warn('Failed to import scipy.ndimage. '
+           'Gridded interpolation will not work',
+	   ImportWarning)
 
 class LagrangianParticleArray2D(object):
     """A class for keeping track of a set of lagrangian particles

@@ -190,7 +190,7 @@ With pyfftw installed, you can now install pyqg. The easiest way is with pip:
 
     $ pip install pyqg
 
-You can also clone the `pyqg git repository <https://github.com/pyqg/pyqg`__ to
+You can also clone the `pyqg git repository <https://github.com/pyqg/pyqg>`__ to
 use the latest development version. 
 
 .. code-block:: bash

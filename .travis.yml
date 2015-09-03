@@ -25,14 +25,15 @@ install:
   # can we make this optional?
   - conda install --yes -n test_env -c mforbes pyfftw
   - source activate test_env
+# build the kernel in the local dir
   - python setup.py build_ext --inplace
-  - python setup.py install
+# not necessary to actually install
+# nose will import the pacakge from the working directory
+#  - python setup.py install
 
 # Run test
 script:
-#  - nosetests --with-cov --cov YOUR_PACKAGE_NAME_HERE --cov-config .coveragerc --logging-level=INFO
-#  - python setup.py test
-  - nosetests
+  - nosetests -v
 # Calculate coverage
 #after_success:
 #  - coveralls --config_file .coveragerc

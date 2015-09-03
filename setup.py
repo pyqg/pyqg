@@ -10,7 +10,7 @@ VERSION='0.1.1'
 DISTNAME='pyqg'
 URL='http://github.com/pyqg/pyqg'
 # how can we make download_url automatically get the right version?
-DOWNLOAD_URL='https://github.com/pyqg/pyqg/archive/v%s.tar.gz' % VERSION
+DOWNLOAD_URL='https://github.com/pyqg/pyqg/tarball/v%s' % VERSION
 AUTHOR='pyqg team'
 AUTHOR_EMAIL='pyqg-dev@googlegroups.com'
 LICENSE='GPLv3'

@@ -5,7 +5,7 @@ import numpy as np
 import os
 import tempfile, subprocess, shutil   
 
-VERSION='0.1.1'
+VERSION='0.1.2'
 
 DISTNAME='pyqg'
 URL='http://github.com/pyqg/pyqg'

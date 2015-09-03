@@ -1,6 +1,12 @@
 What's New
 ==========
 
+v0.1.2 (2 Sept 2015)
+--------------------
+
+Package was not building properly through pip/pypi. Made some tiny changes to
+setup script. pypi forces you to increment the version number.
+
 v0.1.1 (2 Sept 2015)
 --------------------
 

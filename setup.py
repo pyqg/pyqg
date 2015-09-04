@@ -5,7 +5,7 @@ import numpy as np
 import os
 import tempfile, subprocess, shutil   
 
-VERSION='0.1.2'
+VERSION='0.1.3'
 
 DISTNAME='pyqg'
 URL='http://github.com/pyqg/pyqg'
@@ -99,17 +99,18 @@ def check_for_openmp():
     with open(os.devnull, 'w') as fnull:
         result = subprocess.call([cc, '-fopenmp', filename],
                                  stdout=fnull, stderr=fnull)
+    print 'check_for_openmp() result: ', result
     os.chdir(curdir)
     #clean up
     shutil.rmtree(tmpdir)
 
-    return result
+    return result==0
 
 extra_compile_args = []
 extra_link_args = []
 
 use_openmp = True
-if check_for_openmp and use_openmp:
+if check_for_openmp() and use_openmp:
     extra_compile_args.append('-fopenmp')
     extra_link_args.append('-fopenmp')
 else:

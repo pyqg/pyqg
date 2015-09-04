@@ -1,6 +1,11 @@
 What's New
 ==========
 
+v0.1.3 (4 Sept 2014)
+--------------------
+
+Fixed bug in setup.py that caused openmp check to not work.
+
 v0.1.2 (2 Sept 2015)
 --------------------
 

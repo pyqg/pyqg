@@ -3,7 +3,7 @@ Two Layer QG Model Example
 ==========================
 
 Here is a quick overview of how to use the two-layer model. See the
-:py:class:`pyqg.QGModel` api documentation for further details.
+:py:class:``pyqg.QGModel`` api documentation for further details.
 
 First import numpy, matplotlib, and pyqg:
 

@@ -7,7 +7,7 @@ from pyqg import sqg_model
 year = 1.
 m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 40.005,
         beta = 0., Nb = 1., H = 1., rek = 0., rd = None, dt = 0.005,
-                     taveint=1, ntd=8)
+                     taveint=1, ntd=4)
 
 # run the model and plot some figs
 plt.rcParams['image.cmap'] = 'RdBu'

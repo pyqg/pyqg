@@ -36,7 +36,7 @@ the buoyancy, :math:`b`, is hydrostatic balance
 
    b = \partial_z \psi. 
 
- Using the fact that the Potential Vorticity is exactly zero in the
+Using the fact that the Potential Vorticity is exactly zero in the
 interior of the domain and that the domain is semi-infinite, yields that
 the inversion in Fourier space is,
 
@@ -107,7 +107,7 @@ that it is stable. Why don't you try it and see for yourself?
 
 
 
-.. image:: sqg_files/sqg_8_0.png
+.. image:: sqg_files/sqg_11_0.png
 
 
 Runing the model
@@ -132,11 +132,11 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_0.png
+.. image:: sqg_files/sqg_13_0.png
 
 
 
-.. image:: sqg_files/sqg_10_1.png
+.. image:: sqg_files/sqg_13_1.png
 
 
 .. parsed-literal::
@@ -145,15 +145,15 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_3.png
+.. image:: sqg_files/sqg_13_3.png
 
 
 
-.. image:: sqg_files/sqg_10_4.png
+.. image:: sqg_files/sqg_13_4.png
 
 
 
-.. image:: sqg_files/sqg_10_5.png
+.. image:: sqg_files/sqg_13_5.png
 
 
 .. parsed-literal::
@@ -162,11 +162,11 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_7.png
+.. image:: sqg_files/sqg_13_7.png
 
 
 
-.. image:: sqg_files/sqg_10_8.png
+.. image:: sqg_files/sqg_13_8.png
 
 
 .. parsed-literal::
@@ -175,15 +175,15 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_10.png
+.. image:: sqg_files/sqg_13_10.png
 
 
 
-.. image:: sqg_files/sqg_10_11.png
+.. image:: sqg_files/sqg_13_11.png
 
 
 
-.. image:: sqg_files/sqg_10_12.png
+.. image:: sqg_files/sqg_13_12.png
 
 
 .. parsed-literal::
@@ -192,11 +192,11 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_14.png
+.. image:: sqg_files/sqg_13_14.png
 
 
 
-.. image:: sqg_files/sqg_10_15.png
+.. image:: sqg_files/sqg_13_15.png
 
 
 .. parsed-literal::
@@ -205,7 +205,7 @@ visualization).
 
 
 
-.. image:: sqg_files/sqg_10_17.png
+.. image:: sqg_files/sqg_13_17.png
 
 
 Compare these results with Figure 2 of the paper. In this simulation you

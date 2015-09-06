@@ -23,7 +23,7 @@ the buoyancy, :math:`b`, is hydrostatic balance
 
    b = \partial_z \psi. 
 
- Using the fact that the Potential Vorticity is exactly zero in the
+Using the fact that the Potential Vorticity is exactly zero in the
 interior of the domain and that the domain is semi-infinite, yields that
 the inversion in Fourier space is,
 

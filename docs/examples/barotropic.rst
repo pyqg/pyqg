@@ -1,3 +1,4 @@
+
 Barotropic Model
 ================
 
@@ -5,8 +6,6 @@ Here will will use pyqg to reproduce the results of the paper: J. C.
 Mcwilliams (1984). The emergence of isolated coherent vortices in
 turbulent flow. Journal of Fluid Mechanics, 146, pp 21-43
 `doi:10.1017/S0022112084001750 <http://dx.doi.org/10.1017/S0022112084001750>`__
-
-We can do this with the :py:class:`pyqg.BTModel` class.
 
 .. code:: python
 
@@ -178,7 +177,7 @@ visualization).
     t=              39, tc=     40000: cfl=0.104794, ke=0.492275760
 
 
-The genius of McWilliams (1984) was that he has showed that the initial
+The genius of McWilliams (1984) was that he showed that the initial
 random vorticity field organizes itself into strong coherent vortices.
 This is true in significant part of the parameter space. This was
 previously suspected but unproven, mainly because people did not have
@@ -215,6 +214,15 @@ Plotting spectra
     plt.title('Energy Spectrum')
 
 
+
+
+.. parsed-literal::
+
+    <matplotlib.text.Text at 0x10c1b1a90>
+
+
+
+
 .. image:: barotropic_files/barotropic_14_1.png
 
 
@@ -228,6 +236,15 @@ Plotting spectra
     plt.ylim(1.e-3,1.e0)
     plt.xlabel('wavenumber')
     plt.title('Enstrophy Spectrum')
+
+
+
+
+.. parsed-literal::
+
+    <matplotlib.text.Text at 0x10b5d2f50>
+
+
 
 
 .. image:: barotropic_files/barotropic_15_1.png

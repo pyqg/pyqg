@@ -21,7 +21,7 @@ advantages is that it only has two spatial dimensions but describes a
 three-dimensional solution.
 
 If we define :math:`b` to be the buoyancy, then the evolution equation
-for SQG is
+for buoyancy at each the top and bottom surface is
 
 .. math::
 
@@ -34,7 +34,7 @@ the buoyancy, :math:`b`, is hydrostatic balance
 .. math::
 
 
-   b = - \partial_z \psi. 
+   b = \partial_z \psi. 
 
  Using the fact that the Potential Vorticity is exactly zero in the
 interior of the domain and that the domain is semi-infinite, yields that
@@ -43,7 +43,7 @@ the inversion in Fourier space is,
 .. math::
 
 
-   \hat b = - K \hat \psi.
+   \hat b = K \hat \psi.
 
 Held et al. studied several different cases, the first of which was the
 nonlinear evolution of an elliptical vortex. There are several other

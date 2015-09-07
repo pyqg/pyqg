@@ -115,3 +115,21 @@ incorporated into pyqg.
     $ git fetch upstream
     $ git rebase upstream/master
     $ git branch -d cool_new_feature
+    
+Virtual Environment
+===================
+
+This is how to create a virtual environment into which to test-install pyqg,
+install it, check the version, and tear down the virtual environment.
+
+.. code-block:: bash
+
+    $ conda create --yes -n test_env python=2.7 pip nose numpy cython scipy nose
+    $ conda install --yes -n test_env -c mforbes pyfftw
+    $ source activate test_env
+    $ pip install pyqg
+    $ python -c 'import pyqg; print(pyqg.__version__);'
+    $ source deactivate
+    $ conda env remove --yes -n test_env
+    
+

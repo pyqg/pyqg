@@ -7,7 +7,7 @@ describes surface intensified flows due to buoyancy. One of it's
 advantages is that it only has two spatial dimensions but describes a
 three-dimensional solution.
 
-The evolutions equation is
+The evolution equation is
 
 .. math::
 

@@ -7,27 +7,47 @@ describes surface intensified flows due to buoyancy. One of it's
 advantages is that it only has two spatial dimensions but describes a
 three-dimensional solution.
 
-If we define :math:`b` to be the buoyancy, then the evolution equation
-for buoyancy at each the top and bottom surface is
+The evolution equation is
 
 .. math::
 
 
-   \partial_t b + J(\psi, b) = 0.
+   \partial_t b + J(\psi, b) = 0\,,  \qquad \text{at} \qquad z = 0\,,
 
-The invertibility relation between the streamfunction, :math:`\psi`, and
-the buoyancy, :math:`b`, is hydrostatic balance
+where :math:`b = \psi_z` is the buoyancy.
 
-.. math::
-
-
-   b = \partial_z \psi. 
-
-Using the fact that the Potential Vorticity is exactly zero in the
-interior of the domain and that the domain is semi-infinite, yields that
-the inversion in Fourier space is,
+The interior potential vorticity is zero. Hence
 
 .. math::
 
 
-   \hat b = K \hat \psi.
+   \frac{\partial }{\partial z}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,,
+
+where :math:`N` is the buoyancy frequency and :math:`f_0` is the
+Coriolis parameter. In the SQG model both :math:`N` and :math:`f_0` are
+constants. The boundary conditions for this elliptic problem in a
+semi-infinite vertical domain are
+
+.. math::
+
+
+   b = \psi_z\,,  \qquad \text{and} \qquad z = 0\,,
+
+and
+
+.. math::
+
+
+   \psi = 0,  \qquad \text{at} \qquad z \rightarrow -\infty\,,
+
+The solutions to the elliptic problem above, in horizontal Fourier
+space, gives the inversion relationship between surface buoyancy and
+surface streamfunction
+
+.. math::
+
+
+   \hat \psi = \frac{f_0}{N} \frac{1}{\kappa}\hat b\,,  \qquad \text{at} \qquad z = 0\,,
+
+The SQG evolution equation is marched forward similarly to the two-layer
+model.

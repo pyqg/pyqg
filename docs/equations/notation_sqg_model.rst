@@ -7,14 +7,14 @@ describes surface intensified flows due to buoyancy. One of it's
 advantages is that it only has two spatial dimensions but describes a
 three-dimensional solution.
 
-The evolutions equations is
+The evolutions equation is
 
 .. math::
 
 
    \partial_t b + J(\psi, b) = 0\,,  \qquad \text{at} \qquad z = 0\,,
 
-where :math:`b = \psi_z` is buoyancy.
+where :math:`b = \psi_z` is the buoyancy.
 
 The interior potential vorticity is zero. Hence
 
@@ -41,14 +41,13 @@ and
    \psi = 0,  \qquad \text{at} \qquad z \rightarrow -\infty\,,
 
 The solutions to the elliptic problem above, in horizontal Fourier
-space, gives the inversions relationship between surface buoyancy and
+space, gives the inversion relationship between surface buoyancy and
 surface streamfunction
 
 .. math::
 
 
-   \hat \psi = \frac{f_0}{N} \frac{1}{\kappa}\hat b.
+   \hat \psi = \frac{f_0}{N} \frac{1}{\kappa}\hat b\,,  \qquad \text{at} \qquad z = 0\,,
 
 The SQG evolution equation is marched forward similarly to the two-layer
 model.
-

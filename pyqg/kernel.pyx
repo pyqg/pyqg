@@ -69,7 +69,11 @@ cdef class PseudoSpectralKernel:
     cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
     cdef DTYPE_real_t [:] Ubg
+    cdef DTYPE_real_t [:] Vbg
     cdef DTYPE_com_t [:, :] _ikQy
+    cdef DTYPE_com_t [:, :] _ilQx
+    # topography
+    cdef DTYPE_real_t [:, :] _hb
     # spectral filter
     cdef public DTYPE_real_t [:, :] _filtr
     
@@ -101,7 +105,10 @@ cdef class PseudoSpectralKernel:
                     np.ndarray[DTYPE_real_t, ndim=1] k,
                     np.ndarray[DTYPE_real_t, ndim=1] l,
                     np.ndarray[DTYPE_real_t, ndim=1] Ubg,
+                    np.ndarray[DTYPE_real_t, ndim=1] Vbg,
                     np.ndarray[DTYPE_real_t, ndim=1] Qy,
+                    np.ndarray[DTYPE_real_t, ndim=1] Qx,
+                    np.ndarray[DTYPE_real_t, ndim=1] hb,
                     np.ndarray[DTYPE_real_t, ndim=2] filtr,
                     DTYPE_real_t dt=1.0,
                     DTYPE_real_t rek=0.0,
@@ -136,9 +143,13 @@ cdef class PseudoSpectralKernel:
         
         # assign Ubg, Vbg, _ilQx, _ikQy
         self.Ubg = Ubg
-        #self.Vbg = Vbg
+        self.Vbg = Vbg
         self._ikQy = 1j * k[np.newaxis, :] * Qy[:, np.newaxis]
-        
+        self._ilQx = 1j * l[np.newaxis, :] * Qx[:, np.newaxis]
+
+        # assign topography
+        self._hb = hb
+
         # initialize FFT inputs / outputs as byte aligned by pyfftw
         q = self._empty_real()
         self.q = q # assign to memory view
@@ -359,13 +370,12 @@ cdef class PseudoSpectralKernel:
                     self.vq[k,j,i] = (self.v[k,j,i]+self.Vbg[j]) * self.q[k,j,i]
         
         # add topographic term
-        if self.hb:
-            for j in prange(self.Ny, nogil=True, schedule='static',
-                      chunksize=self.chunksize,  
-                      num_threads=self.num_threads):
-                for i in range(self.Nx):
-                    self.uq[-1,j,i] += (self.u[-1,j,i] + self.Ubg[-1]) * self.hb[j,i]
-                    self.vq[-1,j,i] += (self.v[-1,j,i] + self.Vbg[-1]) * self.hb[j,i]
+        for j in prange(self.Ny, nogil=True, schedule='static',
+                  chunksize=self.chunksize,  
+                  num_threads=self.num_threads):
+            for i in range(self.Nx):
+                self.uq[-1,j,i] += (self.u[-1,j,i] + self.Ubg[-1]) * self._hb[j,i]
+                self.vq[-1,j,i] += (self.v[-1,j,i] + self.Vbg[-1]) * self._hb[j,i]
 
         # transform to get spectral advective flux
         with gil:

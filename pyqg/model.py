@@ -312,7 +312,8 @@ class Model(PseudoSpectralKernel):
         self._kernel_init(
             self.nz, self.ny, self.nx,
             self.a, self.kk, self.ll,
-            self.Ubg, self.Qy,
+            self.Ubg, self.Vbg, self.Qy, self.Qx,
+            self.hb,
             self.filtr,
             dt=self.dt,
             rek=self.rek,

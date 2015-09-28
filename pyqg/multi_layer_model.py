@@ -1,6 +1,8 @@
 import numpy as np
 import model
 from numpy import pi
+import scipy as sp
+import scipy.linalg
 try:   
     import mkl
     np.use_fastnumpy = True
@@ -16,10 +18,10 @@ except ImportError:
 class QGModel(model.Model):
     r"""N-layer quasigeostrophic model.
     
-    This model is meant to representflows driven by baroclinic instabilty of a
+    This model is meant to represent flows driven by baroclinic instabilty of a
     base-state shear :math:`U_1-U_2`. The upper and lower
     layer potential vorticity anomalies :math:`q_1` and :math:`q_2` are
-    
+     
     .. math::
     
         q_1 &= \nabla^2\psi_1 + F_1(\psi_2 - \psi_1) \\
@@ -58,13 +60,16 @@ class QGModel(model.Model):
     def __init__(
         self,
         beta=1.5e-11,               # gradient of coriolis parameter
-        #rek=5.787e-7,               # linear drag in lower layer
+        nz = 4,                     # number of layers
         rd=15000.0,                 # deformation radius
-        delta=0.25,                 # layer thickness ratio (H1/H2)
-        H1 = 500,                   # depth of layer 1 (H1)
-        U1=0.025,                   # upper layer flow
-        U2=0.0,                     # lower layer flow
-        nz = 4,
+        H = None,                   # layer thickness 
+        U=None,                     # zonal base state flow
+        V=None,                     # meridional base state flow
+        rho = None,
+        delta = None,
+        g = 9.81,
+        f = 1.e-4,
+        hb = None,
         **kwargs
         ):
         """
@@ -87,17 +92,13 @@ class QGModel(model.Model):
         """
 
         # physical
-        self.g = 9.81    # acceleration due to gravity
-        self.f = 1.2e-4  # Coriolis frequency
-        self.f2 = self.f**2
+        self.g = g    # acceleration due to gravity
+        self.f = f
+        self.f2 = f**2
         self.beta = beta
         #self.rek = rek
         self.rd = rd
         self.delta = delta
-        self.H1 = H1
-        self.H2 = H1/delta
-        self.U1 = U1
-        self.U2 = U2
         #self.filterfac = filterfac
        
         # H is an array
@@ -105,26 +106,17 @@ class QGModel(model.Model):
         #self.rhoi = np.array([1024.,1025.,1026.])
         #self.Ubg = np.array([0.05,0.025,0])
         #self.Vbg = np.array([0.05,0.025,0])
-        self.Hi = np.array([500,2000.])
-        self.rhoi = np.array([1025.,1025.83])
-        self.Ubg = np.array([0.025,.0])
-        self.Vbg = np.array([0.,0])
-         
-        self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
         self.nz = nz
-
-        assert self.Hi.size == self.nz, "size of Hi does not match number\
-                of vertical levels nz" 
-
-        assert self.rhoi.size == self.nz, "size of rhoi does not match number\
-                of vertical levels nz" 
-
-        # stretching matrix
-        self._initialize_stretching_matrix()
+        self.U = U
+        self.V = V
+        self.H = H
+        self.rho = rho
+        self.hb = hb
 
         super(QGModel, self).__init__(**kwargs)
-        
-        # initial conditions: (PV anomalies)
+
+
+               # initial conditions: (PV anomalies)
         #self.set_q1q2(
         #    1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
         #        np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
@@ -137,37 +129,71 @@ class QGModel(model.Model):
    
         self.S = np.zeros((self.nz, self.nz))
       
-        for i in range(self.nz):
+        if (self.nz==2)&(self.rd is not None):
+
+            self.F1 = self.rd**-2 / (1.+self.delta)
+            self.F2 = self.delta*self.F1
+            self.S[0,0], self.S[0,1] = -self.F1,  self.F1
+            self.S[1,0], self.S[1,1] =  self.F2, -self.F2
+
+        else:
             
-            if i == 0:
-                self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i] #- self.f2/self.Hi[i]/self.g
-                self.S[i,i+1] =  self.f2/self.Hi[i]/self.gpi[i]
+            for i in range(self.nz):
 
-                self.S[i,i]   = -3.5555555555555554e-09 #- self.f2/self.Hi[i]/self.g
-                self.S[i,i+1] =  3.5555555555555554e-09
+                if i == 0:
+                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i] #- self.f2/self.Hi[i]/self.g
+                    self.S[i,i+1] =  self.f2/self.Hi[i]/self.gpi[i]
 
-            elif i == self.nz-1:
-                self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i-1] 
-                self.S[i,i-1] =  self.f2/self.Hi[i]/self.gpi[i-1]
-                
-                self.S[i,i]   = -8.888888888888889e-10 
-                self.S[i,i-1] =  8.888888888888889e-10
-
-            else:
-                self.S[i,i-1] = self.f2/self.Hi[i]/self.gpi[i-1]
-                self.S[i,i]   = self.f2/self.Hi[i]/self.gpi[i] - self.f2/self.Hi[i]/self.gpi[i-1]
-                self.S[i,i+1] = self.f2/self.Hi[i]/self.gpi[i]
+                elif i == self.nz-1:
+                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i-1] 
+                    self.S[i,i-1] =  self.f2/self.Hi[i]/self.gpi[i-1]
+                    
+                else:
+                    self.S[i,i-1] = self.f2/self.Hi[i]/self.gpi[i-1]
+                    self.S[i,i]   = self.f2/self.Hi[i]/self.gpi[i] - self.f2/self.Hi[i]/self.gpi[i-1]
+                    self.S[i,i+1] = self.f2/self.Hi[i]/self.gpi[i]
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
         
-        # Background zonal flow (m/s):
+        # Need to figure out a warning to user when
+        # these entries are not provided
+        self.Hi = self.H
+        self.Ubg = self.U
+        self.Vbg = self.V
+        self.rhoi = self.rho
+
+        assert self.Hi.size == self.nz, "size of Hi does not match number\
+                of vertical levels nz" 
+
+        assert self.rhoi.size == self.nz, "size of rhoi does not match number\
+                of vertical levels nz" 
+
+        assert self.Ubg.size == self.nz, "size of Ubg does not match number\
+                of vertical levels nz" 
+
+        assert self.Vbg.size == self.nz, "size of Vbg does not match number\
+                of vertical levels nz" 
+
+        #self.Hi = np.array([500,2000.])
+        #self.rhoi = np.array([1025.,1025.83])
+        #self.Ubg = np.array([0.05,.0])
+        #self.Vbg = np.array([0.,0])
+         
+        self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
+
         self.H = self.Hi.sum()
+
+        self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
         self.Qy = self.beta - np.dot(self.S,self.Ubg)
         self.Qx = np.dot(self.S,self.Vbg)
 
+        # topography
+        if self.hb is not None:
+            self.hb = self.hb * self.f/self.Hi[-1]
+    
         # complex versions, multiplied by k, speeds up computations to precompute 
         for i in range(self.nz): 
             if i == 0:
@@ -185,12 +211,21 @@ class QGModel(model.Model):
         
         a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))        
 
-        for i in range(self.nl):
-            for j in range(self.nk):
-                if self.wv2[i,j]== 0:
-                    a[:,:,i,j] = 0.
-                else:
-                    a[:,:,i,j] = np.linalg.inv(self.S - np.eye(self.nz)*self.wv2[i,j])
+        if (self.nz==2):
+            det_inv =  np.ma.masked_equal(
+                    ( (self.S[0,0]-self.wv2)*(self.S[1,1]-self.wv2) -\
+                            self.S[0,1]*self.S[1,0] ), 0.)**-1
+            a[0,0] = (self.S[1,1]-self.wv2)*det_inv
+            a[0,1] = -self.S[1,0]*det_inv
+            a[1,0] = -self.S[0,1]*det_inv
+            a[1,1] = (self.S[0,0]-self.wv2)*det_inv
+        else:
+            for i in range(self.nl):
+                for j in range(self.nk):
+                    if self.wv2[i,j]== 0:
+                        a[:,:,i,j] = 0.
+                    else:
+                        a[:,:,i,j] = np.linalg.inv(self.S - np.eye(self.nz)*self.wv2[i,j])
 
         self.a = np.ma.masked_invalid(a).filled(0.)
         
@@ -202,7 +237,7 @@ class QGModel(model.Model):
         # wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
         # self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         # self.filtr[wvx<=cphi] = 1.
-        
+         
     def set_qi(self, qi, check=False):
         """Set PV anomalies.
         
@@ -213,7 +248,7 @@ class QGModel(model.Model):
               layer PV anomaly in spatial coordinates.
         """
         self.set_q(q)
-        
+       
 #    def set_U1U2(self, U1, U2):
 #        """Set background zonal flow.
 #        
@@ -245,19 +280,20 @@ class QGModel(model.Model):
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
     def _calc_ke(self):
-        ke1 = .5*self.H1*self.spec_var(self.wv*self.ph[0])
-        ke2 = .5*self.H2*self.spec_var(self.wv*self.ph[1]) 
-        return ( ke1.sum() + ke2.sum() ) / self.H
+        ke = 0.
+        for j in range(self.nz):
+            ke += .5*self.Hi[j]*self.spec_var(self.wv*self.ph[j])
+        return ke.sum() / self.H
 
     # calculate eddy turn over time 
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
+        ens = 0.
+        for j in range(self.nz):
+            ens = .5*self.Hi[j] * self.spec_var(self.wv2*self.ph[j])
 
-        ens = .5*self.H1 * self.spec_var(self.wv2*self.ph1) + \
-            .5*self.H2 * self.spec_var(self.wv2*self.ph2)
-
-        return 2.*pi*np.sqrt( self.H / ens ) / 86400
+        return 2.*pi*np.sqrt( self.H / ens.sum() ) / 86400
 
 #    def _calc_derived_fields(self):
 #        self.p = self.ifft(self.ph)
@@ -307,4 +343,3 @@ class QGModel(model.Model):
 #                            np.conj(self.ph[0] - self.ph[1])).sum() / 
 #                            (self.nx*self.ny) )
 #        )
- 

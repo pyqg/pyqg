@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import pi
+
 import pyqg
 from pyqg.diagnostic_tools import spec_var
 
 # the model object
 year = 1.
+
 m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 200*year,
-        beta = 0., H = 1., rek = 0., rd = None, dt = 0.005,
+        beta = 15., H = 1., rek = 0., rd = None, dt = 0.005,
                      taveint=year, ntd=2)
 
 # McWilliams 84 IC condition
@@ -34,15 +36,30 @@ plt.rcParams['image.cmap'] = 'RdBu_r'
 
 plt.ion()
 
+ke = []
+t = []
+
 for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=15*m.dt):
 
+    ke.append(m._calc_ke())
+    t.append(m.t)
+
     plt.clf()
-    p1 = plt.imshow(m.q[0] + m.beta * m.y)
+    plt.subplot(121)
+    p1 = plt.imshow(np.fliplr(m.q[0,:,:]))
+    plt.ylim(0,m.nx)
     plt.clim([-30., 30.])
     plt.title('t='+str(m.t))
     
-    plt.xticks([])
-    plt.yticks([])
+    #plt.xticks([])
+    #plt.yticks([])
+
+    plt.subplot(122)
+
+    p2 = plt.plot(t,ke)
+    p2 = plt.plot(t[-1],ke[-1],'ro')
+    plt.xlim([0., 200.])
+    plt.ylim([.45,.5])
 
     plt.pause(0.01)
 

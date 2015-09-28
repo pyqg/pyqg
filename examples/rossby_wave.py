@@ -37,8 +37,8 @@ for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=10*m.dt):
     plt.clf()
     plt.imshow(m.q.squeeze())
     plt.clim([-20., 20.])
-    plt.xticks([])
-    plt.yticks([])
+    #plt.xticks([])
+    #plt.yticks([])
 
     plt.pause(0.01)
     plt.draw()

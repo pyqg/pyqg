@@ -1,4 +1,5 @@
 import numpy as np
+import scipy as sp
 from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
 try:   
@@ -189,7 +190,27 @@ class Model(PseudoSpectralKernel):
         """Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
-                
+
+    def stability_analysis(self):
+
+        self.omg = np.zeros_like(self.wv)+0.j
+        I = np.eye(self.nz)
+
+        for i in range(self.nl):
+            for j in range(self.nk):
+
+                # create matrices
+                L2 = self.S - self.wv2[i,j]*I
+                Q = (self.ikQy - self.ilQx).imag[:,i,j]
+                L3 = np.dot(self.Ubg*I*self.k[i,j],L2) +\
+                    np.dot(self.Vbg*I*self.l[i,j],L2)
+
+                # calculate most unstable mode
+                evals,evecs = sp.linalg.eig(L3+Q*I,L2)
+                imax = evals.imag.argmax()
+                eval_max = evals[imax]
+                self.omg[i,j] = eval_max
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):

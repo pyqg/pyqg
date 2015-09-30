@@ -65,6 +65,8 @@ class QGModel(model.Model):
         H1 = 500,                   # depth of layer 1 (H1)
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
+        hb=None,
+        f = None,
         **kwargs
         ):
         """
@@ -95,8 +97,15 @@ class QGModel(model.Model):
         self.H2 = H1/delta
         self.U1 = U1
         self.U2 = U2
+        self.V1 = 0.
+        self.V2 = 0.
+
+
         #self.filterfac = filterfac
         
+        self.f = f
+        self.hb =hb
+
         self.nz = 2
         
         super(QGModel, self).__init__(**kwargs)
@@ -126,7 +135,11 @@ class QGModel(model.Model):
         # the meridional PV gradients in each layer
         self.Qy1 = self.beta + self.F1*(self.U1 - self.U2)
         self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
+        self.Qx1 = self.F1*(self.V2 - self.V1)
+        self.Qx2 = -self.F2*(self.V2 - self.V1)
+
         self.Qy = np.array([self.Qy1, self.Qy2])
+        self.Qx = np.array([self.Qx1, self.Qx2])
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy1 = self.Qy1 * 1j * self.k
         self.ikQy2 = self.Qy2 * 1j * self.k
@@ -135,6 +148,10 @@ class QGModel(model.Model):
         self.ikQy = np.vstack([self.ikQy1[np.newaxis,...], 
                                self.ikQy2[np.newaxis,...]]) 
         self.ilQx = 0.
+
+       # topography
+        if self.hb is not None:
+            self.hb = self.hb * self.f/self.H2
 
         # layer spacing
         self.del1 = self.delta/(self.delta+1.)
@@ -204,6 +221,7 @@ class QGModel(model.Model):
         self.U2 = U2
         #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
         self.Ubg = np.array([U1,U2])
+        self.Vbg = np.array([0.,0.])
 
     def layer2modal(self):
         """ calculate modal streamfunction and PV """

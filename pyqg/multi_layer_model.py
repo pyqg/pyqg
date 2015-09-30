@@ -121,9 +121,11 @@ class QGModel(model.Model):
         #    1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
         #        np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
         #        np.zeros_like(self.x) )   
-                        
+      
+
     ### PRIVATE METHODS - not meant to be called by user ###
-       
+      
+
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
    
@@ -247,8 +249,33 @@ class QGModel(model.Model):
         qi : array-like
               layer PV anomaly in spatial coordinates.
         """
-        self.set_q(q)
-       
+        self.set_q(qi)
+      
+    
+    def set_q1q2(self, q1, q2, check=False):
+        """Set upper and lower layer PV anomalies.
+        
+        Parameters
+        ----------
+        
+        q1 : array-like
+            Upper layer PV anomaly in spatial coordinates.
+        q1 : array-like
+            Lower layer PV anomaly in spatial coordinates.
+        """
+        self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
+        #self.q[0] = q1
+        #self.q[1] = q2
+
+        # initialize spectral PV
+        #self.qh = self.fft2(self.q)
+        
+        # check that it works
+        if check:
+            np.testing.assert_allclose(self.q1, q1)
+            np.testing.assert_allclose(self.q1, self.ifft2(self.qh1))
+
+
 #    def set_U1U2(self, U1, U2):
 #        """Set background zonal flow.
 #        

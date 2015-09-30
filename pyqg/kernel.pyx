@@ -73,7 +73,7 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :] _ikQy
     cdef DTYPE_com_t [:, :] _ilQx
     # topography
-    cdef DTYPE_real_t [:, :] _hb
+    cdef public DTYPE_real_t [:, :] _hb
     # spectral filter
     cdef public DTYPE_real_t [:, :] _filtr
     
@@ -108,7 +108,7 @@ cdef class PseudoSpectralKernel:
                     np.ndarray[DTYPE_real_t, ndim=1] Vbg,
                     np.ndarray[DTYPE_real_t, ndim=1] Qy,
                     np.ndarray[DTYPE_real_t, ndim=1] Qx,
-                    np.ndarray[DTYPE_real_t, ndim=1] hb,
+                    np.ndarray[DTYPE_real_t, ndim=2] hb,
                     np.ndarray[DTYPE_real_t, ndim=2] filtr,
                     DTYPE_real_t dt=1.0,
                     DTYPE_real_t rek=0.0,
@@ -149,6 +149,8 @@ cdef class PseudoSpectralKernel:
 
         # assign topography
         self._hb = hb
+
+        print(self._hb)
 
         # initialize FFT inputs / outputs as byte aligned by pyfftw
         q = self._empty_real()
@@ -367,15 +369,15 @@ cdef class PseudoSpectralKernel:
                       num_threads=self.num_threads):
                 for i in range(self.Nx):
                     self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
-                    self.vq[k,j,i] = (self.v[k,j,i]+self.Vbg[j]) * self.q[k,j,i]
-        
+                    self.vq[k,j,i] = (self.v[k,j,i]+self.Vbg[k]) * self.q[k,j,i]
+           
         # add topographic term
         for j in prange(self.Ny, nogil=True, schedule='static',
                   chunksize=self.chunksize,  
                   num_threads=self.num_threads):
             for i in range(self.Nx):
-                self.uq[-1,j,i] += (self.u[-1,j,i] + self.Ubg[-1]) * self._hb[j,i]
-                self.vq[-1,j,i] += (self.v[-1,j,i] + self.Vbg[-1]) * self._hb[j,i]
+                self.uq[self.Nz-1,j,i] += (self.u[self.Nz-1,j,i] + self.Ubg[self.Nz-1]) * self._hb[j,i]
+                self.vq[self.Nz-1,j,i] += (self.v[self.Nz-1,j,i] + self.Vbg[self.Nz-1]) * self._hb[j,i]
 
         # transform to get spectral advective flux
         with gil:

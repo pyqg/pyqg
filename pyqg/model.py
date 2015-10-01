@@ -322,7 +322,7 @@ class Model(PseudoSpectralKernel):
             fftw_num_threads=self.ntd
         )
        
-        self.logger.info('Kernel initialized')
+        self.logger.info(' Kernel initialized')
         
 
         # still need to initialize a few state variables here, outside kernel
@@ -335,12 +335,12 @@ class Model(PseudoSpectralKernel):
     def _initialize_logger(self):
 
         self.logger = logging.getLogger(__name__)
-        fhandler = logging.FileHandler(filename='qgmodel.log', filemode='w')
+        fhandler = logging.FileHandler(filename='qgmodel.log', mode='w')
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         fhandler.setFormatter(formatter) 
         self.logger.addHandler(fhandler)
         self.logger.setLevel(logging.DEBUG)
-        self.logger.info('Logger initialized')
+        self.logger.info(' Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***

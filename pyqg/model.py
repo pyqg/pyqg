@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
+import logging
 try:   
     import mkl
     np.use_fastnumpy = True
@@ -158,13 +159,14 @@ class Model(PseudoSpectralKernel):
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_inversion_matrix()
-        self._initialize_time()                
+        self._initialize_time()
+        self._initialize_logger()
 
         # call the underlying cython kernel
         self._initialize_kernel()
        
-        self._initialize_diagnostics(diagnostics_list)
-   
+        self._initialize_diagnostics(diagnostics_list)       
+
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
         
@@ -319,13 +321,26 @@ class Model(PseudoSpectralKernel):
             rek=self.rek,
             fftw_num_threads=self.ntd
         )
+       
+        self.logger.info('Kernel initialized')
         
+
         # still need to initialize a few state variables here, outside kernel
         # this is sloppy
         #self.dqhdt_forc = np.zeros_like(self.qh)
         #self.dqhdt_p = np.zeros_like(self.qh)
         #self.dqhdt_pp = np.zeros_like(self.qh)
         
+    # logger
+    def _initialize_logger(self):
+
+        self.logger = logging.getLogger(__name__)
+        fhandler = logging.FileHandler(filename='qgmodel.log', filemode='w')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fhandler.setFormatter(formatter) 
+        self.logger.addHandler(fhandler)
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.info('Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
@@ -355,9 +370,14 @@ class Model(PseudoSpectralKernel):
         if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
             ke = self._calc_ke()
             cfl = self._calc_cfl()
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
-                   self.t, self.tc, cfl, ke)
-            assert cfl<1., "CFL condition violated"
+            #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
+            #       self.t, self.tc, cfl, ke)
+            self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
+                    %(self.tc,self.t,ke,cfl))
+
+
+            #assert cfl<1., 'CFL condition violated'
+            assert cfl<1., self.logger.error('CFL condition violated')
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

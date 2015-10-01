@@ -150,8 +150,6 @@ cdef class PseudoSpectralKernel:
         # assign topography
         self._hb = hb
 
-        print(self._hb)
-
         # initialize FFT inputs / outputs as byte aligned by pyfftw
         q = self._empty_real()
         self.q = q # assign to memory view
@@ -524,6 +522,20 @@ cdef class PseudoSpectralKernel:
         def __get__(self):
             return np.asarray(self.vq)
 
+
+# logger
+def _initialize_logger(self,debug=False):
+
+    import logging
+
+    self.logger = logging.getLogger()
+    fhandler = logging.FileHandler(filename='mylog.log', mode='a')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fhandler.setFormatter(formatter) 
+    logger.addHandler(fhandler)
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
 
 # general purpose timestepping routines
 # take only complex values, since that what the state variables are

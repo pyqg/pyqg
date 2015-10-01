@@ -165,24 +165,25 @@ class QGModel(model.Model):
         self.Vbg = self.V
         self.rhoi = self.rho
 
-        assert self.Hi.size == self.nz, "size of Hi does not match number\
-                of vertical levels nz" 
-
-        assert self.rhoi.size == self.nz, "size of rhoi does not match number\
-                of vertical levels nz" 
-
-        assert self.Ubg.size == self.nz, "size of Ubg does not match number\
-                of vertical levels nz" 
-
-        assert self.Vbg.size == self.nz, "size of Vbg does not match number\
-                of vertical levels nz" 
-
+#        assert self.Hi.size == self.nz, "size of Hi does not match number\
+#                of vertical levels nz" 
+#
+#        assert self.rhoi.size == self.nz, "size of rhoi does not match number\
+#                of vertical levels nz" 
+#
+#        assert self.Ubg.size == self.nz, "size of Ubg does not match number\
+#                of vertical levels nz" 
+#
+#        assert self.Vbg.size == self.nz, "size of Vbg does not match number\
+#                of vertical levels nz" 
+#
         #self.Hi = np.array([500,2000.])
         #self.rhoi = np.array([1025.,1025.83])
         #self.Ubg = np.array([0.05,.0])
         #self.Vbg = np.array([0.,0])
          
-        self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
+        if not self.nz==2:
+            self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
 
         self.H = self.Hi.sum()
 

@@ -523,19 +523,7 @@ cdef class PseudoSpectralKernel:
             return np.asarray(self.vq)
 
 
-# logger
-def _initialize_logger(self,debug=False):
 
-    import logging
-
-    self.logger = logging.getLogger()
-    fhandler = logging.FileHandler(filename='mylog.log', mode='a')
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    fhandler.setFormatter(formatter) 
-    logger.addHandler(fhandler)
-
-    if debug:
-        logger.setLevel(logging.DEBUG)
 
 # general purpose timestepping routines
 # take only complex values, since that what the state variables are

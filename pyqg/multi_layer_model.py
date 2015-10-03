@@ -133,6 +133,10 @@ class QGModel(model.Model):
       
         if (self.nz==2)&(self.rd is not None):
 
+            self.del1 = self.delta/(self.delta+1.)
+            self.del2 = (self.delta+1.)**-1
+            self.Us = self.U[0]-self.U[1]
+
             self.F1 = self.rd**-2 / (1.+self.delta)
             self.F2 = self.delta*self.F1
             self.S[0,0], self.S[0,1] = -self.F1,  self.F1
@@ -323,51 +327,64 @@ class QGModel(model.Model):
 
         return 2.*pi*np.sqrt( self.H / ens.sum() ) / 86400
 
-#    def _calc_derived_fields(self):
-#        self.p = self.ifft(self.ph)
-#        self.xi =self.ifft(-self.wv2*self.ph)
-#        self.Jptpc = -self._advect(
-#                    (self.p[0] - self.p[1]),
-#                    (self.del1*self.u[0] + self.del2*self.u[1]),
-#                    (self.del1*self.v[0] + self.del2*self.v[1]))
-#        # fix for delta.neq.1
-#        self.Jpxi = self._advect(self.xi, self.u, self.v)
-#
-#    def _initialize_model_diagnostics(self):
-#        """Extra diagnostics for two-layer model"""
-#
-#        self.add_diagnostic('entspec',
-#            description='barotropic enstrophy spectrum',
-#            function= (lambda self:
-#                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
-#        )
-#            
-#        self.add_diagnostic('APEflux',
-#            description='spectral flux of available potential energy',
-#            function= (lambda self:
-#              self.rd**-2 * self.del1*self.del2 *
-#              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
-#        )
-#        
-#        self.add_diagnostic('KEflux',
-#            description='spectral flux of kinetic energy',
-#            function= (lambda self:
-#              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) + 
-#              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
-#        )
-#        
-#        self.add_diagnostic('APEgenspec',
-#            description='spectrum of APE generation',
-#            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-#                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
-#                                  np.conj(self.ph[0] - self.ph[1])) )
-#        )
-#        
-#        self.add_diagnostic('APEgen',
-#            description='total APE generation',
-#            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-#                       np.real(1j*self.k*
-#                           (self.del1*self.ph[0] + self.del2*self.ph[1]) *
-#                            np.conj(self.ph[0] - self.ph[1])).sum() / 
-#                            (self.nx*self.ny) )
-#        )
+    def _calc_derived_fields(self):
+
+        if self.nz == 2:
+            self.p = self.ifft(self.ph)
+            self.xi =self.ifft(-self.wv2*self.ph)
+            self.Jptpc = -self._advect(
+                        (self.p[0] - self.p[1]),
+                        (self.del1*self.u[0] + self.del2*self.u[1]),
+                        (self.del1*self.v[0] + self.del2*self.v[1]))
+            # fix for delta.neq.1
+            self.Jpxi = self._advect(self.xi, self.u, self.v)
+
+        else:
+            raise NotImplementedError('Not implemented yet')
+    
+
+    def _initialize_model_diagnostics(self):
+        """Extra diagnostics for two-layer model"""
+
+        if self.nz == 2:
+
+            self.add_diagnostic('entspec',
+                description='barotropic enstrophy spectrum',
+                function= (lambda self:
+                          np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
+            )
+                
+            self.add_diagnostic('APEflux',
+                description='spectral flux of available potential energy',
+                function= (lambda self:
+                  self.rd**-2 * self.del1*self.del2 *
+                  np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
+            )
+            
+            self.add_diagnostic('KEflux',
+                description='spectral flux of kinetic energy',
+                function= (lambda self:
+                  np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) + 
+                  np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
+            )
+            
+            self.add_diagnostic('APEgenspec',
+                description='spectrum of APE generation',
+                function= (lambda self: self.Us * self.rd**-2 * self.del1 * self.del2 *
+                           np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
+                                      np.conj(self.ph[0] - self.ph[1])) )
+            )
+            
+            self.add_diagnostic('APEgen',
+                description='total APE generation',
+                function= (lambda self: self.Us * self.rd**-2 * self.del1 * self.del2 *
+                           np.real(1j*self.k*
+                               (self.del1*self.ph[0] + self.del2*self.ph[1]) *
+                                np.conj(self.ph[0] - self.ph[1])).sum() / 
+                                (self.nx*self.ny) )
+            )
+
+        else:
+            raise NotImplementedError('Not implemented yet')
+    
+

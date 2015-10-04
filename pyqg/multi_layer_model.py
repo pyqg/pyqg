@@ -113,6 +113,16 @@ class QGModel(model.Model):
         self.rho = rho
         self.hb = hb
 
+        self.H1 = H[0]
+        self.H2 = H[1]
+        self.V1 = V[0]
+        self.V2 = V[1]
+        self.U1 = U[0]
+        self.U2 = U[1]
+
+
+
+
         super(QGModel, self).__init__(**kwargs)
 
 
@@ -223,8 +233,8 @@ class QGModel(model.Model):
                     ( (self.S[0,0]-self.wv2)*(self.S[1,1]-self.wv2) -\
                             self.S[0,1]*self.S[1,0] ), 0.)**-1
             a[0,0] = (self.S[1,1]-self.wv2)*det_inv
-            a[0,1] = -self.S[1,0]*det_inv
-            a[1,0] = -self.S[0,1]*det_inv
+            a[0,1] = -self.S[0,1]*det_inv
+            a[1,0] = -self.S[1,0]*det_inv
             a[1,1] = (self.S[0,0]-self.wv2)*det_inv
         else:
             for i in range(self.nl):
@@ -235,7 +245,7 @@ class QGModel(model.Model):
                         a[:,:,i,j] = np.linalg.inv(self.S - np.eye(self.nz)*self.wv2[i,j])
 
         self.a = np.ma.masked_invalid(a).filled(0.)
-        
+     
     def _initialize_forcing(self):
         pass
         #"""Set up frictional filter."""

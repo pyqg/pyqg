@@ -68,8 +68,6 @@ class QGModel(model.Model):
         rho = None,
         delta = None,
         g = 9.81,
-        f = 1.e-4,
-        hb = None,
         **kwargs
         ):
         """
@@ -111,17 +109,6 @@ class QGModel(model.Model):
         self.V = V
         self.H = H
         self.rho = rho
-        self.hb = hb
-
-        self.H1 = H[0]
-        self.H2 = H[1]
-        self.V1 = V[0]
-        self.V2 = V[1]
-        self.U1 = U[0]
-        self.U2 = U[1]
-
-
-
 
         super(QGModel, self).__init__(**kwargs)
 
@@ -207,10 +194,9 @@ class QGModel(model.Model):
         self.Qy = self.beta - np.dot(self.S,self.Ubg)
         self.Qx = np.dot(self.S,self.Vbg)
 
-        # topography
-        if self.hb is not None:
-            self.hb = self.hb * self.f/self.Hi[-1]
-    
+        self.hb = self.hb * self.f/self.Hi[-1]
+   
+
         # complex versions, multiplied by k, speeds up computations to precompute 
         for i in range(self.nz): 
             if i == 0:

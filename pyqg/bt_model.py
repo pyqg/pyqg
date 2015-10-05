@@ -64,6 +64,9 @@ class BTModel(model.Model):
         # background vel.
         self.set_U(self.U)        
 
+        # topography
+        self.hb = self.hb * self.f/self.H
+
         # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
         

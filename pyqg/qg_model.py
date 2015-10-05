@@ -65,8 +65,8 @@ class QGModel(model.Model):
         H1 = 500,                   # depth of layer 1 (H1)
         U1=0.025,                   # upper layer flow
         U2=0.0,                     # lower layer flow
-        hb=None,
-        f = None,
+        V1=0.,
+        V2=0.,
         **kwargs
         ):
         """
@@ -97,14 +97,10 @@ class QGModel(model.Model):
         self.H2 = H1/delta
         self.U1 = U1
         self.U2 = U2
-        self.V1 = 0.
-        self.V2 = 0.
-
+        self.V1 = V1
+        self.V2 = V2
 
         #self.filterfac = filterfac
-        
-        self.f = f
-        self.hb =hb
 
         self.nz = 2
         
@@ -150,8 +146,7 @@ class QGModel(model.Model):
         self.ilQx = 0.
 
        # topography
-        if self.hb is not None:
-            self.hb = self.hb * self.f/self.H2
+        self.hb = self.hb * self.f/self.H2
 
         # layer spacing
         self.del1 = self.delta/(self.delta+1.)

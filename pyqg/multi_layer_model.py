@@ -91,8 +91,6 @@ class QGModel(model.Model):
 
         # physical
         self.g = g    # acceleration due to gravity
-        self.f = f
-        self.f2 = f**2
         self.beta = beta
         #self.rek = rek
         self.rd = rd

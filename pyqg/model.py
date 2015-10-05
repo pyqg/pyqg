@@ -339,7 +339,7 @@ class Model(PseudoSpectralKernel):
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics
-        if (self.t>=self.dt) and (self.tc%self.taveints==0):
+        if (self.t>=self.dt) and (self.t>=tavestart) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
     # def _forward_timestep(self):

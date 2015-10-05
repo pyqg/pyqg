@@ -158,6 +158,7 @@ class Model(PseudoSpectralKernel):
 
         # Coriolis parameter
         self.f = f
+        self.f2=f**2
 
         # topography
         if hb is None:

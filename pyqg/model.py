@@ -73,6 +73,8 @@ class Model(PseudoSpectralKernel):
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
+        f = 1.e4,                  # Coriolis parameter [s^{-1}]        
+        hb = None,                  # topography  [m]
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
@@ -153,6 +155,20 @@ class Model(PseudoSpectralKernel):
         # friction
         self.rek = rek
         self.filterfac = filterfac
+
+        # Coriolis parameter
+        self.f = f
+
+        # topography
+        if hb is None:
+                # topography; this is necessary to pass on
+                # information to the kernel; this is sloppy
+                # since there's no point in computing the 
+                # topographic term if there's no topography,
+                # but we have to pass on info to the kernel...
+            self.hb = np.zeros((ny,nx))
+        else:
+            self.hb = hb
 
         self._initialize_grid()
         self._initialize_background()

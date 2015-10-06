@@ -86,6 +86,7 @@ class Model(PseudoSpectralKernel):
         #use_fftw = False,               # fftw flag 
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
+        linear = False,
         quiet = False,
         ):
         """
@@ -146,6 +147,7 @@ class Model(PseudoSpectralKernel):
         self.tavestart = tavestart
         self.taveint = taveint
         self.quiet = quiet
+        self.linear = linear
         self.useAB2 = useAB2
         # fft 
         #self.use_fftw = use_fftw
@@ -210,18 +212,23 @@ class Model(PseudoSpectralKernel):
         while(self.t < self.tmax): 
             self._step_forward()
 
-    def stability_analysis(self):
+    def stability_analysis(self,bottom_friction=False):
         """ Baroclinic instability analysis """
         self.omg = np.zeros_like(self.wv)+0.j
         self.evec = np.zeros_like(self.qh)
         I = np.eye(self.nz)
         
         L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
+
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
         
         Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
         Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
-        L3 = np.einsum('ij...,jk...->ik...',Uk+Vl,L2)
+        L3 = np.einsum('ij...,jk...->ik...',Uk+Vl,L2) + 0j
+
+        if bottom_friction:
+            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
+
         M = np.einsum('...ij,...jk->...ik',np.linalg.inv(L2.T),(L3+Q).T)
 
         evals,evecs = np.linalg.eig(M) 
@@ -359,7 +366,7 @@ class Model(PseudoSpectralKernel):
             self.filtr,
             dt=self.dt,
             rek=self.rek,
-            fftw_num_threads=self.ntd
+            fftw_num_threads=self.ntd,
         )
        
         self.logger.info(' Kernel initialized')

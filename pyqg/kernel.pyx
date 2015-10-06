@@ -90,6 +90,8 @@ cdef class PseudoSpectralKernel:
     # number of elements per work group in the y / l direction
     cdef int chunksize
 
+    cdef bint linear
+
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
     cdef object ifft_qh_to_q
@@ -100,7 +102,7 @@ cdef class PseudoSpectralKernel:
     cdef object _dummy_fft
     cdef object _dummy_ifft
         
-    def _kernel_init(self, int Nz, int Ny, int Nx, 
+    def _kernel_init(self, int Nz, int Ny, int Nx,
                     np.ndarray[DTYPE_real_t, ndim=4] a,
                     np.ndarray[DTYPE_real_t, ndim=1] k,
                     np.ndarray[DTYPE_real_t, ndim=1] l,
@@ -112,7 +114,8 @@ cdef class PseudoSpectralKernel:
                     np.ndarray[DTYPE_real_t, ndim=2] filtr,
                     DTYPE_real_t dt=1.0,
                     DTYPE_real_t rek=0.0,
-                    fftw_num_threads=1,                                       
+                    fftw_num_threads=1,
+                    linear=0,
     ):
         self.Nz = Nz
         self.Ny = Ny
@@ -121,6 +124,7 @@ cdef class PseudoSpectralKernel:
         self.Nk = Nx/2 + 1
         
         self._rek = rek
+        self.linear = linear
         
         ### none of this shape checking works
         #assert a.shape == (self.Nz, self.Nz self.Nl, self.Nk):
@@ -368,18 +372,17 @@ cdef class PseudoSpectralKernel:
                 for i in range(self.Nx):
                     self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
                     self.vq[k,j,i] = (self.v[k,j,i]+self.Vbg[k]) * self.q[k,j,i]
-           
-        # add topographic term
-        if self._hb is not None:
 
-            for j in prange(self.Ny, nogil=True, schedule='static',
-                      chunksize=self.chunksize,  
-                      num_threads=self.num_threads):
-                for i in range(self.Nx):
-                    self.uq[self.Nz-1,j,i] += (self.u[self.Nz-1,j,i] + 
-                            self.Ubg[self.Nz-1]) * self._hb[j,i]
-                    self.vq[self.Nz-1,j,i] += (self.v[self.Nz-1,j,i] +
-                            self.Vbg[self.Nz-1]) * self._hb[j,i]
+                
+        # add topographic term
+        for j in prange(self.Ny, nogil=True, schedule='static',
+                  chunksize=self.chunksize,  
+                  num_threads=self.num_threads):
+            for i in range(self.Nx):
+                self.uq[self.Nz-1,j,i] += (self.u[self.Nz-1,j,i] + 
+                        self.Ubg[self.Nz-1]) * self._hb[j,i]
+                self.vq[self.Nz-1,j,i] += (self.v[self.Nz-1,j,i] +
+                        self.Vbg[self.Nz-1]) * self._hb[j,i]
 
         # transform to get spectral advective flux
         with gil:
@@ -518,15 +521,12 @@ cdef class PseudoSpectralKernel:
     property vh:
         def __get__(self):
             return np.asarray(self.vh)
-
     property uq:
         def __get__(self):
             return np.asarray(self.uq)
     property vq:
         def __get__(self):
             return np.asarray(self.vq)
-
-
 
 
 # general purpose timestepping routines

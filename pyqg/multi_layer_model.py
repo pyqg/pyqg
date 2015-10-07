@@ -151,7 +151,8 @@ class QGModel(model.Model):
                     
                 else:
                     self.S[i,i-1] = self.f2/self.Hi[i]/self.gpi[i-1]
-                    self.S[i,i]   = self.f2/self.Hi[i]/self.gpi[i] - self.f2/self.Hi[i]/self.gpi[i-1]
+                    self.S[i,i]   = -(self.f2/self.Hi[i]/self.gpi[i] +
+                                        self.f2/self.Hi[i]/self.gpi[i-1])
                     self.S[i,i+1] = self.f2/self.Hi[i]/self.gpi[i]
 
     def _initialize_background(self):
@@ -221,12 +222,9 @@ class QGModel(model.Model):
             a[1,0] = -self.S[1,0]*det_inv
             a[1,1] = (self.S[0,0]-self.wv2)*det_inv
         else:
-            for i in range(self.nl):
-                for j in range(self.nk):
-                    if self.wv2[i,j]== 0:
-                        a[:,:,i,j] = 0.
-                    else:
-                        a[:,:,i,j] = np.linalg.inv(self.S - np.eye(self.nz)*self.wv2[i,j])
+            I = np.eye(self.nz)[:,:,np.newaxis,np.newaxis]
+            a = np.linalg.inv((self.S[:,:,np.newaxis,np.newaxis]-I*self.wv2).T).T
+            a[:,:,0,0] = 0.
 
         self.a = np.ma.masked_invalid(a).filled(0.)
      
@@ -334,7 +332,8 @@ class QGModel(model.Model):
             self.Jpxi = self._advect(self.xi, self.u, self.v)
 
         else:
-            raise NotImplementedError('Not implemented yet')
+            pass
+            #raise NotImplementedError('Not implemented yet')
     
 
     def _initialize_model_diagnostics(self):
@@ -379,6 +378,7 @@ class QGModel(model.Model):
             )
 
         else:
-            raise NotImplementedError('Not implemented yet')
+            pass
+            #raise NotImplementedError('Not implemented yet')
     
 

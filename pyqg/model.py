@@ -86,7 +86,6 @@ class Model(PseudoSpectralKernel):
         #use_fftw = False,               # fftw flag 
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
-        linear = False,
         quiet = False,
         ):
         """
@@ -147,7 +146,6 @@ class Model(PseudoSpectralKernel):
         self.tavestart = tavestart
         self.taveint = taveint
         self.quiet = quiet
-        self.linear = linear
         self.useAB2 = useAB2
         # fft 
         #self.use_fftw = use_fftw
@@ -229,13 +227,14 @@ class Model(PseudoSpectralKernel):
         if bottom_friction:
             L3[-1,-1,:,:] += 1j*self.rek*self.wv2
 
-        M = np.einsum('...ij,...jk->...ik',np.linalg.inv(L2.T),(L3+Q).T)
+        L4 = np.linalg.inv(L2.T)
+        M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
 
         evals,evecs = np.linalg.eig(M) 
     
         # select the mode with maximum growth rate
         # this is sloppy; it would be better to
-        # avoid the for loop...
+        # avoid the  loop...
         imax = evals.imag.argmax(axis=-1)
 
         for i in range(self.nl):
@@ -466,14 +465,6 @@ class Model(PseudoSpectralKernel):
             'needs to be implemented by Model subclass')
     
     # this is stuff the Cesar added
-    
-    # if self.tc==0:
-    #     assert self.calc_cfl()<1., " *** time-step too large "
-    #     # initialize ke and time arrays
-    #     self.ke = np.array([self.calc_ke()])
-    #     self.eddy_time = np.array([self.calc_eddy_time()])
-    #     self.time = np.array([0.])
-           
 
     def _calc_ke(self):
         raise NotImplementedError(

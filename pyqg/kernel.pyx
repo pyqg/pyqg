@@ -90,8 +90,6 @@ cdef class PseudoSpectralKernel:
     # number of elements per work group in the y / l direction
     cdef int chunksize
 
-    cdef bint linear
-
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
     cdef object ifft_qh_to_q
@@ -115,7 +113,6 @@ cdef class PseudoSpectralKernel:
                     DTYPE_real_t dt=1.0,
                     DTYPE_real_t rek=0.0,
                     fftw_num_threads=1,
-                    linear=0,
     ):
         self.Nz = Nz
         self.Ny = Ny

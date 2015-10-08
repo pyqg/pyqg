@@ -121,7 +121,6 @@ cdef class PseudoSpectralKernel:
         self.Nk = Nx/2 + 1
         
         self._rek = rek
-        self.linear = linear
         
         ### none of this shape checking works
         #assert a.shape == (self.Nz, self.Nz self.Nl, self.Nk):

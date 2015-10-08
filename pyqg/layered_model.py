@@ -157,20 +157,10 @@ class LayeredModel(model.Model):
 
         self.hb = self.hb * self.f/self.Hi[-1]
    
-
         # complex versions, multiplied by k, speeds up computations to precompute 
-        for i in range(self.nz): 
-            if i == 0:
-                self.ikQyi = self.Qy[i] * 1j * self.k
-                self.ikQy = self.ikQyi[np.newaxis,...]
-                self.ilQxi = self.Qx[i] * 1j * self.l
-                self.ilQx = self.ilQxi[np.newaxis,...]
-            else:
-                self.ikQyi = self.Qy[i] * 1j * self.k
-                self.ikQy = np.vstack([self.ikQy, self.ikQyi[np.newaxis,...]]) 
-                self.ilQxi = self.Qx[i] * 1j * self.l
-                self.ilQx = np.vstack([self.ilQx, self.ilQxi[np.newaxis,...]]) 
-         
+        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
+        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
+
     def _initialize_inversion_matrix(self):
         
         a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))        
@@ -199,18 +189,6 @@ class LayeredModel(model.Model):
         # self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         # self.filtr[wvx<=cphi] = 1.
          
-    def set_qi(self, qi, check=False):
-        """Set PV anomalies.
-        
-        Parameters
-        ----------
-        
-        qi : array-like
-              layer PV anomaly in spatial coordinates.
-        """
-        self.set_q(qi)
-      
-    
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies.
         

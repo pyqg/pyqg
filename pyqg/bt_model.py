@@ -23,7 +23,7 @@ class BTModel(model.Model):
        
     """
     
-    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(self, beta=0.,  rd=0., H=1., U=0.,V=0., **kwargs):
         """
         Parameters
         ----------
@@ -41,6 +41,7 @@ class BTModel(model.Model):
         self.rd = rd
         self.H = H
         self.U = U
+        self.V = V
         
         self.nz = 1
        
@@ -60,17 +61,17 @@ class BTModel(model.Model):
         
         # the meridional PV gradients in each layer
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        self.Qx = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
-        self.set_U(self.U)        
+        self.set_UV(self.U,self.V)        
 
         # topography
         self.hb = self.hb * self.f/self.H
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
-        
-        self.ilQx = 0.
+        self.ilQx = self.Qy * 1j * self.l
 
     def _initialize_inversion_matrix(self):
         """ the inversion """ 
@@ -91,7 +92,7 @@ class BTModel(model.Model):
     # def _filter(self, q):
     #     return self.filtr * q
 
-    def set_U(self, U):
+    def set_UV(self, U,V):
         """Set background zonal flow.
         
         Parameters
@@ -101,6 +102,8 @@ class BTModel(model.Model):
             Upper layer flow. Units meters.
         """
         self.Ubg = np.asarray(U)[np.newaxis, ...]
+        self.Vbg = np.asarray(V)[np.newaxis, ...]
+
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

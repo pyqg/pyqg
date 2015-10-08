@@ -53,8 +53,8 @@ class SQGModel(model.Model):
         
         # the meridional PV gradient (this are zero is this model unless
         #                               a mean surface buoyancy exists)
-        self.Qy = np.asarray(self.beta)[np.newaxis, ...]*0.
-        self.Qx = np.asarray(self.beta)[np.newaxis, ...]*0.
+        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        self.Qx = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
         self.set_UV(self.U,self.V)        

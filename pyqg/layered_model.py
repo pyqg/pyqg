@@ -17,42 +17,13 @@ class LayeredModel(model.Model):
     r"""N-layer quasigeostrophic model.
     
     This model is meant to represent flows driven by baroclinic instabilty of a
-    base-state shear :math:`U_1-U_2`. The upper and lower
-    layer potential vorticity anomalies :math:`q_1` and :math:`q_2` are
-     
+    base-state shear :math:     
     .. math::
     
-        q_1 &= \nabla^2\psi_1 + F_1(\psi_2 - \psi_1) \\
-        q_2 &= \nabla^2\psi_2 + F_2(\psi_1 - \psi_2)
+        q_i &= \nabla^2\psi_i + S \psi_i \\
 
-    with
-    
-    .. math::
-        F_1 &\equiv \frac{k_d^2}{1 + \delta^2} \\
-        F_2 &\equiv \delta F_1 \ .
+    *** This needs to be completed
 
-    The layer depth ratio is given by :math:`\delta = H_1 / H_2`.
-    The total depth is :math:`H = H_1 + H_2`.
-
-    The background potential vorticity gradients are
-
-    .. math::
-
-        \beta_1 &= \beta + F_1(U_1 - U_2) \\
-        \beta_2 &= \beta - F_2( U_1 - U_2) \ .
-    
-    The evolution equations for :math:`q_1` and :math:`q_2` are
-
-    .. math::
-
-        \partial_t\,{q_1} + J(\psi_1\,, q_1) + \beta_1\,
-        {\psi_1}_x &= \text{ssd} \\
-        \partial_t\,{q_2} + J(\psi_2\,, q_2)+ \beta_2\, {\psi_2}_x
-        &= -r_{ek}\nabla^2 \psi_2 + \text{ssd}\,.
-
-    where `ssd` represents small-scale dissipation and :math:`r_{ek}` is the
-    Ekman friction parameter.
-    
     """
     
     def __init__(
@@ -106,15 +77,8 @@ class LayeredModel(model.Model):
         self.H = H
         self.rho = rho
 
-        super(QGModel, self).__init__(**kwargs)
+        super(LayeredModel, self).__init__(**kwargs)
 
-
-               # initial conditions: (PV anomalies)
-        #self.set_q1q2(
-        #    1e-7*np.random.rand(self.ny,self.nx) + 1e-6*(
-        #        np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
-        #        np.zeros_like(self.x) )   
-      
 
     ### PRIVATE METHODS - not meant to be called by user ###
       

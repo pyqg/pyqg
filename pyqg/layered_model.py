@@ -1,8 +1,6 @@
 import numpy as np
 import model
 from numpy import pi
-import scipy as sp
-import scipy.linalg
 try:   
     import mkl
     np.use_fastnumpy = True

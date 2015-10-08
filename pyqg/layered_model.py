@@ -158,6 +158,7 @@ class LayeredModel(model.Model):
         self.hb = self.hb * self.f/self.Hi[-1]
    
         # complex versions, multiplied by k, speeds up computations to precompute 
+       
         self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 

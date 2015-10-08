@@ -227,7 +227,9 @@ class Model(PseudoSpectralKernel):
         if bottom_friction:
             L3[-1,-1,:,:] += 1j*self.rek*self.wv2
 
-        L4 = np.linalg.inv(L2.T)
+        #L4 = np.linalg.inv(L2.T)
+        L4 = self.a.T
+
         M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
 
         evals,evecs = np.linalg.eig(M) 

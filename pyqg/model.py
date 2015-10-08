@@ -87,6 +87,7 @@ class Model(PseudoSpectralKernel):
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
+        logfile = None,
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -170,6 +171,10 @@ class Model(PseudoSpectralKernel):
             self.hb = np.zeros((ny,nx))
         else:
             self.hb = hb
+
+        # logfile
+        self.logfile = logfile
+
 
         self._initialize_grid()
         self._initialize_background()
@@ -383,11 +388,14 @@ class Model(PseudoSpectralKernel):
     def _initialize_logger(self):
 
         self.logger = logging.getLogger(__name__)
-        fhandler = logging.FileHandler(filename='qgmodel.log', mode='w')
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fhandler.setFormatter(formatter) 
-        self.logger.addHandler(fhandler)
-        self.logger.setLevel(logging.DEBUG)
+
+        if self.logfile is (not None):
+            fhandler = logging.FileHandler(filename=self.logfile, mode='w')
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            fhandler.setFormatter(formatter) 
+            self.logger.addHandler(fhandler)
+        
+        self.logger.setLevel(logging.INFO)
         self.logger.info(' Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)

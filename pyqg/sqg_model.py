@@ -60,6 +60,10 @@ class SQGModel(model.Model):
         
         self.ilQx = 0.
 
+        # this term is always zero for this semi-infinite model...
+        self.hb = self.hb * self.f/self.Hi[-1]
+        
+
     def _initialize_inversion_matrix(self):
         """ the inversion """ 
         # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph

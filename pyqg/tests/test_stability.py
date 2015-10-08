@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import sqrt
-from pyqg import multi_layer_model
+import pyqg
 
 def test_stability(rtol=1.e-13):
     """ Make growth rates calculates numerically
@@ -8,7 +8,7 @@ def test_stability(rtol=1.e-13):
             for nz = 2 """
 
 
-    m = multi_layer_model.QGModel(L=1.e6,rd = 15.e3,nx=256,U=np.array([.1,0.]),V=np.array([0.,0.]),
+    m = pyqg.LayeredModel(L=1.e6,rd = 15.e3,nx=256,U=np.array([.1,0.]),V=np.array([0.,0.]),
             H=np.array([2000,2000.]),delta=1.,nz=2)
 
     # numerical results

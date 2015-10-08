@@ -15,7 +15,7 @@ try:
 except ImportError:
     pass
 
-class QGModel(model.Model):
+class LayeredModel(model.Model):
     r"""N-layer quasigeostrophic model.
     
     This model is meant to represent flows driven by baroclinic instabilty of a

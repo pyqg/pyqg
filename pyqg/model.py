@@ -1,6 +1,8 @@
 import numpy as np
+import scipy as sp
 from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
+import logging
 try:   
     import mkl
     np.use_fastnumpy = True
@@ -71,6 +73,8 @@ class Model(PseudoSpectralKernel):
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
+        f = 1.e4,                  # Coriolis parameter [s^{-1}]        
+        hb = None,                  # topography  [m]
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
@@ -83,6 +87,7 @@ class Model(PseudoSpectralKernel):
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
+        logfile = None,
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -152,18 +157,38 @@ class Model(PseudoSpectralKernel):
         self.rek = rek
         self.filterfac = filterfac
 
+        # Coriolis parameter
+        self.f = f
+        self.f2=f**2
+
+        # topography
+        if hb is None:
+                # topography; this is necessary to pass on
+                # information to the kernel; this is sloppy
+                # since there's no point in computing the 
+                # topographic term if there's no topography,
+                # but we have to pass on info to the kernel...
+            self.hb = np.zeros((ny,nx))
+        else:
+            self.hb = hb
+
+        # logfile
+        self.logfile = logfile
+
+
         self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_inversion_matrix()
-        self._initialize_time()                
+        self._initialize_time()
+        self._initialize_logger()
 
         # call the underlying cython kernel
         self._initialize_kernel()
        
-        self._initialize_diagnostics(diagnostics_list)
-   
+        self._initialize_diagnostics(diagnostics_list)       
+
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
         
@@ -189,7 +214,58 @@ class Model(PseudoSpectralKernel):
         """Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
-                
+
+    def stability_analysis(self,bottom_friction=False):
+        """ Baroclinic instability analysis """
+        self.omg = np.zeros_like(self.wv)+0.j
+        self.evec = np.zeros_like(self.qh)
+        I = np.eye(self.nz)
+        
+        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
+
+        Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
+        
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
+        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
+        L3 = np.einsum('ij...,jk...->ik...',Uk+Vl,L2) + 0j
+
+        if bottom_friction:
+            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
+
+        #L4 = np.linalg.inv(L2.T)
+        L4 = self.a.T
+
+        M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
+
+        evals,evecs = np.linalg.eig(M) 
+    
+        # select the mode with maximum growth rate
+        # this is sloppy; it would be better to
+        # avoid the  loop...
+        imax = evals.imag.argmax(axis=-1)
+
+        for i in range(self.nl):
+            for j in range(self.nk):
+                self.omg[i,j] = evals.T[imax.T[i,j],i,j]
+                self.evec[:,i,j] = evecs.T[imax.T[i,j],:,i,j]
+
+    def vertical_modes(self):
+        """ Calculate standard vertical modes. Simply
+            the eigenvectors of the stretching matrix S """
+
+        evals,evecs = np.linalg.eig(-self.S) 
+
+        asort = evals.argsort()
+
+        # deformation radii
+        self.radii = np.zeros(self.nz)
+        self.radii[0] = 9.81*self.H/np.abs(self.f) # barotropic def. radius
+        self.radii[1:] = np.sqrt(1./evals[asort][1:])
+
+        # eigenstructure (it would be good to normalize this...)
+        self.pmodes = evecs[:,asort] 
+
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
@@ -291,19 +367,36 @@ class Model(PseudoSpectralKernel):
         self._kernel_init(
             self.nz, self.ny, self.nx,
             self.a, self.kk, self.ll,
-            self.Ubg, self.Qy,
+            self.Ubg, self.Vbg, self.Qy, self.Qx,
+            self.hb,
             self.filtr,
             dt=self.dt,
             rek=self.rek,
-            fftw_num_threads=self.ntd
+            fftw_num_threads=self.ntd,
         )
+       
+        self.logger.info(' Kernel initialized')
         
+
         # still need to initialize a few state variables here, outside kernel
         # this is sloppy
         #self.dqhdt_forc = np.zeros_like(self.qh)
         #self.dqhdt_p = np.zeros_like(self.qh)
         #self.dqhdt_pp = np.zeros_like(self.qh)
         
+    # logger
+    def _initialize_logger(self):
+
+        self.logger = logging.getLogger(__name__)
+
+        if self.logfile is (not None):
+            fhandler = logging.FileHandler(filename=self.logfile, mode='w')
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            fhandler.setFormatter(formatter) 
+            self.logger.addHandler(fhandler)
+        
+        self.logger.setLevel(logging.INFO)
+        self.logger.info(' Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
@@ -333,13 +426,18 @@ class Model(PseudoSpectralKernel):
         if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
             ke = self._calc_ke()
             cfl = self._calc_cfl()
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
-                   self.t, self.tc, cfl, ke)
-            assert cfl<1., "CFL condition violated"
+            #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
+            #       self.t, self.tc, cfl, ke)
+            self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
+                    %(self.tc,self.t,ke,cfl))
+
+
+            #assert cfl<1., 'CFL condition violated'
+            assert cfl<1., self.logger.error('CFL condition violated')
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics
-        if (self.t>=self.dt) and (self.tc%self.taveints==0):
+        if (self.t>=self.dt) and (self.t>=self.tavestart) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
     # def _forward_timestep(self):
@@ -377,14 +475,6 @@ class Model(PseudoSpectralKernel):
             'needs to be implemented by Model subclass')
     
     # this is stuff the Cesar added
-    
-    # if self.tc==0:
-    #     assert self.calc_cfl()<1., " *** time-step too large "
-    #     # initialize ke and time arrays
-    #     self.ke = np.array([self.calc_ke()])
-    #     self.eddy_time = np.array([self.calc_eddy_time()])
-    #     self.time = np.array([0.])
-           
 
     def _calc_ke(self):
         raise NotImplementedError(
@@ -420,6 +510,21 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('q',
             description='QGPV',
             function= (lambda self: self.q)
+        )
+
+        self.add_diagnostic('u',
+            description='zonal velocity',
+            function= (lambda self: self.u)
+        )
+
+        self.add_diagnostic('v',
+            description='meridional velocity',
+            function= (lambda self: self.v)
+        )
+
+        self.add_diagnostic('vq',
+            description='meridional PV flux',
+            function= (lambda self: self.v*self.q)
         )
 
         self.add_diagnostic('EKEdiss',

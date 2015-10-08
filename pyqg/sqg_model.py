@@ -13,6 +13,7 @@ class SQGModel(model.Model):
         rd=0.,                      # deformation radius
         H = 1.,                     # depth of layer
         U=0.,                       # max vel. of base-state
+        V=0.,
         **kwargs
         ):
         """
@@ -35,6 +36,7 @@ class SQGModel(model.Model):
         self.rd = rd
         self.H = H
         self.U = U
+        self.V = V
         #self.filterfac = filterfac
         
         self.nz = 1
@@ -49,11 +51,13 @@ class SQGModel(model.Model):
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
         
-        # the meridional PV gradients in each layer
+        # the meridional PV gradient (this are zero is this model unless
+        #                               a mean surface buoyancy exists)
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        self.Qx = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
-        self.set_U(self.U)        
+        self.set_UV(self.U,self.V)        
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
@@ -68,9 +72,11 @@ class SQGModel(model.Model):
     def _initialize_forcing(self):
         pass
     
-    def set_U(self, U):
+    def set_UV(self, U,V):
         """Set background zonal flow"""
         self.Ubg = np.asarray(U)[np.newaxis,...]
+        self.Vbg = np.asarray(V)[np.newaxis,...]
+
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

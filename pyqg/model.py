@@ -436,7 +436,7 @@ class Model(PseudoSpectralKernel):
 
 
             #assert cfl<1., 'CFL condition violated'
-            assert cfl<1., self.logger.error('CFL condition violated')
+            assert self.cfl<1., self.logger.error('CFL condition violated')
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

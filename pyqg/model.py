@@ -389,13 +389,16 @@ class Model(PseudoSpectralKernel):
 
         self.logger = logging.getLogger(__name__)
 
-        if self.logfile is (not None):
+        if not (self.logfile is None):
             fhandler = logging.FileHandler(filename=self.logfile, mode='w')
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            fhandler.setFormatter(formatter) 
-            self.logger.addHandler(fhandler)
-        
-        self.logger.setLevel(logging.INFO)
+        else:
+            fhandler = logging.StreamHandler()
+
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fhandler.setFormatter(formatter) 
+        self.logger.addHandler(fhandler)
+
+        self.logger.setLevel(logging.DEBUG)
         self.logger.info(' Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)

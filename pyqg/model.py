@@ -4,7 +4,6 @@ from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, t
 from numpy import pi
 import logging
 try:
-    import scipy
     import mkl
     np.use_fastnumpy = True
 except ImportError:

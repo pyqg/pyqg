@@ -52,12 +52,14 @@ class LayeredModel(model.Model):
 
     The evolution equations are
 
-    
-       \,{\hat{q}_{i}}_t + ik\,{\hat{\psi}_i} {Q_y} - il\,{\hat{\psi}_i} {Q_x}+
-       \mathsf{\hat{J}}\left(\psi_i\,, q_i + 
-       \delta_{i\textsf{N}} \tfrac{f_0}{H_\textsf{N}} h_b \right) = 
-       \text{ssd} \,, \qquad i = 1,\textsf{N}\,,
+    .. math::
 
+
+       \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + \textsf{Q}_y {\psi_i}_x
+       - \textsf{Q}_x {\psi_i}_y = \text{ssd} - 
+       r_{ek} \delta_{i\textsf{N}} \nabla^2 \psi_i\,, \qquad i = 1,\textsf{N}\,,
+
+    
     where the mean potential vorticy gradients are
 
     .. math::

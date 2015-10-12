@@ -14,15 +14,69 @@ except ImportError:
     pass
 
 class LayeredModel(model.Model):
-    r"""N-layer quasigeostrophic model.
+    r"""Layered quasigeostrophic model.
     
     This model is meant to represent flows driven by baroclinic instabilty of a
-    base-state shear :math:     
-    .. math::
-    
-        q_i &= \nabla^2\psi_i + S \psi_i \\
+    base-state shear. The potential vorticity anomalies qi are related to the
+    streamfunction psii through
 
-    *** This needs to be completed
+    .. math::
+
+
+       {q_i} = \nabla^2\psi_i + \frac{f_0^2}{H_i} \left(\frac{\psi_{i-1}-
+       \psi_i}{g'_{i-1}}- \frac{\psi_{i}-\psi_{i+1}}{g'_{i}}\right)\,,
+       \qquad i = 2,\textsf{N}-1\,,
+
+     and
+
+    .. math::
+
+
+       {q_1} = \nabla^2\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-
+       \psi_1}{g'_{1}}\right)\,,  \qquad i =1\,,
+
+    .. math::
+
+
+       {q_\textsf{N}} = \nabla^2\psi_\textsf{N} +
+       \frac{f_0^2}{H_\textsf{N}} \left(\frac{\psi_{\textsf{N}-1}-
+       \psi_\textsf{N}}{g'_{\textsf{N}}}\right) + \frac{f_0}{H_\textsf{N}}h_b\,,
+       \qquad i =\textsf{N}\,,
+
+     where the reduced gravity, or buoyancy jump, is
+
+
+    .. math::
+
+       g'_i \equiv g \frac{\rho_{i+1}-\rho_i}{\rho_i}\,.
+
+    The evolution equations are
+
+    
+       \,{\hat{q}_{i}}_t + ik\,{\hat{\psi}_i} {Q_y} - il\,{\hat{\psi}_i} {Q_x}+
+       \mathsf{\hat{J}}\left(\psi_i\,, q_i + 
+       \delta_{i\textsf{N}} \tfrac{f_0}{H_\textsf{N}} h_b \right) = 
+       \text{ssd} \,, \qquad i = 1,\textsf{N}\,,
+
+    where the mean potential vorticy gradients are
+
+    .. math::
+
+       \textsf{Q}_x = \textsf{S}\textsf{V}\,,
+       
+    and
+
+    .. math::
+
+       \textsf{Q}_y = \beta\,\textsf{I} - \textsf{S}\textsf{U}\,\,,
+
+    where S is the stretching matrix, I is the identity matrix,
+    and the background velocity is 
+
+    :math:`\vec{\textsf{V}}(z) = \left(\textsf{U},\textsf{V}\right)`.
+
+    For more information see http://pyqg.readthedocs.org/en/stable/equations.html
+
 
     """
     

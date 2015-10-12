@@ -14,20 +14,77 @@ except ImportError:
     pass
 
 class LayeredModel(model.Model):
-    r"""N-layer quasigeostrophic model.
+    r"""Layered quasigeostrophic model.
     
     This model is meant to represent flows driven by baroclinic instabilty of a
-    base-state shear :math:     
-    .. math::
-    
-        q_i &= \nabla^2\psi_i + S \psi_i \\
+    base-state shear. The potential vorticity anomalies qi are related to the
+    streamfunction psii through
 
-    *** This needs to be completed
+    .. math::
+
+
+       {q_i} = \nabla^2\psi_i + \frac{f_0^2}{H_i} \left(\frac{\psi_{i-1}-
+       \psi_i}{g'_{i-1}}- \frac{\psi_{i}-\psi_{i+1}}{g'_{i}}\right)\,,
+       \qquad i = 2,\textsf{N}-1\,,
+
+     and
+
+    .. math::
+
+
+       {q_1} = \nabla^2\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-
+       \psi_1}{g'_{1}}\right)\,,  \qquad i =1\,,
+
+    .. math::
+
+
+       {q_\textsf{N}} = \nabla^2\psi_\textsf{N} +
+       \frac{f_0^2}{H_\textsf{N}} \left(\frac{\psi_{\textsf{N}-1}-
+       \psi_\textsf{N}}{g'_{\textsf{N}}}\right) + \frac{f_0}{H_\textsf{N}}h_b\,,
+       \qquad i =\textsf{N}\,,
+
+     where the reduced gravity, or buoyancy jump, is
+
+
+    .. math::
+
+       g'_i \equiv g \frac{\rho_{i+1}-\rho_i}{\rho_i}\,.
+
+    The evolution equations are
+
+    .. math::
+
+
+       \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + \textsf{Q}_y {\psi_i}_x
+       - \textsf{Q}_x {\psi_i}_y = \text{ssd} - 
+       r_{ek} \delta_{i\textsf{N}} \nabla^2 \psi_i\,, \qquad i = 1,\textsf{N}\,,
+
+    
+    where the mean potential vorticy gradients are
+
+    .. math::
+
+       \textsf{Q}_x = \textsf{S}\textsf{V}\,,
+       
+    and
+
+    .. math::
+
+       \textsf{Q}_y = \beta\,\textsf{I} - \textsf{S}\textsf{U}\,\,,
+
+    where S is the stretching matrix, I is the identity matrix,
+    and the background velocity is 
+
+    :math:`\vec{\textsf{V}}(z) = \left(\textsf{U},\textsf{V}\right)`.
+
+    For more information see http://pyqg.readthedocs.org/en/stable/equations.html
+
 
     """
     
     def __init__(
         self,
+        g = 9.81,
         beta=1.5e-11,               # gradient of coriolis parameter
         nz = 4,                     # number of layers
         rd=15000.0,                 # deformation radius
@@ -36,41 +93,43 @@ class LayeredModel(model.Model):
         V=None,                     # meridional base state flow
         rho = None,
         delta = None,
-        g = 9.81,
         **kwargs
         ):
         """
         Parameters
         ----------
 
+        g : number
+            Gravitational acceleration. Units: meters second :sup:`-2` 
+        nz : integer number
+             Number of layers (> 1)
         beta : number
             Gradient of coriolis parameter. Units: meters :sup:`-1`
             seconds :sup:`-1`
         rek : number
             Linear drag in lower layer. Units: seconds :sup:`-1`
         rd : number
-            Deformation radius. Units: meters.
+            Deformation radius. Units: meters. Only necessary for
+            the two-layer (nz=2) case.
         delta : number
-            Layer thickness ratio (H1/H2)
-        U1 : number
-            Upper layer flow. Units: m/s
-        U2 : number
-            Lower layer flow. Units: m/s
+            Layer thickness ratio (H1/H2). Only necessary for the
+            two-layer (nz=2) case. Unitless.
+        U : array of size nz
+            Base state zonal velocity. Units: meters s :sup:`-1`
+        V : array of size nz 
+            Base state meridional velocity. Units: meters s :sup:`-1`
+        H : array of size nz 
+            Layer thickness. Units: meters
+        rho: array of size nz.
+            Layer density. Units: kilograms meters :sup:`-3`
+        
         """
 
         # physical
-        self.g = g    # acceleration due to gravity
+        self.g = g    
         self.beta = beta
-        #self.rek = rek
         self.rd = rd
         self.delta = delta
-        #self.filterfac = filterfac
-       
-        # H is an array
-        #self.Hi = np.array([100.,700.,2000.])
-        #self.rhoi = np.array([1024.,1025.,1026.])
-        #self.Ubg = np.array([0.05,0.025,0])
-        #self.Vbg = np.array([0.05,0.025,0])
         self.nz = nz
         self.U = U
         self.V = V
@@ -127,25 +186,21 @@ class LayeredModel(model.Model):
         self.Vbg = self.V
         self.rhoi = self.rho
 
-#        assert self.Hi.size == self.nz, "size of Hi does not match number\
-#                of vertical levels nz" 
-#
-#        assert self.rhoi.size == self.nz, "size of rhoi does not match number\
-#                of vertical levels nz" 
-#
-#        assert self.Ubg.size == self.nz, "size of Ubg does not match number\
-#                of vertical levels nz" 
-#
-#        assert self.Vbg.size == self.nz, "size of Vbg does not match number\
-#                of vertical levels nz" 
-#
-        #self.Hi = np.array([500,2000.])
-        #self.rhoi = np.array([1025.,1025.83])
-        #self.Ubg = np.array([0.05,.0])
-        #self.Vbg = np.array([0.,0])
          
         if not self.nz==2:
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
+
+            assert self.Hi.size == self.nz, "size of Hi does not match number\
+                    of vertical levels nz" 
+
+            assert self.rhoi.size == self.nz, "size of rhoi does not match number\
+                    of vertical levels nz" 
+
+            assert self.Ubg.size == self.nz, "size of Ubg does not match number\
+                    of vertical levels nz" 
+
+            assert self.Vbg.size == self.nz, "size of Vbg does not match number\
+                    of vertical levels nz" 
 
         self.H = self.Hi.sum()
 
@@ -157,8 +212,7 @@ class LayeredModel(model.Model):
 
         self.hb = self.hb * self.f/self.Hi[-1]
    
-        # complex versions, multiplied by k, speeds up computations to precompute 
-       
+        # complex versions, multiplied by k, speeds up computations to precompute  
         self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 
@@ -202,34 +256,11 @@ class LayeredModel(model.Model):
             Lower layer PV anomaly in spatial coordinates.
         """
         self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
-        #self.q[0] = q1
-        #self.q[1] = q2
-
-        # initialize spectral PV
-        #self.qh = self.fft2(self.q)
         
         # check that it works
         if check:
             np.testing.assert_allclose(self.q1, q1)
             np.testing.assert_allclose(self.q1, self.ifft2(self.qh1))
-
-
-#    def set_U1U2(self, U1, U2):
-#        """Set background zonal flow.
-#        
-#        Parameters
-#        ----------
-#        
-#        U1 : number
-#            Upper layer flow. Units: m/s
-#        U2 : number
-#            Lower layer flow. Units: m/s
-#        """
-#        self.U1 = U1
-#        self.U2 = U2
-#        #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
-#        #self.Ubg = np.array([U1,U2])
-#        self.Ubg = self.U[:,np.newaxis,np.newaxis]
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics
@@ -319,7 +350,10 @@ class LayeredModel(model.Model):
             )
 
         else:
-            pass
+            self.add_diagnostic('entspec',
+                description='barotropic enstrophy spectrum',
+                function= (lambda self:
+                           np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2 )
+            )  
             #raise NotImplementedError('Not implemented yet')
-    
 

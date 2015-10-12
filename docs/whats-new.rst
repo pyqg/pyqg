@@ -1,7 +1,13 @@
 What's New
 ==========
 
-v0.1.3 (4 Sept 2014)
+v0.1.4 (? ? 2015)
+--------------------
+
+Fixed bug in _calc_diagnostics. Now diagnostics start being averaged at
+tavestart.
+
+v0.1.3 (4 Sept 2015)
 --------------------
 
 Fixed bug in setup.py that caused openmp check to not work.

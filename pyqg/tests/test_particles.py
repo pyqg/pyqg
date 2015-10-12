@@ -169,10 +169,5 @@ class ParticleTester(unittest.TestCase):
                 atol=atol
             )
         
-        
-        
-        
-            
-
 if __name__ == '__main__':
     unittest.main()

@@ -3,7 +3,7 @@ import scipy as sp
 from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
 import logging
-try:   
+try:
     import mkl
     np.use_fastnumpy = True
 except ImportError:
@@ -389,13 +389,16 @@ class Model(PseudoSpectralKernel):
 
         self.logger = logging.getLogger(__name__)
 
-        if self.logfile is (not None):
+        if not (self.logfile is None):
             fhandler = logging.FileHandler(filename=self.logfile, mode='w')
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            fhandler.setFormatter(formatter) 
-            self.logger.addHandler(fhandler)
-        
-        self.logger.setLevel(logging.INFO)
+        else:
+            fhandler = logging.StreamHandler()
+
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fhandler.setFormatter(formatter) 
+        self.logger.addHandler(fhandler)
+
+        self.logger.setLevel(logging.DEBUG)
         self.logger.info(' Logger initialized')
 
     # compute advection in grid space (returns qdot in fourier space)
@@ -424,16 +427,16 @@ class Model(PseudoSpectralKernel):
     def _print_status(self):
         """Output some basic stats."""
         if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
-            ke = self._calc_ke()
-            cfl = self._calc_cfl()
+            self.ke = self._calc_ke()
+            self.cfl = self._calc_cfl()
             #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
             #       self.t, self.tc, cfl, ke)
             self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
-                    %(self.tc,self.t,ke,cfl))
+                    %(self.tc,self.t,self.ke,self.cfl))
 
 
             #assert cfl<1., 'CFL condition violated'
-            assert cfl<1., self.logger.error('CFL condition violated')
+            assert self.cfl<1., self.logger.error('CFL condition violated')
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

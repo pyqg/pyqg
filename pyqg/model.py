@@ -421,7 +421,6 @@ class Model(PseudoSpectralKernel):
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics
         if (self.t>=self.dt) and (self.t>=self.tavestart) and (self.tc%self.taveints==0):
-            self._increment_diagnostics()
 
     # def _forward_timestep(self):
     #     """Step forward based on tendencies"""
@@ -501,6 +500,21 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('q',
             description='QGPV',
             function= (lambda self: self.q)
+        )
+
+        self.add_diagnostic('u',
+            description='zonal velocity',
+            function= (lambda self: self.u)
+        )
+
+        self.add_diagnostic('v',
+            description='meridional velocity',
+            function= (lambda self: self.v)
+        )
+
+        self.add_diagnostic('vq',
+            description='meridional PV flux',
+            function= (lambda self: self.v*self.q)
         )
 
         self.add_diagnostic('EKEdiss',

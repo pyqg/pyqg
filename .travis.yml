@@ -21,7 +21,7 @@ before_install:
   - conda info -a
 # Install packages
 install:
-  - conda create --yes -n test_env python=$TRAVIS_PYTHON_VERSION pip nose numpy cython scipy nose
+  - conda create --yes -n test_env python=$TRAVIS_PYTHON_VERSION pip nose numpy=1.9.3 cython scipy nose
   # can we make this optional?
   - conda install --yes -n test_env -c mforbes pyfftw
   - source activate test_env

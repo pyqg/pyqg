@@ -5,7 +5,7 @@ Layered quasigeostrophic model
 .. math::
 
 
-   \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + {Q_i}_y {\psi_i}_x - {Q_i}_x {\psi_i}_y= \text{ssd} - r_{ek} \delta_{i\textsf{N}} \nabla^2 \psi_i\,, \qquad i = 1,\textsf{N}\,,
+   \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + U_i {q_i}_x + V_i {q_i}_y + {Q_i}_y {\psi_i}_x - {Q_i}_x {\psi_i}_y= \text{ssd} - r_{ek} \delta_{i\textsf{N}} \nabla^2 \psi_i\,, \qquad i = 1,\textsf{N}\,,
 
 where
 
@@ -61,7 +61,7 @@ The forced-dissipative equations in Fourier space are
 .. math::
 
 
-   \,{\hat{q}_{i}}_t + ik\,{\hat{\psi}_i} {Q_y} - il\,{\hat{\psi}_i} {Q_x}+ \mathsf{\hat{J}}\left(\psi_i\,, q_i +  \delta_{i\textsf{N}} \tfrac{f_0}{H_\textsf{N}} h_b \right)     = \text{ssd} \,, \qquad i = 1,\textsf{N}\,,
+   \,{\hat{q}_{i}}_t + ik\,{\hat{\psi}_i} {Q_y} - il\,{\hat{\psi}_i} {Q_x} + (i k U_i + i l V_i) \hat{q}_i+ \mathsf{\hat{J}}\left(\psi_i\,, q_i +  \delta_{i\textsf{N}} \tfrac{f_0}{H_\textsf{N}} h_b \right)     = \text{ssd} \,, \qquad i = 1,\textsf{N}\,,
 
 where the mean potential vorticy gradients are
 
@@ -72,6 +72,45 @@ where the mean potential vorticy gradients are
 
  where the background velocity is
 :math:`\vec{\textsf{V}}(z) = \left(\textsf{U},\textsf{V}\right)`.
+
+Energy balance
+==============
+
+The equation for the energy spectrum,
+
+.. math::
+
+
+   E(k,l) \equiv \underbrace{\frac{1}{2 H}\sum_{i=1}^{\mathsf{N}} H_i \kappa^2 |\hat{\psi}_i|^2}_{\text{kinetic energy}} \,\,\,\,+ \,\,\,\,\,\, \frac{1}{2 H}\underbrace{\sum_{i=1}^{\mathsf{N-1}} \frac{f_0^2}{g'_i}|\hat{\psi}_{i}- \hat{\psi}_{i+1}|^2}_{\text{potential energy}}\,\,\,\,,
+
+is
+
+.. math::
+
+
+   \frac{d}{dt} E(k,l) = \underbrace{\frac{1}{H}\sum_{i=1}^{\mathsf{N}} H_i \text{Re}[\hat{\psi}_i^\star \hat{\mathsf{J}}(\psi_i,\nabla^2\psi_i)]}_{I} +
+   \underbrace{\frac{1}{H}\sum_{i=1}^{\mathsf{N}} H_i\text{Re}[\hat{\psi}_i^\star \hat{\mathsf{J}}(\psi_i,(\mathsf{S} \psi)_i)]}_{II}
+   + \underbrace{\frac{1}{H}\sum_{i=1}^{\mathsf{N}} H_i ( k U_i +  l V_i)\, \text{Re}[i \, \hat{\psi}^\star_i (\mathsf{S}\hat{\psi}_i)]}_{III} \,\,\,\,\,\,\,\underbrace{- r_{ek} \frac{H_\mathsf{N}}{H} \kappa^2 |\hat{\psi}_{\mathsf{N}}|^2}_{IV}\, .
+
+where :math:`\kappa^2 = k^2 + l^2` and the terms above represent
+
+I: Spectral divergence of the kinetic energy flux
+
+II: Spectral divergence of the potential energy flux
+
+III: The rate of potential energy generation
+
+IV: The rate of energy dissipation through bottom friction
+
+Using the notation of the two-layer model, the particular case
+:math:`\mathsf{N}=2` is
+
+.. math::
+
+
+   \frac{d}{dt} E(k,l) = \underbrace{\frac{1}{H}\text{Re}[H_1 \hat{\psi}_1^\star \hat{\mathsf{J}}(\psi_1,\nabla^2\psi_1) + H_2 \hat{\psi}_2^\star \hat{\mathsf{J}}(\psi_2,\nabla^2\psi_2)]}_{I} +
+   \underbrace{ \frac{H_1 H_2}{H^2}\text{Re}[(\hat{\psi}_1-\hat{\psi}_2)^\star \hat{\mathsf{J}}(\psi_1,\hat{\psi}_2])}_{II}\nonumber \\
+   + \underbrace{ \frac{H_1 H_2}{H^2} \left[( U_1 - U_2 )\, \text{Re}[i k\, (\hat{\psi}^\star_1+\hat{\psi}^{\star}_2) (\hat{\psi}_2-\hat{\psi}_1)]\right] + ( V_1 - V_2 )\, \text{Re}[i l\, (\hat{\psi}^\star_1+\hat{\psi}^{\star}_2) (\hat{\psi}_2-\hat{\psi}_1)}_{III} \,\,\,\,\,\,\,\underbrace{- r_{ek} \frac{H_1}{H}\kappa^2 |\hat{\psi}_{\mathsf{N}}|^2}_{IV}\, .
 
 Vertical modes
 ==============

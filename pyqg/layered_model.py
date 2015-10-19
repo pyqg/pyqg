@@ -1,7 +1,7 @@
 import numpy as np
 import model
 from numpy import pi
-try:   
+try:
     import mkl
     np.use_fastnumpy = True
 except ImportError:
@@ -9,13 +9,13 @@ except ImportError:
 
 try:
     import pyfftw
-    pyfftw.interfaces.cache.enable() 
+    pyfftw.interfaces.cache.enable()
 except ImportError:
     pass
 
 class LayeredModel(model.Model):
     r"""Layered quasigeostrophic model.
-    
+
     This model is meant to represent flows driven by baroclinic instabilty of a
     base-state shear. The potential vorticity anomalies qi are related to the
     streamfunction psii through
@@ -56,16 +56,16 @@ class LayeredModel(model.Model):
 
 
        \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + \textsf{Q}_y {\psi_i}_x
-       - \textsf{Q}_x {\psi_i}_y = \text{ssd} - 
+       - \textsf{Q}_x {\psi_i}_y = \text{ssd} -
        r_{ek} \delta_{i\textsf{N}} \nabla^2 \psi_i\,, \qquad i = 1,\textsf{N}\,,
 
-    
+
     where the mean potential vorticy gradients are
 
     .. math::
 
        \textsf{Q}_x = \textsf{S}\textsf{V}\,,
-       
+
     and
 
     .. math::
@@ -73,7 +73,7 @@ class LayeredModel(model.Model):
        \textsf{Q}_y = \beta\,\textsf{I} - \textsf{S}\textsf{U}\,\,,
 
     where S is the stretching matrix, I is the identity matrix,
-    and the background velocity is 
+    and the background velocity is
 
     :math:`\vec{\textsf{V}}(z) = \left(\textsf{U},\textsf{V}\right)`.
 
@@ -81,14 +81,14 @@ class LayeredModel(model.Model):
 
 
     """
-    
+
     def __init__(
         self,
         g = 9.81,
         beta=1.5e-11,               # gradient of coriolis parameter
         nz = 4,                     # number of layers
         rd=15000.0,                 # deformation radius
-        H = None,                   # layer thickness 
+        H = None,                   # layer thickness
         U=None,                     # zonal base state flow
         V=None,                     # meridional base state flow
         rho = None,
@@ -100,7 +100,7 @@ class LayeredModel(model.Model):
         ----------
 
         g : number
-            Gravitational acceleration. Units: meters second :sup:`-2` 
+            Gravitational acceleration. Units: meters second :sup:`-2`
         nz : integer number
              Number of layers (> 1)
         beta : number
@@ -116,17 +116,17 @@ class LayeredModel(model.Model):
             two-layer (nz=2) case. Unitless.
         U : array of size nz
             Base state zonal velocity. Units: meters s :sup:`-1`
-        V : array of size nz 
+        V : array of size nz
             Base state meridional velocity. Units: meters s :sup:`-1`
-        H : array of size nz 
+        H : array of size nz
             Layer thickness. Units: meters
         rho: array of size nz.
             Layer density. Units: kilograms meters :sup:`-3`
-        
+
         """
 
         # physical
-        self.g = g    
+        self.g = g
         self.beta = beta
         self.rd = rd
         self.delta = delta
@@ -140,13 +140,13 @@ class LayeredModel(model.Model):
 
 
     ### PRIVATE METHODS - not meant to be called by user ###
-      
+
 
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
-   
+
         self.S = np.zeros((self.nz, self.nz))
-      
+
         if (self.nz==2)&(self.rd is not None):
 
             self.del1 = self.delta/(self.delta+1.)
@@ -159,7 +159,7 @@ class LayeredModel(model.Model):
             self.S[1,0], self.S[1,1] =  self.F2, -self.F2
 
         else:
-            
+
             for i in range(self.nz):
 
                 if i == 0:
@@ -167,9 +167,9 @@ class LayeredModel(model.Model):
                     self.S[i,i+1] =  self.f2/self.Hi[i]/self.gpi[i]
 
                 elif i == self.nz-1:
-                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i-1] 
+                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i-1]
                     self.S[i,i-1] =  self.f2/self.Hi[i]/self.gpi[i-1]
-                    
+
                 else:
                     self.S[i,i-1] = self.f2/self.Hi[i]/self.gpi[i-1]
                     self.S[i,i]   = -(self.f2/self.Hi[i]/self.gpi[i] +
@@ -178,31 +178,36 @@ class LayeredModel(model.Model):
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
-        
+
         # Need to figure out a warning to user when
         # these entries are not provided
         self.Hi = self.H
         self.Ubg = self.U
         self.Vbg = self.V
         self.rhoi = self.rho
+        self.H = self.Hi.sum()
 
-         
+
         if not self.nz==2:
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
+            self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
 
             assert self.Hi.size == self.nz, "size of Hi does not match number\
-                    of vertical levels nz" 
+                    of vertical levels nz"
 
             assert self.rhoi.size == self.nz, "size of rhoi does not match number\
-                    of vertical levels nz" 
+                    of vertical levels nz"
 
             assert self.Ubg.size == self.nz, "size of Ubg does not match number\
-                    of vertical levels nz" 
+                    of vertical levels nz"
 
             assert self.Vbg.size == self.nz, "size of Vbg does not match number\
-                    of vertical levels nz" 
+                    of vertical levels nz"
 
-        self.H = self.Hi.sum()
+        else:
+            self.f2gpi = np.array(self.rd**-2 *
+                (self.Hi[0]*self.Hi[1])/self.H)[np.newaxis,np.newaxis]
+
 
         self._initialize_stretching_matrix()
 
@@ -211,14 +216,14 @@ class LayeredModel(model.Model):
         self.Qx = np.dot(self.S,self.Vbg)
 
         self.hb = self.hb * self.f/self.Hi[-1]
-   
-        # complex versions, multiplied by k, speeds up computations to precompute  
+
+        # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 
     def _initialize_inversion_matrix(self):
-        
-        a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))        
+
+        a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
 
         if (self.nz==2):
             det_inv =  np.ma.masked_equal(
@@ -234,7 +239,7 @@ class LayeredModel(model.Model):
             a[:,:,0,0] = 0.
 
         self.a = np.ma.masked_invalid(a).filled(0.)
-     
+
     def _initialize_forcing(self):
         pass
         #"""Set up frictional filter."""
@@ -243,20 +248,20 @@ class LayeredModel(model.Model):
         # wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
         # self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         # self.filtr[wvx<=cphi] = 1.
-         
+
     def set_q1q2(self, q1, q2, check=False):
         """Set upper and lower layer PV anomalies.
-        
+
         Parameters
         ----------
-        
+
         q1 : array-like
             Upper layer PV anomaly in spatial coordinates.
         q1 : array-like
             Lower layer PV anomaly in spatial coordinates.
         """
         self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
-        
+
         # check that it works
         if check:
             np.testing.assert_allclose(self.q1, q1)
@@ -281,7 +286,7 @@ class LayeredModel(model.Model):
             ke += .5*self.Hi[j]*self.spec_var(self.wv*self.ph[j])
         return ke.sum() / self.H
 
-    # calculate eddy turn over time 
+    # calculate eddy turn over time
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
@@ -293,67 +298,42 @@ class LayeredModel(model.Model):
 
     def _calc_derived_fields(self):
 
-        if self.nz == 2:
-            self.p = self.ifft(self.ph)
-            self.xi =self.ifft(-self.wv2*self.ph)
-            self.Jptpc = -self._advect(
-                        (self.p[0] - self.p[1]),
-                        (self.del1*self.u[0] + self.del2*self.u[1]),
-                        (self.del1*self.v[0] + self.del2*self.v[1]))
-            # fix for delta.neq.1
-            self.Jpxi = self._advect(self.xi, self.u, self.v)
+        self.p = self.ifft(self.ph)
+        self.xi =self.ifft(-self.wv2*self.ph)
+        self.Jpxi = self._advect(self.xi, self.u, self.v)
 
-        else:
-            pass
-            #raise NotImplementedError('Not implemented yet')
-    
+        self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph)
+        self.Sp = self.ifft(self.Sph)
+        self.JSp = self._advect(self.Sp,self.u,self.v)
 
     def _initialize_model_diagnostics(self):
-        """Extra diagnostics for two-layer model"""
+         """ Extra diagnostics for layered model """
 
-        if self.nz == 2:
+         self.add_diagnostic('entspec',
+            description='barotropic enstrophy spectrum',
+            function= (lambda self:
+                       np.abs((self.Hi[:,np.newaxis,np.newaxis]*
+                              self.qh).sum(axis=0))**2/self.H) )
 
-            self.add_diagnostic('entspec',
-                description='barotropic enstrophy spectrum',
-                function= (lambda self:
-                          np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
-            )
-                
-            self.add_diagnostic('APEflux',
-                description='spectral flux of available potential energy',
-                function= (lambda self:
-                  self.rd**-2 * self.del1*self.del2 *
-                  np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
-            )
-            
-            self.add_diagnostic('KEflux',
-                description='spectral flux of kinetic energy',
-                function= (lambda self:
-                  np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) + 
-                  np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
-            )
-            
-            self.add_diagnostic('APEgenspec',
-                description='spectrum of APE generation',
-                function= (lambda self: self.Us * self.rd**-2 * self.del1 * self.del2 *
-                           np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
-                                      np.conj(self.ph[0] - self.ph[1])) )
-            )
-            
-            self.add_diagnostic('APEgen',
-                description='total APE generation',
-                function= (lambda self: self.Us * self.rd**-2 * self.del1 * self.del2 *
-                           np.real(1j*self.k*
-                               (self.del1*self.ph[0] + self.del2*self.ph[1]) *
-                                np.conj(self.ph[0] - self.ph[1])).sum() / 
-                                (self.nx*self.ny) )
-            )
+         self.add_diagnostic('APEspec',
+            description='available potential energy spectrum',
+            function= (lambda self:
+                       (self.f2gpi*
+                        np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H))
 
-        else:
-            self.add_diagnostic('entspec',
-                description='barotropic enstrophy spectrum',
-                function= (lambda self:
-                           np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2 )
-            )  
-            #raise NotImplementedError('Not implemented yet')
+         self.add_diagnostic('KEflux',
+                description='spectral divergence of flux of kinetic energy',
+                function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
+                           (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H))
 
+         self.add_diagnostic('APEflux',
+                description='spectral divergence of flux of available potential energy',
+                function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
+                           (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H))
+
+         self.add_diagnostic('APEgenspec',
+                description='the rate of generation of available potential energy',
+                function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
+                            (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
+                             self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
+                            (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H))

@@ -11,13 +11,13 @@ except ImportError:
 
 try:
     import pyfftw
-    pyfftw.interfaces.cache.enable() 
+    pyfftw.interfaces.cache.enable()
 except ImportError:
     pass
 
 class Model(PseudoSpectralKernel):
     """A generic pseudo-spectral inversion model.
-    
+
     Attributes
     ----------
     q : real array
@@ -39,8 +39,8 @@ class Model(PseudoSpectralKernel):
     rek : float
         Linear drag in lower layer
     filterfac : float
-        Amplitdue of the spectral spherical filter 
-    dt : float 
+        Amplitdue of the spectral spherical filter
+    dt : float
         Numerical timstep
     twrite : int
         Interval for cfl writeout (units: number of timesteps)
@@ -59,7 +59,7 @@ class Model(PseudoSpectralKernel):
         Number of threads to use. Should not exceed the number of cores on
         your machine.
     """
-    
+
     def __init__(
         self,
         # grid size parameters
@@ -73,7 +73,7 @@ class Model(PseudoSpectralKernel):
         tmax=1576800000.,           # total time of integration
         tavestart=315360000.,       # start time for averaging
         taveint=86400.,             # time interval used for summation in longterm average in seconds
-        f = 1.e4,                  # Coriolis parameter [s^{-1}]        
+        f = 1.e4,                  # Coriolis parameter [s^{-1}]
         hb = None,                  # topography  [m]
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
@@ -83,7 +83,7 @@ class Model(PseudoSpectralKernel):
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
         # removed because fftw is now manditory
-        #use_fftw = False,               # fftw flag 
+        #use_fftw = False,               # fftw flag
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
@@ -93,7 +93,7 @@ class Model(PseudoSpectralKernel):
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
                   these parameters to be different.
         .. note:: All time intervals will be rounded to nearest `dt` interval.
-        
+
         Parameters
         ----------
         nx : int
@@ -103,7 +103,7 @@ class Model(PseudoSpectralKernel):
         L : number
             Domain length in x direction. Units: meters.
         W :
-            Domain width in y direction. Units: meters (default: L).    
+            Domain width in y direction. Units: meters (default: L).
         rek : number
             linear drag in lower layer. Units: seconds :sup:`-1`.
         filterfac : number
@@ -124,7 +124,7 @@ class Model(PseudoSpectralKernel):
             Units: seconds. (For performance purposes, averaging does not have to
             occur every timestep)
         tsnapint : number
-            Time interval for snapshots. Units: seconds. 
+            Time interval for snapshots. Units: seconds.
         ntd : int
             Number of threads to use. Should not exceed the number of cores on
             your machine.
@@ -132,7 +132,7 @@ class Model(PseudoSpectralKernel):
 
         if ny is None: ny = nx
         if W is None: W = L
-       
+
         # put all the parameters into the object
         # grid
         self.nx = nx
@@ -148,11 +148,11 @@ class Model(PseudoSpectralKernel):
         self.taveint = taveint
         self.quiet = quiet
         self.useAB2 = useAB2
-        # fft 
+        # fft
         #self.use_fftw = use_fftw
         #self.teststyle= teststyle
         self.ntd = ntd
-        
+
         # friction
         self.rek = rek
         self.filterfac = filterfac
@@ -165,7 +165,7 @@ class Model(PseudoSpectralKernel):
         if hb is None:
                 # topography; this is necessary to pass on
                 # information to the kernel; this is sloppy
-                # since there's no point in computing the 
+                # since there's no point in computing the
                 # topographic term if there's no topography,
                 # but we have to pass on info to the kernel...
             self.hb = np.zeros((ny,nx))
@@ -186,33 +186,33 @@ class Model(PseudoSpectralKernel):
 
         # call the underlying cython kernel
         self._initialize_kernel()
-       
-        self._initialize_diagnostics(diagnostics_list)       
+
+        self._initialize_diagnostics(diagnostics_list)
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
-        
+
         Parameters
         ----------
-        
+
         tsnapstart : int
             The timestep at which to begin yielding.
         tstapint : int
             The interval at which to yield.
         """
-        
+
         tsnapints = np.ceil(tsnapint/self.dt)
         nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
-        
+
         while(self.t < self.tmax):
             self._step_forward()
             if self.t>=tsnapstart and (self.tc%tsnapints)==0:
                 yield self.t
         return
-                
+
     def run(self):
         """Run the model forward without stopping until the end."""
-        while(self.t < self.tmax): 
+        while(self.t < self.tmax):
             self._step_forward()
 
     def stability_analysis(self,bottom_friction=False):
@@ -220,11 +220,11 @@ class Model(PseudoSpectralKernel):
         self.omg = np.zeros_like(self.wv)+0.j
         self.evec = np.zeros_like(self.qh)
         I = np.eye(self.nz)
-        
+
         L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
 
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
-        
+
         Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
         Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
         L3 = np.einsum('ij...,jk...->ik...',Uk+Vl,L2) + 0j
@@ -237,8 +237,8 @@ class Model(PseudoSpectralKernel):
 
         M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
 
-        evals,evecs = np.linalg.eig(M) 
-    
+        evals,evecs = np.linalg.eig(M)
+
         # select the mode with maximum growth rate
         # this is sloppy; it would be better to
         # avoid the  loop...
@@ -253,7 +253,7 @@ class Model(PseudoSpectralKernel):
         """ Calculate standard vertical modes. Simply
             the eigenvectors of the stretching matrix S """
 
-        evals,evecs = np.linalg.eig(-self.S) 
+        evals,evecs = np.linalg.eig(-self.S)
 
         asort = evals.argsort()
 
@@ -263,7 +263,7 @@ class Model(PseudoSpectralKernel):
         self.radii[1:] = np.sqrt(1./evals[asort][1:])
 
         # eigenstructure (it would be good to normalize this...)
-        self.pmodes = evecs[:,asort] 
+        self.pmodes = evecs[:,asort]
 
 
     ### PRIVATE METHODS - not meant to be called by user ###
@@ -271,33 +271,33 @@ class Model(PseudoSpectralKernel):
     def _step_forward(self):
 
         # the basic steps are
-        self._print_status() 
+        self._print_status()
 
         self._invert()
         # find streamfunction from pv
 
         self._do_advection()
         # use streamfunction to calculate advection tendency
-        
+
         self._do_friction()
-        # apply friction 
-        
+        # apply friction
+
         self._do_external_forcing()
         # apply external forcing
-        
+
         self._calc_diagnostics()
         # do what has to be done with diagnostics
-        
+
         self._forward_timestep()
         # apply tendencies to step the model forward
         # (filter gets called here)
-        
+
     def _initialize_time(self):
         """Set up timestep stuff"""
         #self.t=0        # actual time
         #self.tc=0       # timestep number
-        self.taveints = np.ceil(self.taveint/self.dt)    
-        
+        self.taveints = np.ceil(self.taveint/self.dt)
+
     ### initialization routines, only called once at the beginning ###
     def _initialize_grid(self):
         """Set up spatial and spectral grids and related constants"""
@@ -313,7 +313,7 @@ class Model(PseudoSpectralKernel):
         # wavenumber grids
         self.nl = self.ny
         self.nk = self.nx/2+1
-        self.ll = self.dl*np.append( np.arange(0.,self.nx/2), 
+        self.ll = self.dl*np.append( np.arange(0.,self.nx/2),
             np.arange(-self.nx/2,0.) )
         self.kk = self.dk*np.arange(0.,self.nk)
 
@@ -326,24 +326,24 @@ class Model(PseudoSpectralKernel):
 
         # constant for spectral normalizations
         self.M = self.nx*self.ny
-        
+
         # isotropic wavenumber^2 grid
-        # the inversion is not defined at kappa = 0 
+        # the inversion is not defined at kappa = 0
         self.wv2 = self.k**2 + self.l**2
         self.wv = np.sqrt( self.wv2 )
 
         iwv2 = self.wv2 != 0.
         self.wv2i = np.zeros_like(self.wv2)
         self.wv2i[iwv2] = self.wv2[iwv2]**-1
-        
-    def _initialize_background(self):        
+
+    def _initialize_background(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
-        
+
     def _initialize_inversion_matrix(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
-            
+
     def _initialize_forcing(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
@@ -353,7 +353,7 @@ class Model(PseudoSpectralKernel):
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)  
+        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
         self.filtr[wvx<=cphi] = 1.
 
     def _filter(self, q):
@@ -361,7 +361,7 @@ class Model(PseudoSpectralKernel):
 
     def _do_external_forcing(self):
         pass
-            
+
     def _initialize_kernel(self):
         #super(spectral_kernel.PseudoSpectralKernel, self).__init__(
         self._kernel_init(
@@ -374,16 +374,16 @@ class Model(PseudoSpectralKernel):
             rek=self.rek,
             fftw_num_threads=self.ntd,
         )
-       
+
         self.logger.info(' Kernel initialized')
-        
+
 
         # still need to initialize a few state variables here, outside kernel
         # this is sloppy
         #self.dqhdt_forc = np.zeros_like(self.qh)
         #self.dqhdt_p = np.zeros_like(self.qh)
         #self.dqhdt_pp = np.zeros_like(self.qh)
-        
+
     # logger
     def _initialize_logger(self):
 
@@ -395,7 +395,7 @@ class Model(PseudoSpectralKernel):
             fhandler = logging.StreamHandler()
 
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fhandler.setFormatter(formatter) 
+        fhandler.setFormatter(formatter)
         self.logger.addHandler(fhandler)
 
         self.logger.setLevel(logging.DEBUG)
@@ -410,7 +410,7 @@ class Model(PseudoSpectralKernel):
         vq = v*q
         # this is a hack, since fft now requires input to have shape (nz,ny,nx)
         # it does an extra unnecessary fft
-        is_2d = (uq.ndim==2) 
+        is_2d = (uq.ndim==2)
         if is_2d:
             uq = np.tile(uq[np.newaxis,:,:], (self.nz,1,1))
             vq = np.tile(vq[np.newaxis,:,:], (self.nz,1,1))
@@ -423,7 +423,7 @@ class Model(PseudoSpectralKernel):
     # def _filter(self, q):
     #     """Apply filter to field q."""
     #     return q
-        
+
     def _print_status(self):
         """Output some basic stats."""
         if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
@@ -476,38 +476,38 @@ class Model(PseudoSpectralKernel):
     def _calc_cfl(self):
         raise NotImplementedError(
             'needs to be implemented by Model subclass')
-    
+
     # this is stuff the Cesar added
 
     def _calc_ke(self):
         raise NotImplementedError(
-            'needs to be implemented by Model subclass')        
+            'needs to be implemented by Model subclass')
 
     def _initialize_diagnostics(self, diagnostics_list):
         # Initialization for diagnotics
         self.diagnostics = dict()
-        
+
         self._initialize_core_diagnostics()
         self._initialize_model_diagnostics()
-        
+
         if diagnostics_list == 'all':
             pass # by default, all diagnostics are active
         elif diagnostics_list == 'none':
             self.set_active_diagnostics([])
         else:
             self.set_active_diagnostics(diagnostics_list)
-            
+
     def _initialize_core_diagnostics(self):
         """Diagnostics common to all models."""
         self.add_diagnostic('Ensspec',
             description='enstrophy spectrum',
             function= (lambda self: np.abs(self.qh)**2/self.M**2)
         )
-        
+
         self.add_diagnostic('KEspec',
-            description=' kinetic energy spectrum',
+            description='level-wise kinetic energy spectrum',
             function=(lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
-        )      # factor of 2 to account for the fact that we have only half of 
+        )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
 
         self.add_diagnostic('q',
@@ -535,8 +535,8 @@ class Model(PseudoSpectralKernel):
             function= (lambda self:
                        (self.rek*self.wv2*
                         np.abs(self.ph[-1])**2./(self.M**2)).sum())
-        ) 
-        
+        )
+
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1))
@@ -544,25 +544,25 @@ class Model(PseudoSpectralKernel):
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""
-        pass        
-                 
+        pass
+
     def _initialize_model_diagnostics(self):
         """Should be implemented by subclass."""
         pass
-            
+
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
-            
+
     def add_diagnostic(self, diag_name, description=None, units=None, function=None):
         # create a new diagnostic dict and add it to the object array
-        
+
         # make sure the function is callable
         assert hasattr(function, '__call__')
-        
+
         # make sure the name is valid
         assert isinstance(diag_name, str)
-        
+
         # by default, diagnostic is active
         self.diagnostics[diag_name] = {
            'description': description,
@@ -570,7 +570,7 @@ class Model(PseudoSpectralKernel):
            'active': True,
            'count': 0,
            'function': function, }
-           
+
     def describe_diagnostics(self):
         """Print a human-readable summary of the available diagnostics."""
         diag_names = self.diagnostics.keys()
@@ -581,12 +581,12 @@ class Model(PseudoSpectralKernel):
             d = self.diagnostics[k]
             print('{:<10} | {:<54}').format(
                  *(k,  d['description']))
-           
+
     def _increment_diagnostics(self):
         # compute intermediate quantities needed for some diagnostics
-        
+
         self._calc_derived_fields()
-        
+
         for dname in self.diagnostics:
             if self.diagnostics[dname]['active']:
                 res = self.diagnostics[dname]['function'](self)
@@ -595,9 +595,9 @@ class Model(PseudoSpectralKernel):
                 else:
                     self.diagnostics[dname]['value'] += res
                 self.diagnostics[dname]['count'] += 1
-                
+
     def get_diagnostic(self, dname):
-        return (self.diagnostics[dname]['value'] / 
+        return (self.diagnostics[dname]['value'] /
                 self.diagnostics[dname]['count'])
 
     def spec_var(self, ph):
@@ -607,4 +607,3 @@ class Model(PseudoSpectralKernel):
         var_dens[...,0] = var_dens[...,0]/2.
         var_dens[...,-1] = var_dens[...,-1]/2.
         return var_dens.sum()
-

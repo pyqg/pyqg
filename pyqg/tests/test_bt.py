@@ -1,9 +1,9 @@
 import numpy as np
 from numpy import pi
 import pyqg
- 
+
 def test_the_model(rtol=1e-5):
-    """ Test the BT model. Numbers come from a simulations in 
+    """ Test the BT model. Numbers come from a simulations in
             Cesar's 2014 MacPro with Anaconda 64-bit """
 
     # the model object
@@ -22,7 +22,7 @@ def test_the_model(rtol=1e-5):
     qih = -m.wv2*pih
     qi = m.ifft(qih)
     m.set_q(qi)
-    
+
     np.testing.assert_allclose(m.q, qi, rtol)
 
     m.run()
@@ -34,11 +34,11 @@ def test_the_model(rtol=1e-5):
 
     print 'time:       %g' % m.t
     assert m.t == 10.000999999999896
-    
+
     np.testing.assert_allclose(qnorm, 356981.55844167515, rtol)
     np.testing.assert_allclose(pnorm, 5890.857144590821, rtol)
     np.testing.assert_allclose(ke, 0.99872441481956509, rtol)
 
 if __name__ == "__main__":
     test_the_model()
-    
+

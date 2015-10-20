@@ -129,7 +129,7 @@ class BTModel(model.Model):
         return 2.*pi*np.sqrt( self.H / ens ) / year
 
     def _calc_derived_fields(self):
-        self.xi =self.ifft2( -self.wv2*self.ph)
+        self.xi =self.ifft( -self.wv2*self.ph)
         self.Jpxi = self._advect(self.xi, self.u, self.v)
 
     def _initialize_model_diagnostics(self):
@@ -140,7 +140,7 @@ class BTModel(model.Model):
             function= (lambda self:
                       np.abs(self.qh)**2.)
         )
-        
+
         self.add_diagnostic('KEflux',
                 description='spectral divergence of flux of kinetic energy',
                 function= (lambda self:

@@ -348,6 +348,6 @@ class LayeredModel(model.Model):
          self.add_diagnostic('ENSgenspec',
             description='the spectrum of the rate of generation of barotropic enstrophy',
             function = (lambda self:
-                            (self.Hi[:,np.newaxis,np.newaxis]*
-                              ((self.ikQy.imag - self.ilQx.imag)*
-                            ((self.Sph.conj()*self.ph).imag))).sum(axis=0)/self.H))
+                            -(self.Hi[:,np.newaxis,np.newaxis]*
+                              ((self.ikQy - self.ilQx)*
+                            (self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H))

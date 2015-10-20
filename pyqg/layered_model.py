@@ -163,7 +163,7 @@ class LayeredModel(model.Model):
             for i in range(self.nz):
 
                 if i == 0:
-                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i] #- self.f2/self.Hi[i]/self.g
+                    self.S[i,i]   = -self.f2/self.Hi[i]/self.gpi[i]
                     self.S[i,i+1] =  self.f2/self.Hi[i]/self.gpi[i]
 
                 elif i == self.nz-1:
@@ -301,10 +301,12 @@ class LayeredModel(model.Model):
         self.p = self.ifft(self.ph)
         self.xi =self.ifft(-self.wv2*self.ph)
         self.Jpxi = self._advect(self.xi, self.u, self.v)
+        self.Jq = self._advect(self.q, self.u, self.v)
 
         self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph)
         self.Sp = self.ifft(self.Sph)
         self.JSp = self._advect(self.Sp,self.u,self.v)
+
 
     def _initialize_model_diagnostics(self):
          """ Extra diagnostics for layered model """
@@ -332,8 +334,20 @@ class LayeredModel(model.Model):
                            (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H))
 
          self.add_diagnostic('APEgenspec',
-                description='the rate of generation of available potential energy',
+                description='the spectrum of the rate of generation of available potential energy',
                 function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                             (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
                              self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
                             (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H))
+
+         self.add_diagnostic('ENSflux',
+            description='barotropic enstrophy flux',
+            function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
+                            (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H))
+
+         self.add_diagnostic('ENSgenspec',
+            description='the spectrum of the rate of generation of barotropic enstrophy',
+            function = (lambda self:
+                            (self.Hi[:,np.newaxis,np.newaxis]*
+                              ((self.ikQy.imag - self.ilQx.imag)*
+                            ((self.Sph.conj()*self.ph).imag))).sum(axis=0)/self.H))

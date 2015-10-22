@@ -4,7 +4,7 @@ What's New
 v0.1.4 (? ? 2015)
 --------------------
 
-Fixed `bug <https://github.com/pyqg/pyqg/issues/86>`__ related to the sign of advection terms.
+Fixed bug related to the sign of advection terms (:issue:`86`). 
 
 Added new diagnostics. Those include time-averages of u, v, vq, and the spectral divergence of enstrophy flux.
 
@@ -16,7 +16,7 @@ Added automated linear stability analysis.
 
 Added multi layer model subclass. 
 
-Fixed `bug <https://github.com/pyqg/pyqg/issues/75>`__  in _calc_diagnostics. Now diagnostics start being averaged at
+Fixed bug in _calc_diagnostics (:issue:`75`). Now diagnostics start being averaged at
 tavestart.
 
 v0.1.3 (4 Sept 2015)

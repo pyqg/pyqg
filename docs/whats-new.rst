@@ -4,6 +4,12 @@ What's New
 v0.1.4 (? ? 2015)
 --------------------
 
+Added topography.
+
+Added automated linear stability analysis.
+
+Added multi layered model subclass. 
+
 Fixed bug in _calc_diagnostics. Now diagnostics start being averaged at
 tavestart.
 

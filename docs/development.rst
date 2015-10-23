@@ -49,7 +49,7 @@ Develpment Workflow
 ===================
 
 Anyone interested in helping to develop pyqg needs to create their own fork
-of our `git repository`. (Follow the github `forking instructions`_. You 
+of our `git repository`. (Follow the github `forking instructions`_. You
 will need a github account.)
 
 .. _git repository: https://github.com/pyqg/pyqg
@@ -76,7 +76,7 @@ You will want to periodically sync your master branch with the upstream master.
 
     $ git fetch upstream
     $ git rebase upstream/master
-    
+
 Never make any commits on your local master branch. Instead open a feature
 branch for every new development task.
 
@@ -91,13 +91,13 @@ changes. When your feature is complete and well tested, commit your changes
 .. code-block:: bash
 
     $ git commit -m 'did a bunch of great work'
-    
+
 and push your branch to github.
 
 .. code-block:: bash
 
     $ git push origin cool_new_feature
-    
+
 At this point, you go find your fork on github.com and create a `pull
 request`_. Clearly describe what you have done in the comments. If your
 pull request fixes an issue or adds a useful new feature, the team will
@@ -115,7 +115,7 @@ incorporated into pyqg.
     $ git fetch upstream
     $ git rebase upstream/master
     $ git branch -d cool_new_feature
-    
+
 Virtual Environment
 ===================
 
@@ -131,5 +131,37 @@ install it, check the version, and tear down the virtual environment.
     $ python -c 'import pyqg; print(pyqg.__version__);'
     $ source deactivate
     $ conda env remove --yes -n test_env
-    
 
+Release Procedure
+=================
+
+Once we are ready for a new release, someone needs to make a pull request which
+updates the version number in setup.py. Also make sure that whats-new.rst in
+the docs is up to date.
+
+After the new version number PR has been merged, create a new `release`_ in
+github.
+
+The step of publishing to `pypi`_ has to be done manually from the command line.
+(Note: I figured out how this works from these `instructions`_).
+After the new release has been created, do the following.
+
+.. code-block:: bash
+
+    $ cd pyqg
+    $ git fetch upstream
+    $ git checkout master
+    $ git rebease upstream/master
+    # test the release before publishing
+    $ python setup.py register -r pypitest
+    $ python setup.py sdist upload -r pypitest
+    # if that goes well, publish it
+    $ python setup.py register -r pypi
+    $ python setup.py sdist upload -r pypi
+
+Note that pypi will not let you publish the same release twice, so make sure
+you get it right!
+
+.. _pypi: https://pypi.python.org/pypi/pyqg
+.. _release: https://help.github.com/articles/creating-releases/
+.. _instructions: http://peterdowns.com/posts/first-time-with-pypi.html

@@ -38,7 +38,7 @@ Links
    :target: https://zenodo.org/badge/latestdoi/14957/pyqg/pyqg
 .. |Build Status| image:: https://travis-ci.org/pyqg/pyqg.svg?branch=master
    :target: https://travis-ci.org/pyqg/pyqg
-.. |pypi| image: https://badge.fury.io/py/pyqg.svg
+.. |pypi| image:: https://badge.fury.io/py/pyqg.svg
    :target: https://badge.fury.io/py/pyqg
 .. |landscape| image:: https://landscape.io/github/pyqg/pyqg/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pyqg/pyqg/master

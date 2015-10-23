@@ -14,6 +14,20 @@ First import numpy, matplotlib, and pyqg:
     %matplotlib inline
     import pyqg
 
+
+.. parsed-literal::
+
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 19 days
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 19 days
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 19 days
+
+
 Initialize and Run the Model
 ----------------------------
 
@@ -30,10 +44,10 @@ keyword arguments but we are just using the defaults.
 
 .. parsed-literal::
 
-    t=        72000000, tc=     10000: cfl=0.081583, ke=0.000301118
-    t=       144000000, tc=     20000: cfl=0.105460, ke=0.000515485
-    t=       216000000, tc=     30000: cfl=0.087645, ke=0.000458610
-    t=       288000000, tc=     40000: cfl=0.082984, ke=0.000541443
+    t=        72000000, tc=     10000: cfl=0.105787, ke=0.000565075
+    t=       144000000, tc=     20000: cfl=0.092474, ke=0.000471924
+    t=       216000000, tc=     30000: cfl=0.104418, ke=0.000525463
+    t=       288000000, tc=     40000: cfl=0.089834, ke=0.000502072
 
 
 Visualize Output
@@ -106,9 +120,9 @@ We can also plot the spectral fluxes of energy.
 
 .. code:: python
 
-    ebud = [ -m.get_diagnostic('APEgenspec').sum(axis=0),
-             -m.get_diagnostic('APEflux').sum(axis=0),
-             -m.get_diagnostic('KEflux').sum(axis=0),
+    ebud = [ m.get_diagnostic('APEgenspec').sum(axis=0),
+             m.get_diagnostic('APEflux').sum(axis=0),
+             m.get_diagnostic('KEflux').sum(axis=0),
              -m.rek*m.del2*m.get_diagnostic('KEspec')[1].sum(axis=0)*m.M**2 ]
     ebud.append(-np.vstack(ebud).sum(axis=0))
     ebud_labels = ['APE gen','APE flux','KE flux','Diss.','Resid.']

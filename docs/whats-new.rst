@@ -1,11 +1,12 @@
 What's New
 ==========
 
-v0.1.4 (? ? 2015)
+v0.1.4 (22 Oct 2015)
 --------------------
 
-Fixed bug in _calc_diagnostics. Now diagnostics start being averaged at
-tavestart.
+Fixed bug related to the sign of advection terms (:issue:`86`).
+
+Fixed bug in _calc_diagnostics (:issue:`75`). Now diagnostics start being averaged at tavestart.
 
 v0.1.3 (4 Sept 2015)
 --------------------

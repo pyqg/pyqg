@@ -370,7 +370,7 @@ cdef class PseudoSpectralKernel:
                       num_threads=self.num_threads):
                 for i in range(self.Nk):
                     # overwrite the tendency, since the forcing gets called after
-                    self.dqhdt[k,j,i] = ( self._ik[i] * self.uqh[k,j,i] +
+                    self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
         return

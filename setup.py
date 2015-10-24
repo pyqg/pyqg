@@ -13,7 +13,7 @@ URL='http://github.com/pyqg/pyqg'
 DOWNLOAD_URL='https://github.com/pyqg/pyqg/tarball/v%s' % VERSION
 AUTHOR='pyqg team'
 AUTHOR_EMAIL='pyqg-dev@googlegroups.com'
-LICENSE='GPLv3'
+LICENSE='MIT'
 
 DESCRIPTION='python quasigeostrophic model'
 LONG_DESCRIPTION="""
@@ -45,7 +45,7 @@ Links
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
-    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python',

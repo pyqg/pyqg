@@ -82,9 +82,9 @@ class Model(PseudoSpectralKernel):
         # removed because fftw is now manditory
         #use_fftw = False,               # fftw flag 
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
-        ntd = 1,                    # number of threads to use in fftw computations
-        quiet = False,
-        logfile = None,        
+        ntd = 1,                       # number of threads to use in fftw computations
+        quiet = False,                 # no-printout flag
+        logfile = None,                # logfile; None prints to screen
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose

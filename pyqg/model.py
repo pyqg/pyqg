@@ -162,8 +162,9 @@ class Model(PseudoSpectralKernel):
 
         # constants
         self.g = g
-        self.f = f
-        self.f2 = f**2
+        if f:
+            self.f = f
+            self.f2 = f**2
 
         self._initialize_grid()
         self._initialize_background()

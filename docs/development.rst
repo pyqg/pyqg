@@ -27,7 +27,7 @@ of model than Glenn. Malte implemented a python version of the two-layer
 model while at GFDL. In the summer of 2014, while both were at the `WHOI GFD
 Summer School`_, Ryan worked with Malte refactor the code into a proper
 python package. Cesar got involved and brought pyfftw into the project. Ryan
-implemented a cython kernel. Cesar and Francis implement the barotropic and
+implemented a cython kernel. Cesar and Francis implemented the barotropic and
 sqg models.
 
 .. _WHOI GFD Summer School: https://www.whoi.edu/gfd/

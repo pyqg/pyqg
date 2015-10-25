@@ -363,7 +363,7 @@ class Model(PseudoSpectralKernel):
             #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
             #       self.t, self.tc, cfl, ke)
             self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
-                    %(self.tc,self.t,self.ke,self.cfl))
+                    , self.tc,self.t,self.ke,self.cfl )
 
             assert self.cfl<1., self.logger.error('CFL condition violated')
             

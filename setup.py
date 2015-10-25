@@ -3,7 +3,7 @@ from Cython.Build import cythonize
 import warnings
 import numpy as np
 import os
-import tempfile, subprocess, shutil   
+import tempfile, subprocess, shutil
 
 VERSION='0.1.4'
 
@@ -71,7 +71,7 @@ with open(use_pyfftw_file, 'w') as f:
     except ImportError:
         f.write('DEF PYQG_USE_PYFFTW = 0')
         warnings.warn('Could not import pyfftw. Model will be slow.')
-                       
+
 # check for openmp following
 # http://stackoverflow.com/questions/16549893/programatically-testing-for-openmp-support-from-a-python-setup-script
 # see http://openmp.org/wp/openmp-compilers/
@@ -93,7 +93,7 @@ def check_for_openmp():
     try:
         cc = os.environ['CC']
     except KeyError:
-        cc = 'cc'
+        cc = 'gcc'
     with open(filename, 'w', 0) as file:
         file.write(omp_test)
     with open(os.devnull, 'w') as fnull:
@@ -114,8 +114,8 @@ if check_for_openmp() and use_openmp:
     extra_compile_args.append('-fopenmp')
     extra_link_args.append('-fopenmp')
 else:
-    warnings.warn('Could not link with openmp. Model will be slow.')    
-        
+    warnings.warn('Could not link with openmp. Model will be slow.')
+
 # reathedocs can't and shouldn't build pyfftw
 # apparently setup.py overrides docs/requirements.txt
 #on_rtd = os.environ.get('READTHEDOCS', None) == 'True'

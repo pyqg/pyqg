@@ -83,7 +83,8 @@ class Model(PseudoSpectralKernel):
         #use_fftw = False,               # fftw flag 
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                       # number of threads to use in fftw computations
-        quiet = False,                 # no-printout flag
+        log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
+                                       #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
         ):
         """
@@ -143,8 +144,8 @@ class Model(PseudoSpectralKernel):
         self.tmax = tmax
         self.tavestart = tavestart
         self.taveint = taveint
-        self.quiet = quiet
         self.logfile = logfile
+        self.log_level = log_level
         self.useAB2 = useAB2
         # fft 
         #self.use_fftw = use_fftw
@@ -328,7 +329,8 @@ class Model(PseudoSpectralKernel):
         if not self.logger.handlers:
             self.logger.addHandler(fhandler)
 
-        self.logger.setLevel(logging.DEBUG)
+        #self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(self.log_level*10)
         self.logger.info(' Logger initialized')
 
 
@@ -357,7 +359,7 @@ class Model(PseudoSpectralKernel):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
+        if (self.log_level) and ((self.tc % self.twrite)==0) and self.tc>0.:
             self.ke = self._calc_ke()
             self.cfl = self._calc_cfl()
             #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (

@@ -329,8 +329,11 @@ class Model(PseudoSpectralKernel):
         if not self.logger.handlers:
             self.logger.addHandler(fhandler)
 
-        #self.logger.setLevel(logging.DEBUG)
         self.logger.setLevel(self.log_level*10)
+        
+        # this prevents the logger to propagate into the ipython notebook log
+        self.logger.propagate = False   
+
         self.logger.info(' Logger initialized')
 
 

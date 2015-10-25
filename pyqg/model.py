@@ -1,6 +1,7 @@
 import numpy as np
 from kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from numpy import pi
+import logging
 try:   
     import mkl
     np.use_fastnumpy = True
@@ -81,8 +82,10 @@ class Model(PseudoSpectralKernel):
         # removed because fftw is now manditory
         #use_fftw = False,               # fftw flag 
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
-        ntd = 1,                    # number of threads to use in fftw computations
-        quiet = False,
+        ntd = 1,                       # number of threads to use in fftw computations
+        log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
+                                       #     logger (see  https://docs.python.org/2/library/logging.html)
+        logfile = None,                # logfile; None prints to screen
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -141,7 +144,8 @@ class Model(PseudoSpectralKernel):
         self.tmax = tmax
         self.tavestart = tavestart
         self.taveint = taveint
-        self.quiet = quiet
+        self.logfile = logfile
+        self.log_level = log_level
         self.useAB2 = useAB2
         # fft 
         #self.use_fftw = use_fftw
@@ -158,6 +162,7 @@ class Model(PseudoSpectralKernel):
         self._initialize_filter()
         self._initialize_inversion_matrix()
         self._initialize_time()                
+        self._initialize_logger()
 
         # call the underlying cython kernel
         self._initialize_kernel()
@@ -304,6 +309,33 @@ class Model(PseudoSpectralKernel):
         #self.dqhdt_p = np.zeros_like(self.qh)
         #self.dqhdt_pp = np.zeros_like(self.qh)
         
+        self.logger.info(' Kernel initialized')
+
+
+    # logger
+    def _initialize_logger(self):
+
+        self.logger = logging.getLogger(__name__)
+
+
+        if not (self.logfile is None):
+            fhandler = logging.FileHandler(filename=self.logfile, mode='w')
+        else:
+            fhandler = logging.StreamHandler()
+
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fhandler.setFormatter(formatter)
+
+        if not self.logger.handlers:
+            self.logger.addHandler(fhandler)
+
+        self.logger.setLevel(self.log_level*10)
+        
+        # this prevents the logger to propagate into the ipython notebook log
+        self.logger.propagate = False   
+
+        self.logger.info(' Logger initialized')
+
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
@@ -330,12 +362,16 @@ class Model(PseudoSpectralKernel):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (not self.quiet) and ((self.tc % self.twrite)==0) and self.tc>0.:
-            ke = self._calc_ke()
-            cfl = self._calc_cfl()
-            print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
-                   self.t, self.tc, cfl, ke)
-            assert cfl<1., "CFL condition violated"
+        if (self.log_level) and ((self.tc % self.twrite)==0) and self.tc>0.:
+            self.ke = self._calc_ke()
+            self.cfl = self._calc_cfl()
+            #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
+            #       self.t, self.tc, cfl, ke)
+            self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
+                    , self.tc,self.t,self.ke,self.cfl )
+
+            assert self.cfl<1., self.logger.error('CFL condition violated')
+            
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

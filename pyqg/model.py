@@ -84,6 +84,7 @@ class Model(PseudoSpectralKernel):
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
         ntd = 1,                    # number of threads to use in fftw computations
         quiet = False,
+        logfile = None,        
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -143,6 +144,7 @@ class Model(PseudoSpectralKernel):
         self.tavestart = tavestart
         self.taveint = taveint
         self.quiet = quiet
+        self.logfile = logfile
         self.useAB2 = useAB2
         # fft 
         #self.use_fftw = use_fftw

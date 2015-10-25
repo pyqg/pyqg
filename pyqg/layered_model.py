@@ -190,17 +190,17 @@ class LayeredModel(model.Model):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
 
-            assert self.Hi.size == self.nz, "size of Hi does not match number\
-                    of vertical levels nz"
+            assert self.Hi.size == self.nz, self.logger.error('size of Hi does not' +
+                     'match number of vertical levels nz')
 
-            assert self.rhoi.size == self.nz, "size of rhoi does not match number\
-                    of vertical levels nz"
+            assert self.rhoi.size == self.nz, self.logger.error('size of rhoi does not' +
+                     'match number of vertical levels nz')
 
-            assert self.Ubg.size == self.nz, "size of Ubg does not match number\
-                    of vertical levels nz"
+            assert self.Ubg.size == self.nz, self.logger.error('size of Ubg does not' +
+                     'match number of vertical levels nz')
 
-            assert self.Vbg.size == self.nz, "size of Vbg does not match number\
-                    of vertical levels nz"
+            assert self.Vbg.size == self.nz, self.logger.error('size of Vbg does not' +
+                     'match number of vertical levels nz')
 
         else:
             self.f2gpi = np.array(self.rd**-2 *

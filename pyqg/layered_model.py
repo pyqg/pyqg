@@ -127,10 +127,10 @@ class LayeredModel(model.Model):
         self.rd = rd
         self.delta = delta
         self.nz = nz
-        self.U = np.array(U)
-        self.V = np.array(V)
-        self.H = np.array(H)
-        self.rho = np.array(rho)
+        self.Ubg = np.array(U)
+        self.Vbg = np.array(V)
+        self.Hi = np.array(H)
+        self.rhoi = np.array(rho)
 
         super(LayeredModel, self).__init__(**kwargs)
 
@@ -175,12 +175,7 @@ class LayeredModel(model.Model):
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
 
-        self.Hi = self.H
-        self.Ubg = self.U
-        self.Vbg = self.V
-        self.rhoi = self.rho
         self.H = self.Hi.sum()
-
 
         if not (self.nz==2) and not (self.rd) and not (self.delta):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]

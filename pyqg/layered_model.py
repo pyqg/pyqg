@@ -112,11 +112,11 @@ class LayeredModel(model.Model):
             two-layer (nz=2) case. Unitless.
         U : list of size nz
             Base state zonal velocity. Units: meters s :sup:`-1`
-        V : list of size nz
+        V : array of size nz
             Base state meridional velocity. Units: meters s :sup:`-1`
-        H : list of size nz
+        H : array of size nz
             Layer thickness. Units: meters
-        rho: list of size nz.
+        rho: array of size nz.
             Layer density. Units: kilograms meters :sup:`-3`
 
         """
@@ -177,7 +177,8 @@ class LayeredModel(model.Model):
 
         self.H = self.Hi.sum()
 
-        if not (self.nz==2) and not (self.rd) and not (self.delta):
+
+        if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
 

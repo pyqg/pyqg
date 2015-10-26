@@ -64,8 +64,8 @@ Set up
 
 .. parsed-literal::
 
-    2015-10-25 20:32:06,613 - pyqg.model - INFO -  Logger initialized
-    2015-10-25 20:32:06,670 - pyqg.model - INFO -  Kernel initialized
+    2015-10-25 21:49:12,357 - pyqg.model - INFO -  Logger initialized
+    2015-10-25 21:49:12,416 - pyqg.model - INFO -  Kernel initialized
 
 
 Initial condition
@@ -89,35 +89,35 @@ Run the model
 
 .. parsed-literal::
 
-    2015-10-25 20:32:46,444 - pyqg.model - INFO -  Step: 5000, Time: 3.000000e+06, KE: 7.839139e-07, CFL: 0.002084
-    2015-10-25 20:32:53,352 - pyqg.model - INFO -  Step: 10000, Time: 6.000000e+06, KE: 1.439857e-05, CFL: 0.002605
-    2015-10-25 20:33:00,359 - pyqg.model - INFO -  Step: 15000, Time: 9.000000e+06, KE: 3.883976e-04, CFL: 0.006931
-    2015-10-25 20:33:07,893 - pyqg.model - INFO -  Step: 20000, Time: 1.200000e+07, KE: 3.122142e-03, CFL: 0.017894
-    2015-10-25 20:33:15,486 - pyqg.model - INFO -  Step: 25000, Time: 1.500000e+07, KE: 7.713469e-03, CFL: 0.025531
-    2015-10-25 20:33:22,629 - pyqg.model - INFO -  Step: 30000, Time: 1.800000e+07, KE: 1.491686e-02, CFL: 0.032567
-    2015-10-25 20:33:29,571 - pyqg.model - INFO -  Step: 35000, Time: 2.100000e+07, KE: 3.278798e-02, CFL: 0.049253
-    2015-10-25 20:33:36,833 - pyqg.model - INFO -  Step: 40000, Time: 2.400000e+07, KE: 5.972034e-02, CFL: 0.073931
-    2015-10-25 20:33:44,503 - pyqg.model - INFO -  Step: 45000, Time: 2.700000e+07, KE: 1.055305e-01, CFL: 0.070531
-    2015-10-25 20:33:51,767 - pyqg.model - INFO -  Step: 50000, Time: 3.000000e+07, KE: 1.844561e-01, CFL: 0.091489
-    2015-10-25 20:33:59,218 - pyqg.model - INFO -  Step: 55000, Time: 3.300000e+07, KE: 2.817683e-01, CFL: 0.129196
-    2015-10-25 20:34:06,506 - pyqg.model - INFO -  Step: 60000, Time: 3.600000e+07, KE: 4.363920e-01, CFL: 0.117921
-    2015-10-25 20:34:13,741 - pyqg.model - INFO -  Step: 65000, Time: 3.900000e+07, KE: 6.416493e-01, CFL: 0.139186
-    2015-10-25 20:34:21,197 - pyqg.model - INFO -  Step: 70000, Time: 4.200000e+07, KE: 8.850276e-01, CFL: 0.131505
-    2015-10-25 20:34:28,358 - pyqg.model - INFO -  Step: 75000, Time: 4.500000e+07, KE: 1.157258e+00, CFL: 0.142917
-    2015-10-25 20:34:35,773 - pyqg.model - INFO -  Step: 80000, Time: 4.800000e+07, KE: 1.348394e+00, CFL: 0.169216
-    2015-10-25 20:34:42,977 - pyqg.model - INFO -  Step: 85000, Time: 5.100000e+07, KE: 1.414446e+00, CFL: 0.119539
-    2015-10-25 20:34:50,039 - pyqg.model - INFO -  Step: 90000, Time: 5.400000e+07, KE: 1.187145e+00, CFL: 0.099308
-    2015-10-25 20:34:57,540 - pyqg.model - INFO -  Step: 95000, Time: 5.700000e+07, KE: 1.003230e+00, CFL: 0.098370
-    2015-10-25 20:35:04,699 - pyqg.model - INFO -  Step: 100000, Time: 6.000000e+07, KE: 8.656947e-01, CFL: 0.112893
-    2015-10-25 20:35:11,775 - pyqg.model - INFO -  Step: 105000, Time: 6.300000e+07, KE: 7.799560e-01, CFL: 0.111748
-    2015-10-25 20:35:18,898 - pyqg.model - INFO -  Step: 110000, Time: 6.600000e+07, KE: 6.678069e-01, CFL: 0.110277
-    2015-10-25 20:35:26,230 - pyqg.model - INFO -  Step: 115000, Time: 6.900000e+07, KE: 5.451761e-01, CFL: 0.089681
-    2015-10-25 20:35:33,426 - pyqg.model - INFO -  Step: 120000, Time: 7.200000e+07, KE: 4.497488e-01, CFL: 0.086001
-    2015-10-25 20:35:40,560 - pyqg.model - INFO -  Step: 125000, Time: 7.500000e+07, KE: 3.749194e-01, CFL: 0.087119
-    2015-10-25 20:35:47,737 - pyqg.model - INFO -  Step: 130000, Time: 7.800000e+07, KE: 3.235233e-01, CFL: 0.088282
-    2015-10-25 20:35:55,229 - pyqg.model - INFO -  Step: 135000, Time: 8.100000e+07, KE: 2.801022e-01, CFL: 0.082310
-    2015-10-25 20:36:02,536 - pyqg.model - INFO -  Step: 140000, Time: 8.400000e+07, KE: 3.012773e-01, CFL: 0.110713
-    2015-10-25 20:36:09,822 - pyqg.model - INFO -  Step: 145000, Time: 8.700000e+07, KE: 3.281687e-01, CFL: 0.107622
+    2015-10-25 21:49:22,740 - pyqg.model - INFO -  Step: 5000, Time: 3.000000e+06, KE: 7.809761e-07, CFL: 0.002064
+    2015-10-25 21:49:29,866 - pyqg.model - INFO -  Step: 10000, Time: 6.000000e+06, KE: 1.294099e-05, CFL: 0.002536
+    2015-10-25 21:49:37,268 - pyqg.model - INFO -  Step: 15000, Time: 9.000000e+06, KE: 3.543947e-04, CFL: 0.006603
+    2015-10-25 21:49:44,638 - pyqg.model - INFO -  Step: 20000, Time: 1.200000e+07, KE: 3.264680e-03, CFL: 0.016581
+    2015-10-25 21:49:51,972 - pyqg.model - INFO -  Step: 25000, Time: 1.500000e+07, KE: 8.010529e-03, CFL: 0.026138
+    2015-10-25 21:49:59,509 - pyqg.model - INFO -  Step: 30000, Time: 1.800000e+07, KE: 1.684268e-02, CFL: 0.039642
+    2015-10-25 21:50:06,902 - pyqg.model - INFO -  Step: 35000, Time: 2.100000e+07, KE: 3.456753e-02, CFL: 0.048855
+    2015-10-25 21:50:14,142 - pyqg.model - INFO -  Step: 40000, Time: 2.400000e+07, KE: 7.084024e-02, CFL: 0.072394
+    2015-10-25 21:50:21,186 - pyqg.model - INFO -  Step: 45000, Time: 2.700000e+07, KE: 1.247350e-01, CFL: 0.073444
+    2015-10-25 21:50:28,501 - pyqg.model - INFO -  Step: 50000, Time: 3.000000e+07, KE: 1.813794e-01, CFL: 0.097114
+    2015-10-25 21:50:35,571 - pyqg.model - INFO -  Step: 55000, Time: 3.300000e+07, KE: 2.636245e-01, CFL: 0.084097
+    2015-10-25 21:50:42,814 - pyqg.model - INFO -  Step: 60000, Time: 3.600000e+07, KE: 4.129393e-01, CFL: 0.152460
+    2015-10-25 21:50:50,198 - pyqg.model - INFO -  Step: 65000, Time: 3.900000e+07, KE: 4.847927e-01, CFL: 0.107015
+    2015-10-25 21:50:57,357 - pyqg.model - INFO -  Step: 70000, Time: 4.200000e+07, KE: 7.404359e-01, CFL: 0.136182
+    2015-10-25 21:51:04,535 - pyqg.model - INFO -  Step: 75000, Time: 4.500000e+07, KE: 9.254192e-01, CFL: 0.155382
+    2015-10-25 21:51:11,317 - pyqg.model - INFO -  Step: 80000, Time: 4.800000e+07, KE: 1.025710e+00, CFL: 0.135584
+    2015-10-25 21:51:18,730 - pyqg.model - INFO -  Step: 85000, Time: 5.100000e+07, KE: 1.030813e+00, CFL: 0.130809
+    2015-10-25 21:51:26,116 - pyqg.model - INFO -  Step: 90000, Time: 5.400000e+07, KE: 1.270087e+00, CFL: 0.167862
+    2015-10-25 21:51:33,085 - pyqg.model - INFO -  Step: 95000, Time: 5.700000e+07, KE: 1.791460e+00, CFL: 0.176772
+    2015-10-25 21:51:39,784 - pyqg.model - INFO -  Step: 100000, Time: 6.000000e+07, KE: 1.644498e+00, CFL: 0.131095
+    2015-10-25 21:51:46,476 - pyqg.model - INFO -  Step: 105000, Time: 6.300000e+07, KE: 1.421885e+00, CFL: 0.127148
+    2015-10-25 21:51:53,167 - pyqg.model - INFO -  Step: 110000, Time: 6.600000e+07, KE: 1.183883e+00, CFL: 0.110700
+    2015-10-25 21:51:59,850 - pyqg.model - INFO -  Step: 115000, Time: 6.900000e+07, KE: 9.889258e-01, CFL: 0.115063
+    2015-10-25 21:52:06,896 - pyqg.model - INFO -  Step: 120000, Time: 7.200000e+07, KE: 8.383714e-01, CFL: 0.105721
+    2015-10-25 21:52:13,874 - pyqg.model - INFO -  Step: 125000, Time: 7.500000e+07, KE: 7.619532e-01, CFL: 0.119120
+    2015-10-25 21:52:20,689 - pyqg.model - INFO -  Step: 130000, Time: 7.800000e+07, KE: 1.096286e+00, CFL: 0.153684
+    2015-10-25 21:52:27,420 - pyqg.model - INFO -  Step: 135000, Time: 8.100000e+07, KE: 1.342043e+00, CFL: 0.185609
+    2015-10-25 21:52:34,127 - pyqg.model - INFO -  Step: 140000, Time: 8.400000e+07, KE: 1.413888e+00, CFL: 0.132139
+    2015-10-25 21:52:40,835 - pyqg.model - INFO -  Step: 145000, Time: 8.700000e+07, KE: 1.151289e+00, CFL: 0.103622
 
 
 A snapshot and some diagnostics
@@ -153,12 +153,18 @@ A snapshot and some diagnostics
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x1127c5c10>
+    <matplotlib.text.Text at 0x111a11e50>
 
 
 
+.. parsed-literal::
 
-.. image:: layered_files/layered_10_1.png
+    /Users/crocha/anaconda/lib/python2.7/site-packages/matplotlib/collections.py:590: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison
+      if self._edgecolors == str('face'):
+
+
+
+.. image:: layered_files/layered_10_2.png
 
 
 .. code:: python

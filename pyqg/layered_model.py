@@ -99,15 +99,11 @@ class LayeredModel(model.Model):
         Parameters
         ----------
 
-        g : number
-            Gravitational acceleration. Units: meters second :sup:`-2`
         nz : integer number
              Number of layers (> 1)
         beta : number
             Gradient of coriolis parameter. Units: meters :sup:`-1`
             seconds :sup:`-1`
-        rek : number
-            Linear drag in lower layer. Units: seconds :sup:`-1`
         rd : number
             Deformation radius. Units: meters. Only necessary for
             the two-layer (nz=2) case.

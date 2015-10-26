@@ -79,8 +79,7 @@ identity matrix, and the stretching matrix is
 
 .. math::
 
-   \textsf{S} \equiv  f_0^2
-   \left(
+   \textsf{S} {\ensuremath{\stackrel{\mathrm{def}}{=}}}f_0^2
    \begin{bmatrix}
        -\frac{1}{g'_1 H_1}& & \frac{1}{g'_1 H_1} &  & 0 \dots& \\
     & 0 & & & & &\\
@@ -90,7 +89,6 @@ identity matrix, and the stretching matrix is
    & & & & & \\
    & \dots & 0 & \frac{1}{ g'_{{\mathrm{N}}-1} H_{\mathrm{N}}}& & -\frac{1}{g'_{{\mathrm{N}}-1} H_{\mathrm{N}}}
    \end{bmatrix}
-   \right)
    {\, .}
 
 Energy spectrum
@@ -212,28 +210,28 @@ With this notation, the “stretching matrix” is simply
 
 .. math::
 
-   {\mathsf{S}}= \left(\begin{bmatrix}
+   {\mathsf{S}}= \begin{bmatrix}
    - F_1 \qquad \:\:\:\:F_1\\
    F_2 \qquad -  + F_2
-   \end{bmatrix}\right){\, .}
+   \end{bmatrix}{\, .}
 
 The inversion relationship in Fourier space is
 
 .. math::
 
-   \left(\begin{bmatrix}
+   \begin{bmatrix}
    \hat{\psi}_1\\
    \hat{\psi}_2\\
-   \end{bmatrix}\right)
+   \end{bmatrix}
    = \frac{1}{\text{det} \: {\mathsf{B}}}
-   \left(\begin{bmatrix}
+   \begin{bmatrix}
    -(\kappa^2 + F_2) \qquad \:\:\:\:-F_1\\
    \:\:\:\: -F_2 \qquad - (\kappa^2 + F_1)
-   \end{bmatrix}\right)
-   \left(\begin{bmatrix}
+   \end{bmatrix}
+   \begin{bmatrix}
    \hat{q}_1\\
    \hat{q}_2\\
-   \end{bmatrix}\right){\, ,}
+   \end{bmatrix}{\, ,}
 
 where
 

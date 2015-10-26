@@ -72,7 +72,6 @@ The evolutionary equation in spectral space is
 \begin{align}
     \hat{q}_{nt} + (\mathrm{i} k U + \mathrm{i} l V) \left(\hat{q}_n + \delta_{n \nmax} \frac{f_0}{H_\nmax}\hat{h}_b\right) + (\mathrm{i} k\, {Q_y} -  - \mathrm{i} l\,{Q_x}){\hat{\psi}_n} + \mathsf{\hat{J}}(\psi_n, q_n + \delta_{n \nmax} \frac{f_0}{H_\nmax}h_b )   \nonumber \\ =  \ssd + \mathrm{i}  \delta_{n \nmax} r_{ek} \kappa^2 \hat{\psi}_n \,, \qquad i = 1,\textsf{N}\com
 \end{align}
-
 where $\kappa^2 = k^2 + l^2$. Also, in the pseudo-spectral spirit we write the transform of the nonlinear
 terms and the non-constant coefficient linear term as the transform of the products, calculated in physical space, as opposed to double convolution sums.  That is $\mathsf{\hat{J}}$ is the Fourier transform of Jacobian computed in physical space.
 
@@ -84,8 +83,7 @@ The inversion relationship is
 where $\sI$ is the $\nmax\times\nmax$ identity matrix, and the stretching matrix is
 
 \begin{equation}
-\textsf{S} \equiv  f_0^2
-\left(
+\textsf{S} \defn  f_0^2
 \begin{bmatrix}
     -\frac{1}{g'_1 H_1}& & \frac{1}{g'_1 H_1} &  & 0 \dots& \\
  & 0 & & & & &\\
@@ -95,7 +93,6 @@ where $\sI$ is the $\nmax\times\nmax$ identity matrix, and the stretching matrix
 & & & & & \\
 & \dots & 0 & \frac{1}{ g'_{\nmax-1} H_\nmax}& & -\frac{1}{g'_{\nmax-1} H_\nmax}
 \end{bmatrix}
-\right)
 \per
 \end{equation}
 
@@ -190,26 +187,26 @@ k_d^2 \defn \, \frac{f_0^2}{g} \frac{H_1+H_2}{H_1 H_2} \per
 \end{equation}
 With this notation, the ``stretching matrix'' is simply
 \begin{equation}
-    \sS = \left(\begin{bmatrix}
+\sS = \begin{bmatrix}
 - F_1 \qquad \:\:\:\:F_1\\
 F_2 \qquad -  + F_2
-\end{bmatrix}\right)\per
+\end{bmatrix}\per
 \end{equation}
 The inversion relationship in Fourier space is
 \begin{equation}
-    \left(\begin{bmatrix}
+\begin{bmatrix}
 \hat{\psi}_1\\
 \hat{\psi}_2\\
-\end{bmatrix}\right)
+\end{bmatrix}
 = \frac{1}{\text{det} \: \sB}
-\left(\begin{bmatrix}
+\begin{bmatrix}
 -(\kappa^2 + F_2) \qquad \:\:\:\:-F_1\\
 \:\:\:\: -F_2 \qquad - (\kappa^2 + F_1)
-\end{bmatrix}\right)
-\left(\begin{bmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 \hat{q}_1\\
 \hat{q}_2\\
-\end{bmatrix}\right)\com
+\end{bmatrix}\com
 \end{equation}
 where 
 \begin{equation}

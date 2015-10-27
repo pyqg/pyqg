@@ -166,13 +166,14 @@ class Model(PseudoSpectralKernel):
             self.f = f
             self.f2 = f**2
 
+
+        self._initialize_logger()
         self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_inversion_matrix()
         self._initialize_time()                
-        self._initialize_logger()
 
         # call the underlying cython kernel
         self._initialize_kernel()

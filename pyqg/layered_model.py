@@ -147,7 +147,7 @@ class LayeredModel(model.Model):
 
             self.del1 = self.delta/(self.delta+1.)
             self.del2 = (self.delta+1.)**-1
-            self.Us = self.U[0]-self.U[1]
+            self.Us = self.Ubg[0]-self.Ubg[1]
 
             self.F1 = self.rd**-2 / (1.+self.delta)
             self.F2 = self.delta*self.F1

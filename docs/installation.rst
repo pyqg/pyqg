@@ -10,6 +10,7 @@ The only requirements are
 
 - Python 2.7. (Python 3 support is in the works) 
 - numpy_ (1.6 or later)
+- Cython (0.2 or later)
 
 Because pyqg is a pseudo-spectral code, it realies heavily on fast-Fourier
 transforms (FFTs), which are the main performance bottlneck. For this reason,
@@ -194,7 +195,12 @@ remember how.)
 
 Installing pyqg
 ---------------
-
+.. note::
+    The pyqg kernel is written in Cython and uses OpenMP to parallelise some operations for a performance boost.
+    If you are using Mac OSX Yosemite or later OpenMP support is not available out of the box.  While pyqg will
+    still run without OpenMP, it will not be as fast as it can be. See :ref:`advanced-install` below for more
+    information on installing on OSX with OpenMP support.
+    
 With pyfftw installed, you can now install pyqg. The easiest way is with pip:
 
 .. code-block:: bash
@@ -224,3 +230,52 @@ If you want to make changes in the code, set up the development mode:
 
 pyqg is a work in progress, and we really encourage users to contribute to its
 :doc:`/development`
+
+
+.. _advanced-install:
+
+Installing with OpenMP support on OSX
+-------------------------------------
+
+There are two options for installing on OSX with OpenMP support.  Both methods require using the Anaconda distribution of
+Python.
+
+1. Using Homebrew
+
+Install the GCC-5 compiler in ``/usr/local`` using Homebrew:
+
+.. code-block:: bash
+
+    $ brew install gcc --without-multilib --with-fortran
+
+Install Cython from the conda repository
+
+.. code-block:: bash
+
+    $ conda install cython
+
+Install pyqg using the homebrew ``gcc`` compiler
+
+.. code-block:: bash
+    
+    $ CC=/usr/local/bin/gcc-5 pip install pyqg
+
+
+2. Using the HPC precompiled gcc binaries.
+
+The `HPC for Mac OSX <http://hpc.sourceforge.net/>`__ sourceforge project has copies of the latest ``gcc`` precompiled for Mac OSX.  Download the latest version of gcc from the HPC site and follow the installation instructions.
+
+Install Cython from the conda repository
+
+.. code-block:: bash
+
+    $ conda install cython
+
+Install pyqg using the HPC ``gcc`` compiler
+
+.. code-block:: bash
+    
+    $ CC=/usr/local/bin/gcc pip install pyqg
+    
+
+    

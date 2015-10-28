@@ -210,7 +210,7 @@ A snapshot and some diagnostics
 
 The dynamics here is similar to the reference experiment of `Larichev &
 Held
-(1996) <http://journals.ametsoc.org/doi/abs/10.1175/1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2>`__.
+(1995) <http://journals.ametsoc.org/doi/pdf/10.1175/1520-0485%281995%29025%3C2285%3AEAAFIA%3E2.0.CO%3B2>`__.
 The APE generated through baroclinic instability is fluxed towards
 deformation length scales, where it is converted into KE. The KE the
 experiments and inverse tranfer, cascading up to the scale of the

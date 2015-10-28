@@ -208,8 +208,12 @@ A snapshot and some diagnostics
 .. image:: layered_files/layered_12_0.png
 
 
-This simple example illustrate the classic phenomenology of baroclinic
-turbulence. The APE generated through baroclinic instability is fluxed
-towards deformation length scales, where it is converted into KE. The KE
-the experiments and inverse cascade. The mechanical bottom drag
-essentially removes the large scale KE.
+The dynamics here is similar to the reference experiment of `Larichev &
+Held
+(1995) <http://journals.ametsoc.org/doi/abs/10.1175/1520-0469%281996%29053%3C0946%3AASTFHH%3E2.0.CO%3B2>`__.
+The APE generated through baroclinic instability is fluxed towards
+deformation length scales, where it is converted into KE. The KE the
+experiments and inverse tranfer, cascading up to the scale of the
+domain. The mechanical bottom drag essentially removes the large scale
+KE.
+

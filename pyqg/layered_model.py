@@ -177,7 +177,6 @@ class LayeredModel(model.Model):
 
         self.H = self.Hi.sum()
 
-
         if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
@@ -224,8 +223,9 @@ class LayeredModel(model.Model):
             a[1,1] = (self.S[0,0]-self.wv2)*det_inv
         else:
             I = np.eye(self.nz)[:,:,np.newaxis,np.newaxis]
-            a = np.linalg.inv((self.S[:,:,np.newaxis,np.newaxis]-I*self.wv2).T).T
-            a[:,:,0,0] = 0.
+            M = self.S[:,:,np.newaxis,np.newaxis]-I*self.wv2
+            M[:,:,0,0] = np.nan  # avoids singular matrix in inv()
+            a = np.linalg.inv(M.T).T
 
         self.a = np.ma.masked_invalid(a).filled(0.)
 

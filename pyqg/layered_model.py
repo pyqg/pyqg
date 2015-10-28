@@ -181,6 +181,10 @@ class LayeredModel(model.Model):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
 
+            assert m.gpi.size == m.nz-1, "Invalid size of gpi"
+
+            assert np.all(m.gpi>0.), "Buoyancy jump has negative sign!"
+
             assert self.Hi.size == self.nz, self.logger.error('size of Hi does not' +
                      'match number of vertical levels nz')
 

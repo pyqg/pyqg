@@ -16,13 +16,13 @@ Fully developed baroclinic instability of a 3-layer flow
 
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 28 days
+    Message: trial mode expires in 26 days
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 28 days
+    Message: trial mode expires in 26 days
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 28 days
+    Message: trial mode expires in 26 days
 
 
 Set up
@@ -59,13 +59,13 @@ Set up
 
     m = pyqg.LayeredModel(nx=Nx, nz=3, U = [U1,U2,U3],V = [0.,0.,0.],L=L,f=f0,beta=beta,
                              H = [H1,H2,H3], rho=[rho1,rho2,rho3],rek=rek,
-                            dt=dt,tmax=tmax, twrite=5000, tavestart=Ti*300)
+                            dt=dt,tmax=tmax, twrite=5000, tavestart=Ti*10)
 
 
 .. parsed-literal::
 
-    2015-10-25 21:49:12,357 - pyqg.model - INFO -  Logger initialized
-    2015-10-25 21:49:12,416 - pyqg.model - INFO -  Kernel initialized
+    2015-10-27 23:08:03,360 - pyqg.model - INFO -  Logger initialized
+    2015-10-27 23:08:03,427 - pyqg.model - INFO -  Kernel initialized
 
 
 Initial condition

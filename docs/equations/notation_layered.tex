@@ -37,14 +37,14 @@ where $q_n$ is the n'th layer QG potential vorticity, and $\psi_n$ is the stream
 bottom topography. (Note that in QG $h_b/H_\nmax << 1$.) Also the n'th buoyancy
 jump (reduced gravity) is
 \begin{equation}
-g'_n \defn g \frac{\rho_{n}-\rho_{n+1}}{\rho_n}\com
+g'_n \equiv g \frac{\rho_{n}-\rho_{n+1}}{\rho_n}\com
 \end{equation}
 where $g$ is the acceleration due to gravity and $\rho_n$ is the layer density.
 
 The dynamics of the system is given by the evolution of PV. In particular, assuming a background
 flow with background velocity $\vec{V} = (U,V)$ such that
 \begin{align}
-\label{eq:Udefn}
+\label{eq:Uequiv}
 u_n^{{\tot}} = U_n - \psi_{n y}\com \nonumber \\
 v_n^{\tot} = V_n + \psi_{n x} \com
 \end{align}
@@ -83,7 +83,7 @@ The inversion relationship is
 where $\sI$ is the $\nmax\times\nmax$ identity matrix, and the stretching matrix is
 
 \begin{equation}
-\textsf{S} \defn  f_0^2
+\textsf{S} \equiv  f_0^2
 \begin{bmatrix}
     -\frac{1}{g'_1 H_1}& & \frac{1}{g'_1 H_1} &  & 0 \dots& \\
  & 0 & & & & &\\
@@ -99,7 +99,7 @@ where $\sI$ is the $\nmax\times\nmax$ identity matrix, and the stretching matrix
 \subsection*{Energy spectrum}
 The equation for the energy spectrum,
 \begin{equation}
-E(k,l) \defn {\frac{1}{2 H}\sum_{i=1}^{\nmax} H_i \kappa^2 |\hat{\psi}_i|^2} \,\,\,\,+ \,\,\,\,\,\, {\frac{1}{2 H} \sum_{i=1}^{\nmax-1} \frac{f_0^2}{g'_i}|\hat{\psi}_{i}- \hat{\psi}_{i+1}|^2}\,\,\,\,,
+E(k,l) \equiv {\frac{1}{2 H}\sum_{i=1}^{\nmax} H_i \kappa^2 |\hat{\psi}_i|^2} \,\,\,\,+ \,\,\,\,\,\, {\frac{1}{2 H} \sum_{i=1}^{\nmax-1} \frac{f_0^2}{g'_i}|\hat{\psi}_{i}- \hat{\psi}_{i+1}|^2}\,\,\,\,,
 \end{equation}
 is 
 
@@ -125,7 +125,7 @@ budget above is dominated by I through IV.
 Similarly the evolution of the barotropic enstrophy spectrum,
 
 \begin{equation}
-Z(k,l) \defn \frac{1}{2H} \sum_{i=1}^{\nmax} H_i |\hat{q}_i|^2\com
+Z(k,l) \equiv \frac{1}{2H} \sum_{i=1}^{\nmax} H_i |\hat{q}_i|^2\com
 \end{equation}
 is governed by
 \begin{equation}
@@ -161,12 +161,12 @@ With $h_b = 0$, the linear eigenproblem is
 where
 
 \begin{equation}
-\sA \defn \mathsf{B}(\mathsf{U}\, k + \mathsf{V}\,l) + \mathsf{I}\left(k\,\mathsf{Q}_y - l\,\mathsf{Q}_x\right) + \mathsf{I}\,\delta_{\mathsf{N}\mathsf{N}}\, \mathrm{i} \,r_{ek}\,\kappa^2\,,
+\sA \equiv \mathsf{B}(\mathsf{U}\, k + \mathsf{V}\,l) + \mathsf{I}\left(k\,\mathsf{Q}_y - l\,\mathsf{Q}_x\right) + \mathsf{I}\,\delta_{\mathsf{N}\mathsf{N}}\, \mathrm{i} \,r_{ek}\,\kappa^2\,,
 \end{equation}
 where $\delta_{\mathsf{N}\mathsf{N}} = [0,0,\dots,0,1]\,,$
 and 
 \begin{equation}
-\mathsf{B} \defn  \mathsf{S} - \mathsf{I} \kappa^2\,. 
+\mathsf{B} \equiv  \mathsf{S} - \mathsf{I} \kappa^2\,. 
 \end{equation}
 The growth rate is Im$\{\omega\}$.
 
@@ -179,11 +179,11 @@ With $\nmax = 2$, an alternative notation for the perturbation of potential vort
 where we use the following definitions
 where
 \begin{equation}
-F_1 \defn \frac{k_d^2}{1 + \delta^2}\,, \qquad \:\:\text{and} \qquad F_2 \defn \delta \,F_1\,,
+F_1 \equiv \frac{k_d^2}{1 + \delta^2}\,, \qquad \:\:\text{and} \qquad F_2 \defn \delta \,F_1\,,
 \end{equation}
 with the deformation wavenumber
 \begin{equation}
-k_d^2 \defn \, \frac{f_0^2}{g} \frac{H_1+H_2}{H_1 H_2} \per
+k_d^2 \equiv \, \frac{f_0^2}{g} \frac{H_1+H_2}{H_1 H_2} \per
 \end{equation}
 With this notation, the ``stretching matrix'' is simply
 \begin{equation}

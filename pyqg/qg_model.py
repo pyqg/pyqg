@@ -205,11 +205,6 @@ class QGModel(model.Model):
         #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
         self.Ubg = np.array([U1,U2])
 
-    def _calc_diagnostics(self):
-        # here is where we calculate diagnostics
-        if (self.t>=self.dt) and (self.tc%self.taveints==0):
-            self._increment_diagnostics()
-
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(

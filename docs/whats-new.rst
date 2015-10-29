@@ -4,9 +4,11 @@ What's New
 v0.1.5 (???)
 ------------
 
-- Adds new logger that leverages on built-in python logging.
-- Changed license to MIT
+Implemented multi-layer subclass.
 
+Added new logger that leverages on built-in python logging.
+
+Changed license to MIT
 
 v0.1.4 (22 Oct 2015)
 --------------------

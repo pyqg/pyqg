@@ -76,6 +76,10 @@ class Model(PseudoSpectralKernel):
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
         filterfac=23.6,             # the factor for use in the exponential filter
+        # constants
+        f = None,                   # coriolis parameter (not necessary for two-layer model
+                                    #  if deformation radius is provided)
+        g= 9.81,                    # acceleration due to gravity
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -156,13 +160,20 @@ class Model(PseudoSpectralKernel):
         self.rek = rek
         self.filterfac = filterfac
 
+        # constants
+        self.g = g
+        if f:
+            self.f = f
+            self.f2 = f**2
+
+
+        self._initialize_logger()
         self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
         self._initialize_inversion_matrix()
         self._initialize_time()                
-        self._initialize_logger()
 
         # call the underlying cython kernel
         self._initialize_kernel()

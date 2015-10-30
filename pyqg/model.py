@@ -334,7 +334,8 @@ class Model(PseudoSpectralKernel):
         else:
             fhandler = logging.StreamHandler()
 
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(levelname)s: %(message)s')
+
         fhandler.setFormatter(formatter)
 
         if not self.logger.handlers:
@@ -378,7 +379,7 @@ class Model(PseudoSpectralKernel):
             self.cfl = self._calc_cfl()
             #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (
             #       self.t, self.tc, cfl, ke)
-            self.logger.info(' Step: %i, Time: %e, KE: %e, CFL: %f'
+            self.logger.info('Step: %i, Time: %3.2e, KE: %3.2e, CFL: %4.3f'
                     , self.tc,self.t,self.ke,self.cfl )
 
             assert self.cfl<1., self.logger.error('CFL condition violated')

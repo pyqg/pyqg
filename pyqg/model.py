@@ -205,7 +205,29 @@ class Model(PseudoSpectralKernel):
         """Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
-                
+               
+
+    def vertical_modes(self):
+        """ Calculate standard vertical modes. Simply
+            the eigenvectors of the stretching matrix S """
+
+        evals,evecs = np.linalg.eig(-self.S)
+
+        asort = evals.argsort()
+
+        # deformation radii
+        self.radii = np.zeros(self.nz)
+        self.radii[0] = self.g*self.H/np.abs(self.f) # barotropic def. radius
+        self.radii[1:] = np.sqrt(1./evals[asort][1:])
+
+        # eigenstructure 
+        self.pmodes = evecs[:,asort]
+
+        # normalize to have unit L2-norm
+        Ai = (self.H / (self.Hi[:,np.newaxis]*(self.pmodes**2)).sum(axis=0))**0.5
+        self.pmodes = Ai[np.newaxis,:]*self.pmodes
+
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):

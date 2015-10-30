@@ -4,6 +4,8 @@ What's New
 v0.1.5 (???)
 ------------
 
+Implemented vertical mode methods.
+
 Implemented multi-layer subclass.
 
 Added new logger that leverages on built-in python logging.

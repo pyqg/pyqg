@@ -227,6 +227,18 @@ class Model(PseudoSpectralKernel):
         Ai = (self.H / (self.Hi[:,np.newaxis]*(self.pmodes**2)).sum(axis=0))**0.5
         self.pmodes = Ai[np.newaxis,:]*self.pmodes
 
+    def modal_projection(self,p,forward=True):
+        """ Performs a field p into modal amplitudes pn
+                using the basis [pmodes]. The inverse
+                transform calculates p from pn"""
+        
+        if forward:
+            pt = np.linalg.solve(self.pmodes[np.newaxis,np.newaxis],p.T).T
+        else:
+            pt = np.einsum("ik,k...->i...",self.pmodes,p)
+
+        return pt
+
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

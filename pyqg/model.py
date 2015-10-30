@@ -57,6 +57,10 @@ class Model(PseudoSpectralKernel):
     ntd : int
         Number of threads to use. Should not exceed the number of cores on
         your machine.
+    pmodes : real array
+        Vertical pressure modes (unitless)
+    radii :  real array
+        Deformation radii  (units: model length)
     """
     
     def __init__(

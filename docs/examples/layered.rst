@@ -10,19 +10,20 @@ Fully developed baroclinic instability of a 3-layer flow
     %matplotlib inline
     
     import pyqg
+    from pyqg import diagnostic_tools as tools
 
 
 .. parsed-literal::
 
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 22 days
+    Message: trial mode expires in 21 days
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 22 days
+    Message: trial mode expires in 21 days
     Vendor:  Continuum Analytics, Inc.
     Package: mkl
-    Message: trial mode expires in 22 days
+    Message: trial mode expires in 21 days
 
 
 Set up
@@ -64,8 +65,8 @@ Set up
 
 .. parsed-literal::
 
-    2015-10-31 20:46:27,674 - pyqg.model - INFO -  Logger initialized
-    2015-10-31 20:46:27,743 - pyqg.model - INFO -  Kernel initialized
+    2015-11-01 09:24:48,899 - pyqg.model - INFO -  Logger initialized
+    2015-11-01 09:24:48,976 - pyqg.model - INFO -  Kernel initialized
 
 
 Initial condition
@@ -89,17 +90,17 @@ Run the model
 
 .. parsed-literal::
 
-    2015-10-31 20:46:35,461 - pyqg.model - INFO -  Step: 5000, Time: 7.500000e+06, KE: 3.031285e-06, CFL: 0.005523
-    2015-10-31 20:46:43,220 - pyqg.model - INFO -  Step: 10000, Time: 1.500000e+07, KE: 2.739828e-04, CFL: 0.011262
-    2015-10-31 20:46:51,022 - pyqg.model - INFO -  Step: 15000, Time: 2.250000e+07, KE: 9.408583e-03, CFL: 0.062950
-    2015-10-31 20:46:58,740 - pyqg.model - INFO -  Step: 20000, Time: 3.000000e+07, KE: 3.752716e-02, CFL: 0.099449
-    2015-10-31 20:47:06,509 - pyqg.model - INFO -  Step: 25000, Time: 3.750000e+07, KE: 9.344290e-02, CFL: 0.158044
-    2015-10-31 20:47:14,373 - pyqg.model - INFO -  Step: 30000, Time: 4.500000e+07, KE: 1.581918e-01, CFL: 0.150727
-    2015-10-31 20:47:22,635 - pyqg.model - INFO -  Step: 35000, Time: 5.250000e+07, KE: 2.302018e-01, CFL: 0.204099
-    2015-10-31 20:47:30,323 - pyqg.model - INFO -  Step: 40000, Time: 6.000000e+07, KE: 2.999698e-01, CFL: 0.188181
-    2015-10-31 20:47:38,000 - pyqg.model - INFO -  Step: 45000, Time: 6.750000e+07, KE: 3.947220e-01, CFL: 0.218937
-    2015-10-31 20:47:46,096 - pyqg.model - INFO -  Step: 50000, Time: 7.500000e+07, KE: 4.528079e-01, CFL: 0.244699
-    2015-10-31 20:47:54,058 - pyqg.model - INFO -  Step: 55000, Time: 8.250000e+07, KE: 3.766524e-01, CFL: 0.232231
+    2015-11-01 09:24:56,724 - pyqg.model - INFO -  Step: 5000, Time: 7.500000e+06, KE: 2.943601e-06, CFL: 0.005405
+    2015-11-01 09:25:04,047 - pyqg.model - INFO -  Step: 10000, Time: 1.500000e+07, KE: 2.458295e-04, CFL: 0.009907
+    2015-11-01 09:25:11,367 - pyqg.model - INFO -  Step: 15000, Time: 2.250000e+07, KE: 7.871924e-03, CFL: 0.052224
+    2015-11-01 09:25:18,647 - pyqg.model - INFO -  Step: 20000, Time: 3.000000e+07, KE: 2.883665e-02, CFL: 0.097805
+    2015-11-01 09:25:25,984 - pyqg.model - INFO -  Step: 25000, Time: 3.750000e+07, KE: 6.801730e-02, CFL: 0.128954
+    2015-11-01 09:25:33,610 - pyqg.model - INFO -  Step: 30000, Time: 4.500000e+07, KE: 1.381786e-01, CFL: 0.162363
+    2015-11-01 09:25:41,222 - pyqg.model - INFO -  Step: 35000, Time: 5.250000e+07, KE: 2.030859e-01, CFL: 0.232705
+    2015-11-01 09:25:48,808 - pyqg.model - INFO -  Step: 40000, Time: 6.000000e+07, KE: 2.863686e-01, CFL: 0.212858
+    2015-11-01 09:25:56,022 - pyqg.model - INFO -  Step: 45000, Time: 6.750000e+07, KE: 2.558977e-01, CFL: 0.212194
+    2015-11-01 09:26:03,663 - pyqg.model - INFO -  Step: 50000, Time: 7.500000e+07, KE: 1.979363e-01, CFL: 0.172992
+    2015-11-01 09:26:11,409 - pyqg.model - INFO -  Step: 55000, Time: 8.250000e+07, KE: 1.755793e-01, CFL: 0.170431
 
 
 A snapshot and some diagnostics
@@ -135,7 +136,7 @@ A snapshot and some diagnostics
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x111be1910>
+    <matplotlib.text.Text at 0x1119c4c50>
 
 
 
@@ -199,7 +200,7 @@ We can project the solution onto the modes
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x112837590>
+    <matplotlib.text.Text at 0x11273f350>
 
 
 
@@ -212,16 +213,16 @@ Diagnostics
 
 .. code:: python
 
-    kespec_1 = m.get_diagnostic('KEspec')[0].sum(axis=0)
-    kespec_2 = m.get_diagnostic('KEspec')[1].sum(axis=0)
-    kespec_3 = m.get_diagnostic('KEspec')[2].sum(axis=0)
+    kr, kespec_1 = tools.calc_ispec(m,m.get_diagnostic('KEspec')[0])
+    _, kespec_2 = tools.calc_ispec(m,m.get_diagnostic('KEspec')[1])
+    _, kespec_3 = tools.calc_ispec(m,m.get_diagnostic('KEspec')[2])
     
-    plt.loglog( m.kk, kespec_1, '.-' )
-    plt.loglog( m.kk, kespec_2, '.-' )
-    plt.loglog( m.kk, kespec_3, '.-' )
+    plt.loglog( kr, kespec_1, '.-' )
+    plt.loglog( kr, kespec_2, '.-' )
+    plt.loglog( kr, kespec_3, '.-' )
     
     plt.legend(['layer 1','layer 2', 'layer 3'], loc='lower left')
-    plt.ylim([1e-9,1e-0]); plt.xlim([m.kk.min(), m.kk.max()])
+    plt.ylim([1e-14,1e-6]); plt.xlim([m.kk.min(), m.kk.max()])
     plt.xlabel(r'k (m$^{-1}$)'); plt.grid()
     plt.title('Kinetic Energy Spectrum');
 
@@ -234,63 +235,56 @@ By default the modal KE and PE spectra are also calculated
 
 .. code:: python
 
-    modal_kespec_1 = m.get_diagnostic('KEspec_modal')[0].sum(axis=0)
-    modal_kespec_2 = m.get_diagnostic('KEspec_modal')[1].sum(axis=0)
-    modal_kespec_3 = m.get_diagnostic('KEspec_modal')[2].sum(axis=0)
+    kr, modal_kespec_1 = tools.calc_ispec(m,m.get_diagnostic('KEspec_modal')[0])
+    _,  modal_kespec_2 = tools.calc_ispec(m,m.get_diagnostic('KEspec_modal')[1])
+    _,  modal_kespec_3 = tools.calc_ispec(m,m.get_diagnostic('KEspec_modal')[2])
     
-    modal_pespec_2 = m.get_diagnostic('PEspec_modal')[0].sum(axis=0)
-    modal_pespec_3 = m.get_diagnostic('PEspec_modal')[1].sum(axis=0)
+    _,  modal_pespec_2 = tools.calc_ispec(m,m.get_diagnostic('PEspec_modal')[0])
+    _,  modal_pespec_3 = tools.calc_ispec(m,m.get_diagnostic('PEspec_modal')[1])
 
 .. code:: python
 
-    plt.figure(figsize=(15,6))
+    plt.figure(figsize=(15,5))
     
     plt.subplot(121)
-    plt.loglog( m.kk, modal_kespec_1, '.-' )
-    plt.loglog( m.kk, modal_kespec_2, '.-' )
-    plt.loglog( m.kk, modal_kespec_3, '.-' )
+    plt.loglog( kr, modal_kespec_1, '.-' )
+    plt.loglog( kr, modal_kespec_2, '.-' )
+    plt.loglog( kr, modal_kespec_3, '.-' )
     
     plt.legend(['barotropic ','1st baroclinic', '2nd baroclinic'], loc='lower left')
-    plt.ylim([1e-9,1e-0]); plt.xlim([m.kk.min(), m.kk.max()])
+    plt.ylim([1e-14,1e-6]); plt.xlim([m.kk.min(), m.kk.max()])
     plt.xlabel(r'k (m$^{-1}$)'); plt.grid()
     plt.title('Kinetic Energy Spectra');
-    plt.ylim([1e-7,1e-0]); plt.xlim([m.kk.min(), m.kk.max()])
     
     
     plt.subplot(122)
-    plt.loglog( m.kk, modal_pespec_2, '.-' )
-    plt.loglog( m.kk, modal_pespec_3, '.-' )
+    plt.loglog( kr, modal_pespec_2, '.-' )
+    plt.loglog( kr, modal_pespec_3, '.-' )
     
     plt.legend(['1st baroclinic', '2nd baroclinic'], loc='lower left')
-    plt.ylim([1e-9,1e-0]); plt.xlim([m.kk.min(), m.kk.max()])
+    plt.ylim([1e-14,1e-6]); plt.xlim([m.kk.min(), m.kk.max()])
     plt.xlabel(r'k (m$^{-1}$)'); plt.grid()
     plt.title('Potential Energy Spectra');
-    
-    plt.ylim([1e-7,1e-0]); plt.xlim([m.kk.min(), m.kk.max()])
 
 
 
-
-
-.. parsed-literal::
-
-    (6.2831853071795867e-06, 0.00020106192982974677)
-
-
-
-
-.. image:: layered_files/layered_20_1.png
+.. image:: layered_files/layered_20_0.png
 
 
 .. code:: python
 
-    ebud = [ m.get_diagnostic('APEgenspec').sum(axis=0),
-             m.get_diagnostic('APEflux').sum(axis=0),
-             m.get_diagnostic('KEflux').sum(axis=0),
-             -m.rek*(m.Hi[-1]/m.H)*m.get_diagnostic('KEspec')[1].sum(axis=0)*m.M**2 ]
+    _, APEgenspec =  tools.calc_ispec(m,m.get_diagnostic('APEgenspec'))
+    _, APEflux =  tools.calc_ispec(m,m.get_diagnostic('APEflux'))
+    _, KEflux =   tools.calc_ispec(m,m.get_diagnostic('KEflux'))
+    _, KEspec =   tools.calc_ispec(m,m.get_diagnostic('KEspec')[1]*m.M**2)
+    
+    ebud = [ APEgenspec,
+             APEflux,
+             KEflux,
+             -m.rek*(m.Hi[-1]/m.H)*KEspec ]
     ebud.append(-np.vstack(ebud).sum(axis=0))
     ebud_labels = ['APE gen','APE flux div.','KE flux div.','Diss.','Resid.']
-    [plt.semilogx(m.kk, term) for term in ebud]
+    [plt.semilogx(kr, term) for term in ebud]
     plt.legend(ebud_labels, loc='upper right')
     plt.xlim([m.kk.min(), m.kk.max()])
     plt.xlabel(r'k (m$^{-1}$)'); plt.grid()
@@ -310,4 +304,3 @@ deformation length scales, where it is converted into KE. The KE the
 experiments and inverse tranfer, cascading up to the scale of the
 domain. The mechanical bottom drag essentially removes the large scale
 KE.
-

@@ -219,10 +219,11 @@ class Model(PseudoSpectralKernel):
 
         asort = evals.argsort()
 
-        # deformation radii
-        self.radii = np.zeros(self.nz)
+        # deformation wavenumbers and radii
+        self.kdi2 = evals[asort]
+        self.radii = np.zeros_like(self.kdi2)
         self.radii[0] = self.g*self.H/np.abs(self.f) # barotropic def. radius
-        self.radii[1:] = np.sqrt(1./evals[asort][1:])
+        self.radii[1:] = 1./np.sqrt(self.kdi2[1:])
 
         # eigenstructure 
         self.pmodes = evecs[:,asort]
@@ -552,7 +553,7 @@ class Model(PseudoSpectralKernel):
         """Print a human-readable summary of the available diagnostics."""
         diag_names = self.diagnostics.keys()
         diag_names.sort()
-        print('NAME       | DESCRIPTION')
+        print('NAME               | DESCRIPTION')
         print(80*'-')
         for k in diag_names:
             d = self.diagnostics[k]

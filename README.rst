@@ -44,4 +44,5 @@ Links
 .. |landscape| image:: https://landscape.io/github/pyqg/pyqg/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pyqg/pyqg/master
    :alt: Code Health
-.. |binder| image:: http://mybinder.org/badge.svg :target: http://mybinder.org/repo/crocha700/pyqg
+.. |binder| image:: http://mybinder.org/badge.svg 
+    :target: http://mybinder.org/repo/crocha700/pyqg

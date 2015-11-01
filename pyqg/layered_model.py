@@ -134,6 +134,8 @@ class LayeredModel(model.Model):
 
         super(LayeredModel, self).__init__(**kwargs)
 
+        self.vertical_modes()
+        
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
@@ -277,6 +279,8 @@ class LayeredModel(model.Model):
         self.Sp = self.ifft(self.Sph)
         self.JSp = self._advect(self.Sp,self.u,self.v)
 
+        self.phn = self.modal_projection(self.ph)
+
 
     def _initialize_model_diagnostics(self):
         """ Extra diagnostics for layered model """
@@ -285,6 +289,16 @@ class LayeredModel(model.Model):
                 description='barotropic enstrophy spectrum',
                 function= (lambda self: 
                     np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H) )
+
+        self.add_diagnostic('KEspec_modal',
+                description='modal KE spectra',
+                function= (lambda self: 
+                    self.wv2*(np.abs(self.phn)**2)/self.M**2 ))
+        
+        self.add_diagnostic('PEspec_modal',
+                description='modal PE spectra',
+                function= (lambda self: 
+                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2 ))
 
         self.add_diagnostic('APEspec',
                 description='available potential energy spectrum',

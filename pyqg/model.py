@@ -57,6 +57,10 @@ class Model(PseudoSpectralKernel):
     ntd : int
         Number of threads to use. Should not exceed the number of cores on
         your machine.
+    pmodes : real array
+        Vertical pressure modes (unitless)
+    radii :  real array
+        Deformation radii  (units: model length)
     """
     
     def __init__(
@@ -205,7 +209,42 @@ class Model(PseudoSpectralKernel):
         """Run the model forward without stopping until the end."""
         while(self.t < self.tmax): 
             self._step_forward()
-                
+               
+
+    def vertical_modes(self):
+        """ Calculate standard vertical modes. Simply
+            the eigenvectors of the stretching matrix S """
+
+        evals,evecs = np.linalg.eig(-self.S)
+
+        asort = evals.argsort()
+
+        # deformation wavenumbers and radii
+        self.kdi2 = evals[asort]
+        self.radii = np.zeros_like(self.kdi2)
+        self.radii[0] = self.g*self.H/np.abs(self.f) # barotropic def. radius
+        self.radii[1:] = 1./np.sqrt(self.kdi2[1:])
+
+        # eigenstructure 
+        self.pmodes = evecs[:,asort]
+
+        # normalize to have unit L2-norm
+        Ai = (self.H / (self.Hi[:,np.newaxis]*(self.pmodes**2)).sum(axis=0))**0.5
+        self.pmodes = Ai[np.newaxis,:]*self.pmodes
+
+    def modal_projection(self,p,forward=True):
+        """ Performs a field p into modal amplitudes pn
+                using the basis [pmodes]. The inverse
+                transform calculates p from pn"""
+        
+        if forward:
+            pt = np.linalg.solve(self.pmodes[np.newaxis,np.newaxis],p.T).T
+        else:
+            pt = np.einsum("ik,k...->i...",self.pmodes,p)
+
+        return pt
+
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
@@ -515,7 +554,7 @@ class Model(PseudoSpectralKernel):
         """Print a human-readable summary of the available diagnostics."""
         diag_names = self.diagnostics.keys()
         diag_names.sort()
-        print('NAME       | DESCRIPTION')
+        print('NAME               | DESCRIPTION')
         print(80*'-')
         for k in diag_names:
             d = self.diagnostics[k]

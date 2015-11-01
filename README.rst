@@ -1,6 +1,8 @@
 .. figure:: https://github.com/pyqg/pyqg/blob/master/docs/_static/vortex_rollup.png
    :alt:
 
+.. image:: http://mybinder.org/badge.svg :target: http://mybinder.org/repo/crocha700/pyqg
+
 pyqg: Python Quasigeostrophic Model
 ===================================
 

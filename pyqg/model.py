@@ -197,7 +197,6 @@ class Model(PseudoSpectralKernel):
         """
         
         tsnapints = np.ceil(tsnapint/self.dt)
-        nt = np.ceil(np.floor((self.tmax-tsnapstart)/self.dt+1)/tsnapints)
         
         while(self.t < self.tmax):
             self._step_forward()
@@ -249,9 +248,6 @@ class Model(PseudoSpectralKernel):
 
     def _step_forward(self):
 
-        # the basic steps are
-        self._print_status() 
-
         self._invert()
         # find streamfunction from pv
 
@@ -270,6 +266,9 @@ class Model(PseudoSpectralKernel):
         self._forward_timestep()
         # apply tendencies to step the model forward
         # (filter gets called here)
+
+        # the basic steps are
+        self._print_status() 
         
     def _initialize_time(self):
         """Set up timestep stuff"""
@@ -413,7 +412,7 @@ class Model(PseudoSpectralKernel):
         
     def _print_status(self):
         """Output some basic stats."""
-        if (self.log_level) and ((self.tc % self.twrite)==0) and self.tc>0.:
+        if (self.log_level) and ((self.tc % self.twrite)==0):
             self.ke = self._calc_ke()
             self.cfl = self._calc_cfl()
             #print 't=%16d, tc=%10d: cfl=%5.6f, ke=%9.9f' % (

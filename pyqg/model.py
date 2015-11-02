@@ -244,6 +244,40 @@ class Model(PseudoSpectralKernel):
 
         return pt
 
+    def stability_analysis(self,bottom_friction=False):
+        """ Baroclinic linear instability analysis """
+
+        self.omg = np.zeros_like(self.wv)+0.j
+        self.evec = np.zeros_like(self.qh)
+        I = np.eye(self.nz)
+
+        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
+
+        Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
+
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
+        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
+        L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
+
+        if bottom_friction:
+            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
+
+        L4 = self.a.T
+
+        M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
+
+        evals,evecs = np.linalg.eig(M)
+
+        evals, evecs = evals.T, evecs.T
+    
+        # sorting things this way proved way
+        #  more faster than using numpy's argsort() !
+        imax = evals.imag.argmax(axis=0)
+        for i in range(self.nl):
+            for j in range(self.nk):
+                self.omg[i,j] = evals[imax[i,j],i,j]
+                self.evec[:,i,j] = evecs[imax[i,j],:,i,j]
+
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

@@ -8,3 +8,4 @@ Examples
     examples/layered
     examples/barotropic
     examples/sqg
+    examples/linear_stability

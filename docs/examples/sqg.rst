@@ -15,6 +15,20 @@ Surface quasi-geostrophic dynamics. Journal of Fluid Mechanics, 282, pp
     %matplotlib inline
     from pyqg import sqg_model
 
+
+.. parsed-literal::
+
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 21 days
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 21 days
+    Vendor:  Continuum Analytics, Inc.
+    Package: mkl
+    Message: trial mode expires in 21 days
+
+
 Surface quasi-geostrophy (SQG) is a relatively simple model that
 describes surface intensified flows due to buoyancy. One of it's
 advantages is that it only has two spatial dimensions but describes a
@@ -57,9 +71,16 @@ pedagogical reasons.
     year = 1.
     m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 26.005,
             beta = 0., Nb = 1., H = 1., rek = 0., rd = None, dt = 0.005,
-                         taveint=1, ntd=4)
+                         taveint=1, twrite=400, ntd=4)
     # in this example we used ntd=4, four threads
     # if your machine has more (or fewer) cores available, you could try changing it
+
+
+.. parsed-literal::
+
+    INFO:  Logger initialized
+    INFO:  Kernel initialized
+
 
 Initial condition
 -----------------
@@ -106,8 +127,14 @@ that it is stable. Why don't you try it and see for yourself?
     plt.show()
 
 
+.. parsed-literal::
 
-.. image:: sqg_files/sqg_11_0.png
+    /Users/crocha/anaconda/lib/python2.7/site-packages/matplotlib/collections.py:590: FutureWarning: elementwise comparison failed; returning scalar instead, but in the future will perform elementwise comparison
+      if self._edgecolors == str('face'):
+
+
+
+.. image:: sqg_files/sqg_11_1.png
 
 
 Runing the model
@@ -119,7 +146,7 @@ visualization).
 
 .. code:: python
 
-    for snapshot in m.run_with_snapshots(tsnapstart=0, tsnapint=400*m.dt):
+    for snapshot in m.run_with_snapshots(tsnapstart=0., tsnapint=400*m.dt):
         plt.clf()
         p1 = plt.imshow(m.q.squeeze() + m.beta * m.y)
         #plt.clim([-30., 30.])
@@ -131,8 +158,9 @@ visualization).
         plt.show()
 
 
+.. parsed-literal::
 
-.. image:: sqg_files/sqg_13_0.png
+    INFO: Step: 400, Time: 2.00e+00, KE: 5.21e-03, CFL: 0.245
 
 
 
@@ -141,15 +169,16 @@ visualization).
 
 .. parsed-literal::
 
-    t=               4, tc=      1000: cfl=0.239869, ke=0.005206463
+    INFO: Step: 800, Time: 4.00e+00, KE: 5.21e-03, CFL: 0.239
 
 
 
 .. image:: sqg_files/sqg_13_3.png
 
 
+.. parsed-literal::
 
-.. image:: sqg_files/sqg_13_4.png
+    INFO: Step: 1200, Time: 6.00e+00, KE: 5.21e-03, CFL: 0.261
 
 
 
@@ -158,41 +187,43 @@ visualization).
 
 .. parsed-literal::
 
-    t=              10, tc=      2000: cfl=0.267023, ke=0.005206261
+    INFO: Step: 1600, Time: 8.00e+00, KE: 5.21e-03, CFL: 0.273
 
 
 
 .. image:: sqg_files/sqg_13_7.png
 
 
+.. parsed-literal::
 
-.. image:: sqg_files/sqg_13_8.png
+    INFO: Step: 2000, Time: 1.00e+01, KE: 5.21e-03, CFL: 0.267
+
+
+
+.. image:: sqg_files/sqg_13_9.png
 
 
 .. parsed-literal::
 
-    t=              15, tc=      3000: cfl=0.251901, ke=0.005199422
-
-
-
-.. image:: sqg_files/sqg_13_10.png
+    INFO: Step: 2400, Time: 1.20e+01, KE: 5.20e-03, CFL: 0.247
 
 
 
 .. image:: sqg_files/sqg_13_11.png
 
 
+.. parsed-literal::
 
-.. image:: sqg_files/sqg_13_12.png
+    INFO: Step: 2800, Time: 1.40e+01, KE: 5.20e-03, CFL: 0.254
+
+
+
+.. image:: sqg_files/sqg_13_13.png
 
 
 .. parsed-literal::
 
-    t=              20, tc=      4000: cfl=0.259413, ke=0.005189615
-
-
-
-.. image:: sqg_files/sqg_13_14.png
+    INFO: Step: 3200, Time: 1.60e+01, KE: 5.20e-03, CFL: 0.259
 
 
 
@@ -201,11 +232,47 @@ visualization).
 
 .. parsed-literal::
 
-    t=              24, tc=      5000: cfl=0.255257, ke=0.005176248
+    INFO: Step: 3600, Time: 1.80e+01, KE: 5.19e-03, CFL: 0.256
 
 
 
 .. image:: sqg_files/sqg_13_17.png
+
+
+.. parsed-literal::
+
+    INFO: Step: 4000, Time: 2.00e+01, KE: 5.19e-03, CFL: 0.259
+
+
+
+.. image:: sqg_files/sqg_13_19.png
+
+
+.. parsed-literal::
+
+    INFO: Step: 4400, Time: 2.20e+01, KE: 5.19e-03, CFL: 0.259
+
+
+
+.. image:: sqg_files/sqg_13_21.png
+
+
+.. parsed-literal::
+
+    INFO: Step: 4800, Time: 2.40e+01, KE: 5.18e-03, CFL: 0.242
+
+
+
+.. image:: sqg_files/sqg_13_23.png
+
+
+.. parsed-literal::
+
+    INFO: Step: 5200, Time: 2.60e+01, KE: 5.17e-03, CFL: 0.263
+
+
+
+.. image:: sqg_files/sqg_13_25.png
 
 
 Compare these results with Figure 2 of the paper. In this simulation you

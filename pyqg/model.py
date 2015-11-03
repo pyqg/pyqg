@@ -288,8 +288,8 @@ class Model(PseudoSpectralKernel):
 
         """
 
-        omg = np.zeros_like(self.wv)+0.j
-        evec = np.zeros_like(self.qh)
+        omega = np.zeros_like(self.wv)+0.j
+        phi = np.zeros_like(self.qh)
 
         I = np.eye(self.nz)
 
@@ -309,7 +309,6 @@ class Model(PseudoSpectralKernel):
         M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
 
         evals,evecs = np.linalg.eig(M)
-
         evals, evecs = evals.T, evecs.T
     
         # sorting things this way proved way
@@ -317,10 +316,10 @@ class Model(PseudoSpectralKernel):
         imax = evals.imag.argmax(axis=0)
         for i in range(self.nl):
             for j in range(self.nk):
-                omg[i,j] = evals[imax[i,j],i,j]
-                evec[:,i,j] = evecs[imax[i,j],:,i,j]
+                omega[i,j] = evals[imax[i,j],i,j]
+                phi[:,i,j] = evecs[imax[i,j],:,i,j]
 
-        return omg, evec
+        return omega, phi
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

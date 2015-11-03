@@ -28,14 +28,14 @@ method ``stability_analysis``:
 
 .. code:: python
 
-    m.stability_analysis()
+    evals,evecs = m.stability_analysis()
 
 The eigenvalues are stored in ``omg``, and the eigenctors in ``evec``.
 For plotting purposes, we use fftshift to reorder the entries
 
 .. code:: python
 
-    omg = np.fft.fftshift(m.omg.imag,axes=(0,))
+    evals = np.fft.fftshift(evals.imag,axes=(0,))
     
     k,l = m.k*m.radii[1], np.fft.fftshift(m.l,axes=(0,))*m.radii[1]
 
@@ -43,8 +43,8 @@ It is also useful to analyze the fasted-growing mode:
 
 .. code:: python
 
-    argmax = omg[m.Ny/2,:].argmax()
-    evec = np.fft.fftshift(m.evec,axes=(1))[:,m.Ny/2,argmax]
+    argmax = evals[m.Ny/2,:].argmax()
+    evec = np.fft.fftshift(evecs,axes=(1))[:,m.Ny/2,argmax]
     kmax = k[m.Ny/2,argmax]
     
     x = np.linspace(0,4.*pi/kmax,100)
@@ -55,11 +55,11 @@ friction, but the stability method also supports bottom friction:
 
 .. code:: python
 
-    m.stability_analysis(bottom_friction=True)
-    omg_fric = np.fft.fftshift(m.omg.imag,axes=(0,))
+    evals_fric, evecs_fric = m.stability_analysis(bottom_friction=True)
+    evals_fric = np.fft.fftshift(evals_fric.imag,axes=(0,))
     
-    argmax = omg_fric[m.Ny/2,:].argmax()
-    evec_fric = np.fft.fftshift(m.evec,axes=(1))[:,m.Ny/2,argmax]
+    argmax = evals_fric[m.Ny/2,:].argmax()
+    evec_fric = np.fft.fftshift(evecs_fric,axes=(1))[:,m.Ny/2,argmax]
     kmax_fric = k[m.Ny/2,argmax]
     
     mag_fric, phase_fric = np.abs(evec_fric), np.arctan2(evec_fric.imag,evec_fric.real) 
@@ -71,8 +71,8 @@ Plotting growth rates
 
     plt.figure(figsize=(14,4))
     plt.subplot(121)
-    plt.contour(k,l,omg,colors='k')
-    plt.pcolormesh(k,l,omg,cmap='Blues')
+    plt.contour(k,l,evals,colors='k')
+    plt.pcolormesh(k,l,evals,cmap='Blues')
     plt.colorbar()
     plt.xlim(0,2.); plt.ylim(-2.,2.)
     plt.clim([0.,.1])
@@ -80,8 +80,8 @@ Plotting growth rates
     plt.title('without bottom friction')
     
     plt.subplot(122)
-    plt.contour(k,l,omg_fric,colors='k')
-    plt.pcolormesh(k,l,omg_fric,cmap='Blues')
+    plt.contour(k,l,evals_fric,colors='k')
+    plt.pcolormesh(k,l,evals_fric,cmap='Blues')
     plt.colorbar()
     plt.xlim(0,2.); plt.ylim(-2.,2.)
     plt.clim([0.,.1])
@@ -93,7 +93,7 @@ Plotting growth rates
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x11602de10>
+    <matplotlib.text.Text at 0x11539e290>
 
 
 
@@ -104,8 +104,8 @@ Plotting growth rates
 .. code:: python
 
     plt.figure(figsize=(8,4))
-    plt.plot(k[m.Ny/2,:],omg[m.Ny/2,:],'b',label='without bottom friction')
-    plt.plot(k[m.Ny/2,:],omg_fric[m.Ny/2,:],'b--',label='with bottom friction')
+    plt.plot(k[m.Ny/2,:],evals[m.Ny/2,:],'b',label='without bottom friction')
+    plt.plot(k[m.Ny/2,:],evals_fric[m.Ny/2,:],'b--',label='with bottom friction')
     plt.xlim(0.,2.)
     plt.legend()
     plt.xlabel(r'$k\,L_d$')
@@ -116,7 +116,7 @@ Plotting growth rates
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x11742a090>
+    <matplotlib.text.Text at 0x10f9731d0>
 
 
 
@@ -142,7 +142,7 @@ Plotting the wavestructure of the most unstable modes
 
 .. parsed-literal::
 
-    <matplotlib.text.Text at 0x11993d990>
+    <matplotlib.text.Text at 0x114c6d410>
 
 
 

@@ -18,7 +18,7 @@ class LinearStabilityTester(unittest.TestCase):
                 H=np.array([2000,2000.]),delta=1.,nz=2,f=1.)
 
         # numerical results
-        m.stability_analysis()
+        evals, evecs = m.stability_analysis()
 
         # analytical results
         kb = sqrt(m.beta/(m.Us/2.))
@@ -32,7 +32,7 @@ class LinearStabilityTester(unittest.TestCase):
         fneg = D<0.
         omg_ana[fneg] = 1j*m.k[fneg]*(m.beta/(m.wv2[fneg] + kd2))*( (kd2/(2.*m.wv2[fneg]))*sqrt(-D[fneg]) )
 
-        res = np.abs(omg_ana.imag-m.omg.imag).max()
+        res = np.abs(omg_ana.imag-evals.imag).max()
 
         np.testing.assert_allclose(res,0.,atol=self.atol,
                 err_msg=' Residual  of growth rate is larger than %1.1e' %res)

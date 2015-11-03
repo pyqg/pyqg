@@ -38,15 +38,15 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         assert m.t == 93312000.0
     
-        np.testing.assert_allclose(q1norm, 9.561430503712755e-08, atol=0.1,
+        np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol=0.1,
                     err_msg= ' Inconsistent with reference solution')
 
 
     def test_bt(self):
         """ Tests against some statistics of a reference barotropic solution """
 
-        m = pyqg.BTModel(L=2.*np.pi,nx=128, tmax = 10,
-                beta = 0., H = 1., rek = 0., rd = None, dt = 0.001,
+        m = pyqg.BTModel(L=2.*np.pi,nx=64, tmax = 5,
+                beta = 0., H = 1., rek = 0., rd = None, dt = 0.0025,
                 twrite=1000)
 
         # IC
@@ -59,10 +59,11 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qih = -m.wv2*pih
         qi = m.ifft(qih)
         m.set_q(qi)
-        
-        atol = 1.e-5
+       
+        rtol = 1.e-5
+        atol = 1.e-14
 
-        np.testing.assert_allclose(m.q, qi, atol)
+        np.testing.assert_allclose(m.q, qi, rtol, atol)
 
         m.run()
 
@@ -72,20 +73,20 @@ class ReferenceSolutionsTester(unittest.TestCase):
         ke = m._calc_ke()
 
         print 'time:       %g' % m.t
-        assert m.t == 10.000999999999896
+        assert m.t == 5.000000000000082
         
-        np.testing.assert_allclose(qnorm, 356981.55844167515, atol,
+        np.testing.assert_allclose(qnorm, 89101.741238768518, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
-        np.testing.assert_allclose(pnorm, 5890.857144590821, atol,
+        np.testing.assert_allclose(pnorm, 1493.217664248918, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
-        np.testing.assert_allclose(ke, 0.99872441481956509, atol,
+        np.testing.assert_allclose(ke, 0.9950360837282386, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
 
     def test_sqg(self):
         """ Tests against some statistics of a reference sqg solution """
 
-        m = pyqg.SQGModel(L=2.*np.pi,nx=128, tmax = 10,
-                beta = 0., H = 1., rek = 0., dt = 1.e-3,
+        m = pyqg.SQGModel(L=2.*np.pi,nx=64, tmax = 5.,
+                beta = 0., H = 1., rek = 0., dt = 0.0025,
                 twrite=1000)
 
         p = np.exp(-(2.*(m.x-1.75*np.pi/2))**2.-(2.*(m.y-np.pi))**2) +\
@@ -98,7 +99,8 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qi = m.ifft(qih)
         m.set_q(qi)
 
-        atol = 1.e-5
+        rtol = 1.e-5
+        atol = 1.e-14
 
         np.testing.assert_allclose(m.q, qi, atol)
 
@@ -110,13 +112,13 @@ class ReferenceSolutionsTester(unittest.TestCase):
         ke = m._calc_ke()
 
         print 'time:       %g' % m.t
-        assert m.t == 10.000999999999896
+        assert m.t == 5.000000000000082
         
-        np.testing.assert_allclose(qnorm, 31517.690603406099, atol,
+        np.testing.assert_allclose(qnorm, 7847.5169609881032, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
-        np.testing.assert_allclose(pnorm, 5398.52096250875, atol,
+        np.testing.assert_allclose(pnorm, 1346.8874163575524, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
-        np.testing.assert_allclose(ke, 0.96184358530902392, atol,
+        np.testing.assert_allclose(ke, 0.9579493831013508, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
 
 

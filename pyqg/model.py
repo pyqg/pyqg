@@ -288,8 +288,9 @@ class Model(PseudoSpectralKernel):
 
         """
 
-        self.omg = np.zeros_like(self.wv)+0.j
-        self.evec = np.zeros_like(self.qh)
+        omg = np.zeros_like(self.wv)+0.j
+        evec = np.zeros_like(self.qh)
+
         I = np.eye(self.nz)
 
         L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
@@ -316,9 +317,10 @@ class Model(PseudoSpectralKernel):
         imax = evals.imag.argmax(axis=0)
         for i in range(self.nl):
             for j in range(self.nk):
-                self.omg[i,j] = evals[imax[i,j],i,j]
-                self.evec[:,i,j] = evecs[imax[i,j],:,i,j]
+                omg[i,j] = evals[imax[i,j],i,j]
+                evec[:,i,j] = evecs[imax[i,j],:,i,j]
 
+        return omg, evec
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

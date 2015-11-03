@@ -284,7 +284,7 @@ class Model(PseudoSpectralKernel):
         omega: complex array
              The eigenvalues with largest complex part (units: inverse model time)
         phi: complex array
-             The eigenvectors associated associates with \omega (unitless)
+             The eigenvectors associated associated with \omega (unitless)
 
         """
 

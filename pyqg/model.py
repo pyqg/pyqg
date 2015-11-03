@@ -244,7 +244,49 @@ class Model(PseudoSpectralKernel):
         return pt
 
     def stability_analysis(self,bottom_friction=False):
-        """ Baroclinic linear instability analysis """
+        """ Performs the baroclinic linear instability analysis given
+                given the base state velocity (``U``,``V``) and stretching matrix ``S``
+        
+        
+        .. math:: {\mathsf{A}}\, \mathsf{\Phi} = \omega \, {\mathsf{B}}\, \mathsf{\Phi}\,,
+
+        where
+
+        .. math:: {\mathsf{A}}\equiv \mathsf{B}(\mathsf{U}\, k + \mathsf{V}\,l) +
+                    \mathsf{I}\left(k\,\mathsf{Q}_y - l\,\mathsf{Q}_x\right) +
+                    \mathsf{I}\,\delta_{\mathsf{N}\mathsf{N}}\, \mathrm{i} \,r_{ek}\,\kappa^2\,,
+
+        where :math:`\delta_{\mathsf{N}\mathsf{N}} = [0,0,\dots,0,1]\,,`
+        
+        and
+
+        .. math:: \mathsf{B} \equiv  \mathsf{S} - \mathsf{I} \kappa^2\,.
+
+        
+        The eigenstructure is 
+        
+        .. math:: \mathsf{\Phi}\,.
+        
+        and the eigenvalue is
+
+        .. math:: `\{\omega}`
+        
+        The growth rate is Im\ :math:`\{\omega\}`.
+
+
+        Parameters
+        ----------
+        bottom_friction: optional inclusion linear bottom drag
+                         in the linear stability calculation (default is False)
+        
+        Returns
+        -------
+        omg: complex array
+             The eigenvalues with largest complex part
+        evecs: complex array
+             The eigenvectors associated with ``omg``
+
+        """
 
         self.omg = np.zeros_like(self.wv)+0.j
         self.evec = np.zeros_like(self.qh)

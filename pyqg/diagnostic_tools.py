@@ -26,7 +26,7 @@ def spec_var(model, ph):
     return var_dens.sum(axis=(-1,-2))
    
 
-def spec_sum(model, ph2):
+def spec_sum(ph2):
     """Compute total spectral sum of the real spectral quantity``ph^2``.
     
     Parameters

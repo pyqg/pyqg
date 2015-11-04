@@ -21,7 +21,10 @@ These are the actual models which are run.
 
 .. autoclass:: QGModel
     :members: 
-   
+
+.. autoclass:: LayeredModel
+    :members:  
+
 .. autoclass:: BTModel
     :members:
 

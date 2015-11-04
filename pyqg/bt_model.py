@@ -40,6 +40,7 @@ class BTModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.H = H
+        self.Hi = np.array([H]) # this is needed so that the diags in model.py don't break
         self.U = U
         
         self.nz = 1

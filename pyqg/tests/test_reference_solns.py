@@ -20,7 +20,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             filterfac=18.4,
             dt=12800.,                   
             tmax=3*year,          
-            tavestart=1*year*0,     
+            tavestart=1*year,     
             taveint=12800.,
             useAB2=True,
             diagnostics_list='all'     

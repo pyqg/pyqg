@@ -20,7 +20,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             filterfac=18.4,
             dt=12800.,                   
             tmax=3*year,          
-            tavestart=1*year*0,     
+            tavestart=1*year,     
             taveint=12800.,
             useAB2=True,
             diagnostics_list='all'     
@@ -37,21 +37,31 @@ class ReferenceSolutionsTester(unittest.TestCase):
         q1norm = (q1**2).sum()
 
         assert m.t == 93312000.0
-    
-        np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol=0.1,
+   
+        
+        # machine + numpy.version fluctuations
+        #   appear to be about 0.1%
+        rtol, atol = 0.001, 0.
+
+        np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol=rtol, atol=atol,
                     err_msg= ' Inconsistent with reference solution')
 
+        diagnostic_results = {
+                'APEgen': 2.5225558013107688e-07  / (m.nx**2),
+                'EKEdiss': 1.4806764171539711e-07 / (m.nx**2),           
+                }
 
         # just skip all the other tests for now
-        return
+        #return
         
         ## raw diagnostics (scalar output)
-        diagnostic_results = {
-            'EKE1': 5.695448642915733e-03,
-            'EKE2': 1.088253274803528e-04,
-            'APEgen': 8.842056320175081e-08,
-            'EKEdiss': 6.368668363708053e-08,        
-        }
+        #diagnostic_results = {
+        #    'EKE1': 5.695448642915733e-03,
+        #    'EKE2': 1.088253274803528e-04,
+        #    'APEgen': 8.842056320175081e-08,
+        #    'EKEdiss': 6.368668363708053e-08,        
+        #}
+
         ## old values
         #diagnostic_results = {
         #    'EKE1': 0.008183776317328265,
@@ -61,14 +71,14 @@ class ReferenceSolutionsTester(unittest.TestCase):
         #}
         
         ## need to average these diagnostics
-        avg_diagnostic_results = {
-            'entspec': 5.703438193477885e-07,
-            'APEflux': 9.192940039964286e-05,
-            'KEflux': 1.702621259427053e-04,
-            'APEgenspec': 9.058591846403974e-05,
-            'KE1spec': 3.338261440237941e+03,
-            'KE2spec': 7.043282793801889e+01
-        }
+        #avg_diagnostic_results = {
+        #    'entspec': 5.703438193477885e-07,
+        #    'APEflux': 9.192940039964286e-05,
+        #    'KEflux': 1.702621259427053e-04,
+        #    'APEgenspec': 9.058591846403974e-05,
+        #    'KE1spec': 3.338261440237941e+03,
+        #    'KE2spec': 7.043282793801889e+01
+        #}
         
         ## old values
         #avg_diagnostic_results = {
@@ -84,17 +94,17 @@ class ReferenceSolutionsTester(unittest.TestCase):
         for name, des in diagnostic_results.iteritems():
             res = m.get_diagnostic(name)
             print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
-        for name, des in avg_diagnostic_results.iteritems():
-            res = np.abs(m.get_diagnostic(name)).sum()
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+        #for name, des in avg_diagnostic_results.iteritems():
+        #    res = np.abs(m.get_diagnostic(name)).sum()
+        #    print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
 
         # now do assertions
         for name, des in diagnostic_results.iteritems():
             res = m.get_diagnostic(name)
-            np.testing.assert_allclose(res, des, rtol)
-        for name, des in avg_diagnostic_results.iteritems():
-            res = np.abs(m.get_diagnostic(name)).sum()
-            np.testing.assert_allclose(res, des, rtol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+        #for name, des in avg_diagnostic_results.iteritems():
+        #    res = np.abs(m.get_diagnostic(name)).sum()
+        #    np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
 
     def test_bt(self):
         """ Tests against some statistics of a reference barotropic solution """

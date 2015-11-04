@@ -65,7 +65,7 @@ friction, but the stability method also supports bottom friction:
     mag_fric, phase_fric = np.abs(evec_fric), np.arctan2(evec_fric.imag,evec_fric.real) 
 
 Plotting growth rates
-=====================
+---------------------
 
 .. code:: python
 
@@ -125,7 +125,7 @@ Plotting growth rates
 
 
 Plotting the wavestructure of the most unstable modes
-=====================================================
+-----------------------------------------------------
 
 .. code:: python
 

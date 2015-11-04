@@ -4,6 +4,8 @@ What's New
 v0.1.5 (???)
 ------------
 
+Implemented linear baroclinic stability analysis method.
+
 Implemented vertical mode methods and modal KE and PE spectra diagnostics.
 
 Implemented multi-layer subclass.

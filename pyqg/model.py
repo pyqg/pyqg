@@ -243,6 +243,83 @@ class Model(PseudoSpectralKernel):
 
         return pt
 
+    def stability_analysis(self,bottom_friction=False):
+        """ Performs the baroclinic linear instability analysis given
+                given the base state velocity :math: `(U, V)` and 
+                the stretching matrix  :math: `S`:
+
+        .. math:: A \Phi = \omega B \Phi,
+
+        where
+
+        .. math:: A = B (U k + V l) + I (k Q_y - l Q_x) +
+                        1j \delta_{N N} r_{ek} I  \kappa^2
+
+        where :math:`\delta_{N N} = [0,0,\dots,0,1] ,`
+        
+        and
+
+        .. math:: B =  S - I \kappa^2 .
+
+        
+        The eigenstructure is 
+        
+        .. math:: \Phi 
+        
+        and the eigenvalue is
+
+        .. math:: `\omega`
+        
+        The growth rate is Im\ :math:`\{\omega\}`.
+
+
+        Parameters
+        ----------
+        bottom_friction: optional inclusion linear bottom drag
+                         in the linear stability calculation 
+                         (default is False, as if :math: `r_{ek} = 0`)
+        
+        Returns
+        -------
+        omega: complex array
+             The eigenvalues with largest complex part (units: inverse model time)
+        phi: complex array
+             The eigenvectors associated associated with \omega (unitless)
+
+        """
+
+        omega = np.zeros_like(self.wv)+0.j
+        phi = np.zeros_like(self.qh)
+
+        I = np.eye(self.nz)
+
+        L2 = self.S[:,:,np.newaxis,np.newaxis] - self.wv2*I[:,:,np.newaxis,np.newaxis]
+
+        Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
+
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
+        Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
+        L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
+
+        if bottom_friction:
+            L3[-1,-1,:,:] += 1j*self.rek*self.wv2
+
+        L4 = self.a.T
+
+        M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)
+
+        evals,evecs = np.linalg.eig(M)
+        evals, evecs = evals.T, evecs.T
+    
+        # sorting things this way proved way
+        #  more faster than using numpy's argsort() !
+        imax = evals.imag.argmax(axis=0)
+        for i in range(self.nl):
+            for j in range(self.nk):
+                omega[i,j] = evals[imax[i,j],i,j]
+                phi[:,i,j] = evecs[imax[i,j],:,i,j]
+
+        return omega, phi
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

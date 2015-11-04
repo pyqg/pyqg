@@ -510,10 +510,8 @@ class Model(PseudoSpectralKernel):
 
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
-            function= (lambda self:
-                       (self.rek*self.wv2*
-                        np.abs(self.ph[-1])**2./(self.M**2)).sum())
-        ) 
+            function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean())
+        )
         
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',

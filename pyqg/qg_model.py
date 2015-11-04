@@ -91,8 +91,7 @@ class QGModel(model.Model):
         #self.rek = rek
         self.rd = rd
         self.delta = delta
-        self.H1 = H1
-        self.H2 = H1/delta
+        self.Hi = np.array([ H1, H1/delta])
         self.U1 = U1
         self.U2 = U2
         #self.filterfac = filterfac
@@ -115,7 +114,7 @@ class QGModel(model.Model):
         """Set up background state (zonal flow and PV gradients)."""
         
         # Background zonal flow (m/s):
-        self.H = self.H1 + self.H2
+        self.H = self.Hi.sum()
         self.set_U1U2(self.U1, self.U2)
         self.U = self.U1 - self.U2        
 
@@ -214,8 +213,8 @@ class QGModel(model.Model):
     # calculate KE: this has units of m^2 s^{-2}
     #   (should also multiply by H1 and H2...)
     def _calc_ke(self):
-        ke1 = .5*self.H1*self.spec_var(self.wv*self.ph[0])
-        ke2 = .5*self.H2*self.spec_var(self.wv*self.ph[1]) 
+        ke1 = .5*self.Hi[0]*self.spec_var(self.wv*self.ph[0])
+        ke2 = .5*self.Hi[1]*self.spec_var(self.wv*self.ph[1]) 
         return ( ke1.sum() + ke2.sum() ) / self.H
 
     # calculate eddy turn over time 
@@ -223,8 +222,8 @@ class QGModel(model.Model):
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
 
-        ens = .5*self.H1 * self.spec_var(self.wv2*self.ph1) + \
-            .5*self.H2 * self.spec_var(self.wv2*self.ph2)
+        ens = .5*self.Hi[0] * self.spec_var(self.wv2*self.ph1) + \
+            .5*self.Hi[1] * self.spec_var(self.wv2*self.ph2)
 
         return 2.*pi*np.sqrt( self.H / ens ) / 86400
 
@@ -271,10 +270,13 @@ class QGModel(model.Model):
         self.add_diagnostic('APEgen',
             description='total APE generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real(1j*self.k*
-                           (self.del1*self.ph[0] + self.del2*self.ph[1]) *
-                            np.conj(self.ph[0] - self.ph[1])).sum() / 
-                            (self.nx*self.ny) )
+                       np.real((1j*self.k*
+                            (self.del1*self.ph[0] + self.del2*self.ph[1]) *
+                            np.conj(self.ph[0] - self.ph[1])).sum()
+                              +(1j*self.k[:,1:-2]*
+                            (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
+                            np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) / 
+                            (self.M**2) )
         )
         
         ### These generic diagnostics are now calculated in model.py ###

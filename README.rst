@@ -1,10 +1,11 @@
 .. figure:: https://github.com/pyqg/pyqg/blob/master/docs/_static/vortex_rollup.png
    :alt:
 
+
 pyqg: Python Quasigeostrophic Model
 ===================================
 
-|DOI| |pypi| |Build Status| |landscape|
+|DOI| |pypi| |Build Status| |landscape| |binder|
 
 pyqg is a python solver for quasigeostrophic systems. Quasigeostophic
 equations are an approximation to the full fluid equations of motion in
@@ -43,3 +44,5 @@ Links
 .. |landscape| image:: https://landscape.io/github/pyqg/pyqg/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pyqg/pyqg/master
    :alt: Code Health
+.. |binder| image:: http://mybinder.org/badge.svg 
+    :target: http://mybinder.org/repo/crocha700/pyqg

@@ -75,7 +75,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             res = m.get_diagnostic(name).sum()
             print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
         for name, des in avg_diagnostic_results.iteritems():
-            res = diag.spec_sum(m,np.abs(m.get_diagnostic(name))).sum()
+            res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
             print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
 
         # now do assertions
@@ -86,7 +86,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             res = m.get_diagnostic(name).sum()
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol) 
         for name, des in avg_diagnostic_results.iteritems():
-            res = diag.spec_sum(m, np.abs(m.get_diagnostic(name))).sum()
+            res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
 
         

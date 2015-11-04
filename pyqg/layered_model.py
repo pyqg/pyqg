@@ -22,29 +22,19 @@ class LayeredModel(model.Model):
 
     .. math::
 
-
        {q_i} = \nabla^2\psi_i + \frac{f_0^2}{H_i} \left(\frac{\psi_{i-1}-
        \psi_i}{g'_{i-1}}- \frac{\psi_{i}-\psi_{i+1}}{g'_{i}}\right)\,,
        \qquad i = 2,\textsf{N}-1\,,
 
-     and
-
-    .. math::
-
-
        {q_1} = \nabla^2\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-
        \psi_1}{g'_{1}}\right)\,,  \qquad i =1\,,
-
-    .. math::
-
 
        {q_\textsf{N}} = \nabla^2\psi_\textsf{N} +
        \frac{f_0^2}{H_\textsf{N}} \left(\frac{\psi_{\textsf{N}-1}-
        \psi_\textsf{N}}{g'_{\textsf{N}}}\right) + \frac{f_0}{H_\textsf{N}}h_b\,,
        \qquad i =\textsf{N}\,,
 
-     where the reduced gravity, or buoyancy jump, is
-
+    where the reduced gravity, or buoyancy jump, is
 
     .. math::
 
@@ -53,7 +43,6 @@ class LayeredModel(model.Model):
     The evolution equations are
 
     .. math::
-
 
        \,{q_{i}}_t + \mathsf{J}\left(\psi_i\,, q_i\right) + \textsf{Q}_y {\psi_i}_x
        - \textsf{Q}_x {\psi_i}_y = \text{ssd} -
@@ -76,9 +65,6 @@ class LayeredModel(model.Model):
     and the background velocity is
 
     :math:`\vec{\textsf{V}}(z) = \left(\textsf{U},\textsf{V}\right)`.
-
-    For more information see http://pyqg.readthedocs.org/en/stable/equations.html
-
 
     """
 

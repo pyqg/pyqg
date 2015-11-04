@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pyqg
+from pyqg import diagnostic_tools as diag
 
 class ReferenceSolutionsTester(unittest.TestCase):
 
@@ -41,125 +42,54 @@ class ReferenceSolutionsTester(unittest.TestCase):
         
         # machine + numpy.version fluctuations
         #   appears to be less than 0.1%
-        rtol, atol = 0.001, 0.
+        rtol, atol = 0.01, 0.
 
+        # These numbers come from Malte's original 2-layer simulation
         np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol=rtol, atol=atol,
                     err_msg= ' Inconsistent with reference solution')
 
         diagnostic_results = {
                 'APEgen': 2.5225558013107688e-07  / (m.nx**2),
-                'EKEdiss': 1.4806764171539711e-07 / (m.nx**2),           
+                'EKEdiss': 1.4806764171539711e-07 / (m.nx**2),                  
+               }
+
+        sum_diagnostic_results = {
+             'EKE': 0.00818377631732826 + 0.00015616609033468579,
                 }
 
-        # just skip all the other tests for now
-        #return
-        
-        ## raw diagnostics (scalar output)
-        #diagnostic_results = {
-        #    'EKE1': 5.695448642915733e-03,
-        #    'EKE2': 1.088253274803528e-04,
-        #    'APEgen': 8.842056320175081e-08,
-        #    'EKEdiss': 6.368668363708053e-08,        
-        #}
+        # need to average these diagnostics
+        avg_diagnostic_results = {
+             'entspec': 1.5015983257921716e-06,
+              'APEflux': 0.00017889483037254459,
+              'KEflux':  0.00037067750708912918,
+              'APEgenspec': 0.00025837684260178754,
+              'KEspec': 2 * (8581.3114357188006 + 163.75201433878425) / (m.M**2)
+        }    
 
-        ## old values
-        #diagnostic_results = {
-        #    'EKE1': 0.008183776317328265,
-        #    'EKE2': 0.00015616609033468579,
-        #    'APEgen': 2.5225558013107688e-07,
-        #    'EKEdiss': 1.4806764171539711e-07,        
-        #}
-        
-        ## need to average these diagnostics
-        #avg_diagnostic_results = {
-        #    'entspec': 5.703438193477885e-07,
-        #    'APEflux': 9.192940039964286e-05,
-        #    'KEflux': 1.702621259427053e-04,
-        #    'APEgenspec': 9.058591846403974e-05,
-        #    'KE1spec': 3.338261440237941e+03,
-        #    'KE2spec': 7.043282793801889e+01
-        #}
-        
-        ## old values
-        #avg_diagnostic_results = {
-        #    'entspec': 1.5015983257921716e-06,,
-        #    'APEflux': 0.00017889483037254459,
-        #    'KEflux':  0.00037067750708912918,
-        #    'APEgenspec': 0.00025837684260178754,
-        #    'KE1spec': 8581.3114357188006,,
-        #    'KE2spec': 163.75201433878425
-        #}    
-        
+ 
         # first print all output
         for name, des in diagnostic_results.iteritems():
             res = m.get_diagnostic(name)
             print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
-        #for name, des in avg_diagnostic_results.iteritems():
-        #    res = np.abs(m.get_diagnostic(name)).sum()
-        #    print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+        for name, des in sum_diagnostic_results.iteritems():
+            res = m.get_diagnostic(name).sum()
+            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+        for name, des in avg_diagnostic_results.iteritems():
+            res = diag.spec_sum(m,np.abs(m.get_diagnostic(name))).sum()
+            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
 
         # now do assertions
         for name, des in diagnostic_results.iteritems():
             res = m.get_diagnostic(name)
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
-        #for name, des in avg_diagnostic_results.iteritems():
-        #    res = np.abs(m.get_diagnostic(name)).sum()
-        #    np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
-
-        # just skip all the other tests for now
-        return
-        
-        ## raw diagnostics (scalar output)
-        diagnostic_results = {
-            'EKE1': 5.695448642915733e-03,
-            'EKE2': 1.088253274803528e-04,
-            'APEgen': 8.842056320175081e-08,
-            'EKEdiss': 6.368668363708053e-08,        
-        }
-        ## old values
-        #diagnostic_results = {
-        #    'EKE1': 0.008183776317328265,
-        #    'EKE2': 0.00015616609033468579,
-        #    'APEgen': 2.5225558013107688e-07,
-        #    'EKEdiss': 1.4806764171539711e-07,        
-        #}
-        
-        ## need to average these diagnostics
-        avg_diagnostic_results = {
-            'entspec': 5.703438193477885e-07,
-            'APEflux': 9.192940039964286e-05,
-            'KEflux': 1.702621259427053e-04,
-            'APEgenspec': 9.058591846403974e-05,
-            'KE1spec': 3.338261440237941e+03,
-            'KE2spec': 7.043282793801889e+01
-        }
-        
-        ## old values
-        #avg_diagnostic_results = {
-        #    'entspec': 1.5015983257921716e-06,,
-        #    'APEflux': 0.00017889483037254459,
-        #    'KEflux':  0.00037067750708912918,
-        #    'APEgenspec': 0.00025837684260178754,
-        #    'KE1spec': 8581.3114357188006,,
-        #    'KE2spec': 163.75201433878425
-        #}    
-        
-        # first print all output
-        for name, des in diagnostic_results.iteritems():
-            res = m.get_diagnostic(name)
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+        for name, des in sum_diagnostic_results.iteritems():
+            res = m.get_diagnostic(name).sum()
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol) 
         for name, des in avg_diagnostic_results.iteritems():
-            res = np.abs(m.get_diagnostic(name)).sum()
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+            res = diag.spec_sum(m, np.abs(m.get_diagnostic(name))).sum()
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
 
-        # now do assertions
-        for name, des in diagnostic_results.iteritems():
-            res = m.get_diagnostic(name)
-            np.testing.assert_allclose(res, des, rtol)
-        for name, des in avg_diagnostic_results.iteritems():
-            res = np.abs(m.get_diagnostic(name)).sum()
-            np.testing.assert_allclose(res, des, rtol)
-
+        
     def test_bt(self):
         """ Tests against some statistics of a reference barotropic solution """
 
@@ -199,6 +129,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
                 err_msg= ' Inconsistent with reference solution')
         np.testing.assert_allclose(ke, 0.9950360837282386, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
+
 
     def test_sqg(self):
         """ Tests against some statistics of a reference sqg solution """

@@ -27,7 +27,7 @@ Fully developed baroclinic instability of a 3-layer flow
 
 
 Set up
-======
+------
 
 .. code:: python
 
@@ -70,7 +70,7 @@ Set up
 
 
 Initial condition
-=================
+-----------------
 
 .. code:: python
 
@@ -81,7 +81,7 @@ Initial condition
     m.set_q(qi)
 
 Run the model
-=============
+-------------
 
 .. code:: python
 
@@ -103,8 +103,8 @@ Run the model
     2015-11-01 09:26:11,409 - pyqg.model - INFO -  Step: 55000, Time: 8.250000e+07, KE: 1.755793e-01, CFL: 0.170431
 
 
-A snapshot and some diagnostics
-===============================
+Snapshots
+---------
 
 .. code:: python
 

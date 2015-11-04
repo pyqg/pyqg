@@ -40,8 +40,8 @@ class ReferenceSolutionsTester(unittest.TestCase):
    
         
         # machine + numpy.version fluctuations
-        #   appears to be less than 1%
-        rtol, atol = 0.01, 0.
+        #   appears to be less than 0.1%
+        rtol, atol = 0.001, 0.
 
         np.testing.assert_allclose(q1norm, 9.561430503712755e-08, rtol=rtol, atol=atol,
                     err_msg= ' Inconsistent with reference solution')

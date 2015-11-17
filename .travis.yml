@@ -19,7 +19,6 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - pip install codecov
 # Install packages
 install:
   - conda create --yes -n test_env python=$TRAVIS_PYTHON_VERSION pip nose numpy=1.9.3 cython scipy=0.16.0
@@ -37,5 +36,8 @@ script:
   - nosetests -v
 # Calculate coverage
 after_success:
+# codecov can't be found because we are in virtual environment
+#  - source deactivate
+  - pip install codecov
   - codecov
 #  - coveralls --config_file .coveragerc

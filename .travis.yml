@@ -11,6 +11,7 @@ notifications:
 # Setup anaconda
 before_install:
 # python 3 needs something different
+  - pip install codecov
   - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - chmod +x miniconda.sh
   - ./miniconda.sh -b -p $HOME/miniconda
@@ -36,8 +37,7 @@ script:
   - nosetests -v
 # Calculate coverage
 after_success:
-# codecov can't be found because we are in virtual environment
+# codecov can't be found because we are in virtual environment? no that doesn't seem right
 #  - source deactivate
-  - pip install codecov
   - codecov
 #  - coveralls --config_file .coveragerc

@@ -19,6 +19,7 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
+  - pip install codecov
 # Install packages
 install:
   - conda create --yes -n test_env python=$TRAVIS_PYTHON_VERSION pip nose numpy=1.9.3 cython scipy=0.16.0
@@ -35,5 +36,6 @@ install:
 script:
   - nosetests -v
 # Calculate coverage
-#after_success:
+after_success:
+  - codecov
 #  - coveralls --config_file .coveragerc

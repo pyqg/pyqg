@@ -37,5 +37,7 @@ script:
   - nosetests -v
 # Calculate coverage
 after_success:
+# codecov can't be found because we are in virtual environment
+  - source deactivate
   - codecov
 #  - coveralls --config_file .coveragerc

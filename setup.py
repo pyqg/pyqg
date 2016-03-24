@@ -64,19 +64,19 @@ install_requires = [
 
 # This hack tells cython whether pyfftw is present
 use_pyfftw_file = 'pyqg/.compile_time_use_pyfftw.pxi'
-with open(use_pyfftw_file, 'w') as f:
+with open(use_pyfftw_file, 'wb') as f:
     try:
         import pyfftw
-        f.write('DEF PYQG_USE_PYFFTW = 1')
+        f.write(b'DEF PYQG_USE_PYFFTW = 1')
     except ImportError:
-        f.write('DEF PYQG_USE_PYFFTW = 0')
+        f.write(b'DEF PYQG_USE_PYFFTW = 0')
         warnings.warn('Could not import pyfftw. Model will be slow.')
 
 # check for openmp following
 # http://stackoverflow.com/questions/16549893/programatically-testing-for-openmp-support-from-a-python-setup-script
 # see http://openmp.org/wp/openmp-compilers/
 omp_test = \
-r"""
+br"""
 #include <omp.h>
 #include <stdio.h>
 int main() {
@@ -84,6 +84,8 @@ int main() {
 printf("Hello from thread %d, nthreads %d\n", omp_get_thread_num(), omp_get_num_threads());
 }
 """
+
+# python 3 needs rb
 
 def check_for_openmp():
     tmpdir = tempfile.mkdtemp()
@@ -94,12 +96,12 @@ def check_for_openmp():
         cc = os.environ['CC']
     except KeyError:
         cc = 'gcc'
-    with open(filename, 'w', 0) as file:
+    with open(filename, 'wb', 0) as file:
         file.write(omp_test)
-    with open(os.devnull, 'w') as fnull:
+    with open(os.devnull, 'wb') as fnull:
         result = subprocess.call([cc, '-fopenmp', filename],
                                  stdout=fnull, stderr=fnull)
-    print 'check_for_openmp() result: ', result
+    print('check_for_openmp() result: ', result)
     os.chdir(curdir)
     #clean up
     shutil.rmtree(tmpdir)
@@ -122,7 +124,7 @@ else:
 #if on_rtd:
 #    install_requires.remove('pyfftw')
 
-tests_require = ['nose']
+tests_require = ['pytest']
 
 def readme():
     with open('README.md') as f:

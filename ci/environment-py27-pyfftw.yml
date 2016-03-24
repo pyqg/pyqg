@@ -1,0 +1,16 @@
+name: test_env
+channels:
+# for pyfftw
+#  - mforbes # old, doesn't support 3.5
+  - nanshe
+dependencies:
+  - python=2.7
+  - numpy
+  - scipy
+  - cython
+  - pyfftw
+  - pytest
+  - future
+  - pip:
+    - codecov
+    - pytest-cov

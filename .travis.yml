@@ -1,43 +1,51 @@
-# based on this
-# https://gist.github.com/dan-blanchard/7045057
+# Based on http://conda.pydata.org/docs/travis.html
 language: python
-sudo: false
-python:
-  - 2.7
-#  - 3.3
+sudo: false # use container based build
 notifications:
   email: false
 
-# Setup anaconda
+matrix:
+  fast_finish: true
+  include:
+  - python: 2.7
+    env: CONDA_ENV=py27
+  - python: 2.7
+    env: CONDA_ENV=py27-pyfftw
+  - python: 3.5
+    env: CONDA_ENV=py35
+  - python: 3.5
+    env: CONDA_ENV=py35-pyfftw
+
 before_install:
-# python 3 needs something different
-  - pip install codecov
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p $HOME/miniconda
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget http://repo.continuum.io/miniconda/Miniconda-3.16.0-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget http://repo.continuum.io/miniconda/Miniconda3-3.16.0-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-# Install packages
-install:
-  - conda create --yes -n test_env python=$TRAVIS_PYTHON_VERSION pip nose numpy=1.9.3 cython scipy=0.16.0
-  # can we make this optional?
-  - conda install --yes -n test_env -c mforbes pyfftw
-  - source activate test_env
-# build the kernel in the local dir
-  - python setup.py build_ext --inplace
-# not necessary to actually install
-# nose will import the pacakge from the working directory
-#  - python setup.py install
 
-# Run test
+install:
+  - conda env create --file ci/environment-$CONDA_ENV.yml
+  - source activate test_env
+# if we do this, the package gets installed into
+# /home/travis/build/xgcm/xgcm/build/lib/xgcm
+#  - python setup.py install
+  - python setup.py build_ext --inplace
+  - pip install -e .
+# this puts the package into
+# /home/travis/build/xgcm/xgcm/xgcm
+# That turns out to be necessary for py.test to correctly collect the tests
+# and for coverage to work properly.
+# It is very complicated and confusing.
+
 script:
-  - nosetests -v
-# Calculate coverage
+#  - py.test xgcm --cov=xgcm --cov-config .coveragerc --cov-report term-missing
+  - py.test
+
 after_success:
-# codecov can't be found because we are in virtual environment? no that doesn't seem right
-#  - source deactivate
-  - codecov
-#  - coveralls --config_file .coveragerc
+#  - codecov

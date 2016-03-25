@@ -1,11 +1,12 @@
+from __future__ import print_function
 import numpy as np
-import model
 from numpy import pi
+from . import model
 
 
 class SQGModel(model.Model):
     """Surface quasigeostrophic model."""
-    
+
     def __init__(
         self,
         beta=0.,                    # gradient of coriolis parameter
@@ -36,38 +37,38 @@ class SQGModel(model.Model):
         self.H = H
         self.U = U
         #self.filterfac = filterfac
-        
+
         self.nz = 1
-       
+
         super(SQGModel, self).__init__(**kwargs)
-     
+
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
- 
+
     ### PRIVATE METHODS - not meant to be called by user ###
-        
+
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
-        
+
         # the meridional PV gradients in each layer
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
-        self.set_U(self.U)        
+        self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
-        
+
         self.ilQx = 0.
 
     def _initialize_inversion_matrix(self):
-        """ the inversion """ 
+        """ the inversion """
         # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph
         self.a = np.asarray(self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass
-    
+
     def set_U(self, U):
         """Set background zonal flow"""
         self.Ubg = np.asarray(U)[np.newaxis,...]
@@ -88,7 +89,7 @@ class SQGModel(model.Model):
         ke = .5*self.spec_var(self.wv*self.ph)
         return ke.sum()
 
-    # calculate eddy turn over time 
+    # calculate eddy turn over time
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """

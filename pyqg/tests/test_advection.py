@@ -1,10 +1,11 @@
+from __future__ import print_function
 import numpy as np
 import pyqg
 
 def test_advect(rtol=1.e-13):
-    """ Make sure advective term vanishes for plane wave 
+    """ Make sure advective term vanishes for plane wave
         It is an unpleasant fact that we cannot to get
-        a double precision accuracy when the plane wave is 
+        a double precision accuracy when the plane wave is
         slanted (kx != 0 and ky !=0 ) """
 
     #m = bt_model.BTModel(L=2.*np.pi,nx=256)
@@ -23,7 +24,7 @@ def test_advect(rtol=1.e-13):
         # set plane wave PV
         #m.set_q(
         #        np.cos( kx[i] * m.x + ky[i] * m.y ))
-        
+
         m.set_q1q2(
                 np.cos( kx[i] * m.x + ky[i] * m.y ),
                 np.zeros_like(m.x) )
@@ -44,7 +45,7 @@ def test_advect(rtol=1.e-13):
         # residual -- the L2-norm of the jacobian
         res = np.abs(jacob).sum()*m.dx*m.dy/(m.L**2)
 
-        print "residual = %1.5e" %res
+        print("residual = %1.5e" %res)
 
         assert res<rtol, " *** Jacobian residual is larger than %1.1e" %rtol
 

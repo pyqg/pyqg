@@ -1,6 +1,8 @@
+from __future__ import print_function
 import numpy as np
-import model
 from numpy import pi
+from . import model
+
 try:
     import mkl
     np.use_fastnumpy = True
@@ -121,7 +123,7 @@ class LayeredModel(model.Model):
         super(LayeredModel, self).__init__(**kwargs)
 
         self.vertical_modes()
-        
+
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
@@ -273,17 +275,17 @@ class LayeredModel(model.Model):
 
         self.add_diagnostic('entspec',
                 description='barotropic enstrophy spectrum',
-                function= (lambda self: 
+                function= (lambda self:
                     np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H) )
 
         self.add_diagnostic('KEspec_modal',
                 description='modal KE spectra',
-                function= (lambda self: 
+                function= (lambda self:
                     self.wv2*(np.abs(self.phn)**2)/self.M**2 ))
-        
+
         self.add_diagnostic('PEspec_modal',
                 description='modal PE spectra',
-                function= (lambda self: 
+                function= (lambda self:
                     self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2 ))
 
         self.add_diagnostic('APEspec',
@@ -317,5 +319,5 @@ class LayeredModel(model.Model):
         self.add_diagnostic('ENSgenspec',
                     description='the spectrum of the rate of generation of barotropic enstrophy',
                     function = (lambda self:
-                            -(self.Hi[:,np.newaxis,np.newaxis]*((self.ikQy - 
+                            -(self.Hi[:,np.newaxis,np.newaxis]*((self.ikQy -
                             self.ilQx)*(self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H))

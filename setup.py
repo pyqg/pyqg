@@ -131,7 +131,7 @@ def readme():
         return f.read()
 
 ext_module = Extension(
-    "pyqg/kernel",
+    "pyqg.kernel",
     ["pyqg/kernel.pyx"],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,

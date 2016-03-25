@@ -1,3 +1,5 @@
+from __future__ import print_function
+from future.utils import iteritems
 import unittest
 import numpy as np
 import pyqg
@@ -10,36 +12,36 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         year = 360*86400.
         m = pyqg.QGModel(
-            nx=32,                      
-            L=1e6,                      
-            beta=1.5e-11,               
-            rek=5.787e-7,               
-            rd=30000.0,                 
-            delta=0.25,                 
-            U1=0.05,                    
-            U2=0.0,                     
+            nx=32,
+            L=1e6,
+            beta=1.5e-11,
+            rek=5.787e-7,
+            rd=30000.0,
+            delta=0.25,
+            U1=0.05,
+            U2=0.0,
             filterfac=18.4,
-            dt=12800.,                   
-            tmax=3*year,          
-            tavestart=1*year,     
+            dt=12800.,
+            tmax=3*year,
+            tavestart=1*year,
             taveint=12800.,
             useAB2=True,
-            diagnostics_list='all'     
+            diagnostics_list='all'
             )
 
         m.set_q1q2(
                 (1e-6*np.cos(2*5*np.pi * m.x / m.L) +
                  1e-7*np.cos(2*5*np.pi * m.y / m.W)),
                 np.zeros_like(m.x) )
-                    
+
         m.run()
 
-        q1 = m.q[0] 
+        q1 = m.q[0]
         q1norm = (q1**2).sum()
 
         assert m.t == 93312000.0
-   
-        
+
+
         # machine + numpy.version fluctuations
         #   appears to be less than 0.1%
         rtol, atol = 0.01, 0.
@@ -50,7 +52,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         diagnostic_results = {
                 'APEgen': 2.5225558013107688e-07  / (m.nx**2),
-                'EKEdiss': 1.4806764171539711e-07 / (m.nx**2),                  
+                'EKEdiss': 1.4806764171539711e-07 / (m.nx**2),
                }
 
         sum_diagnostic_results = {
@@ -64,32 +66,32 @@ class ReferenceSolutionsTester(unittest.TestCase):
               'KEflux':  0.00037067750708912918,
               'APEgenspec': 0.00025837684260178754,
               'KEspec': 2 * (8581.3114357188006 + 163.75201433878425) / (m.M**2)
-        }    
+        }
 
- 
+
         # first print all output
-        for name, des in diagnostic_results.iteritems():
+        for name, des in iteritems(diagnostic_results):
             res = m.get_diagnostic(name)
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
-        for name, des in sum_diagnostic_results.iteritems():
+            print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
+        for name, des in iteritems(sum_diagnostic_results):
             res = m.get_diagnostic(name).sum()
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
-        for name, des in avg_diagnostic_results.iteritems():
+            print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
+        for name, des in iteritems(avg_diagnostic_results):
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
-            print '%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des)
+            print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
 
         # now do assertions
-        for name, des in diagnostic_results.iteritems():
+        for name, des in iteritems(diagnostic_results):
             res = m.get_diagnostic(name)
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
-        for name, des in sum_diagnostic_results.iteritems():
+        for name, des in iteritems(sum_diagnostic_results):
             res = m.get_diagnostic(name).sum()
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol) 
-        for name, des in avg_diagnostic_results.iteritems():
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+        for name, des in iteritems(avg_diagnostic_results):
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
 
-        
+
     def test_bt(self):
         """ Tests against some statistics of a reference barotropic solution """
 
@@ -107,7 +109,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qih = -m.wv2*pih
         qi = m.ifft(qih)
         m.set_q(qi)
-       
+
         rtol = 1.e-5
         atol = 1.e-14
 
@@ -120,9 +122,9 @@ class ReferenceSolutionsTester(unittest.TestCase):
         pnorm = (mp**2).sum()
         ke = m._calc_ke()
 
-        print 'time:       %g' % m.t
+        print('time:       %g' % m.t)
         assert m.t == 5.000000000000082
-        
+
         np.testing.assert_allclose(qnorm, 89101.741238768518, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
         np.testing.assert_allclose(pnorm, 1493.217664248918, rtol, atol,
@@ -160,9 +162,9 @@ class ReferenceSolutionsTester(unittest.TestCase):
         pnorm = (mp**2).sum()
         ke = m._calc_ke()
 
-        print 'time:       %g' % m.t
+        print('time:       %g' % m.t)
         assert m.t == 5.000000000000082
-        
+
         np.testing.assert_allclose(qnorm, 7847.5169609881032, rtol, atol,
                 err_msg= ' Inconsistent with reference solution')
         np.testing.assert_allclose(pnorm, 1346.8874163575524, rtol, atol,

@@ -8,7 +8,7 @@ Requirements
 
 The only requirements are
 
-- Python 2.7. (Python 3 support is in the works) 
+- Python 2.7. (Python 3 support is in the works)
 - numpy_ (1.6 or later)
 - Cython (0.2 or later)
 
@@ -65,25 +65,24 @@ distributed as a conda pacakge through several `user channels
 
 There is a useful `blog post
 <https://dranek.com/blog/2014/Feb/conda-binstar-and-fftw/>`__ describing how
-the pyfftw conda package was created. There are currently 13 
+the pyfftw conda package was created. There are currently 13
 `pyfftw user packages <https://anaconda.org/search?q=pyfftw>`__
 hosted on anaconda.org. Each has different dependencies and platform support
-(e.g. linux, windows, mac.) 
-The `mforbes <https://anaconda.org/mforbes>`__ channel version was selected
-for this documentation because its pyfftw package is compatible with the
-latest version of numpy (1.9.2) and both linux and mac platforms. We don't know
-who mforbes is, but we are greatful to him/her.
+(e.g. linux, windows, mac.)
+The `nanshe <https://anaconda.org/nanshe/pyfftw>`__ channel version is the most
+popular and appears to have the broadest cross-platform support. We don't know
+who nanshe is, but we are greatful to him/her.
 
-To install pyfftw from the mforbes channel, open a terminal and run
+To install pyfftw from the nanshe channel, open a terminal and run
 the command
 
 .. code-block:: bash
 
-    $ conda install -c mforbes pyfftw
+    $ conda install -c nanshe pyfftw
 
 If this doesn't work for you, or if it asks you to upgrade / downgrade more of
 your core pacakges (e.g. numpy) than you would like, you can easily try
-replacing ``mforbes`` with one of the other `channels
+replacing ``nanshe`` with one of the other `channels
 <https://anaconda.org/search?q=pyfftw>`__.
 
 The hard way: installing from source
@@ -133,18 +132,18 @@ Then install the software
 
     $ sudo make install
 
-This will install the FFTW3 libraries into you system's library directory. 
+This will install the FFTW3 libraries into you system's library directory.
 If you don't have root privileges (see note above), remove the ``sudo``. This
 will install the libraries into the ``prefix`` location you specified.
 
-You are not done installing FFTW yet. pyfftw requires special versions 
+You are not done installing FFTW yet. pyfftw requires special versions
 of the FFTW library specialized to different data types (32-bit floats and
 double-long floars). You need to-configure and re-build FFTW two more times
-with extra flags. 
+with extra flags.
 
 .. code-block:: bash
 
-    $ ./configure --enable-threads --enable-shared --enable-float 
+    $ ./configure --enable-threads --enable-shared --enable-float
     $ make
     $ sudo make install
     $ ./configure --enable-threads --enable-shared --enable-long-double
@@ -180,7 +179,7 @@ Then install it
     $ cd pyFFTW
     $ python setup.py install
 
-or 
+or
 
 .. code-block:: bash
 
@@ -200,7 +199,7 @@ Installing pyqg
     If you are using Mac OSX Yosemite or later OpenMP support is not available out of the box.  While pyqg will
     still run without OpenMP, it will not be as fast as it can be. See :ref:`advanced-install` below for more
     information on installing on OSX with OpenMP support.
-    
+
 With pyfftw installed, you can now install pyqg. The easiest way is with pip:
 
 .. code-block:: bash
@@ -208,7 +207,7 @@ With pyfftw installed, you can now install pyqg. The easiest way is with pip:
     $ pip install pyqg
 
 You can also clone the `pyqg git repository <https://github.com/pyqg/pyqg>`__ to
-use the latest development version. 
+use the latest development version.
 
 .. code-block:: bash
 
@@ -257,7 +256,7 @@ Install Cython from the conda repository
 Install pyqg using the homebrew ``gcc`` compiler
 
 .. code-block:: bash
-    
+
     $ CC=/usr/local/bin/gcc-5 pip install pyqg
 
 
@@ -274,8 +273,5 @@ Install Cython from the conda repository
 Install pyqg using the HPC ``gcc`` compiler
 
 .. code-block:: bash
-    
-    $ CC=/usr/local/bin/gcc pip install pyqg
-    
 
-    
+    $ CC=/usr/local/bin/gcc pip install pyqg

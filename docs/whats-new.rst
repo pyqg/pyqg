@@ -4,6 +4,8 @@ What's New
 v0.1.5 (???)
 ------------
 
+Added compatibility with python 3.
+
 Implemented linear baroclinic stability analysis method.
 
 Implemented vertical mode methods and modal KE and PE spectra diagnostics.
@@ -12,7 +14,7 @@ Implemented multi-layer subclass.
 
 Added new logger that leverages on built-in python logging.
 
-Changed license to MIT
+Changed license to MIT.
 
 v0.1.4 (22 Oct 2015)
 --------------------

@@ -1,6 +1,7 @@
+from __future__ import print_function
 import numpy as np
-import model
 from numpy import pi
+from . import model
 
 
 class BTModel(model.Model):
@@ -8,7 +9,7 @@ class BTModel(model.Model):
     This class can represent both pure two-dimensional flow
     and also single reduced-gravity layers with deformation
     radius ``rd``.
-    
+
     The equivalent-barotropic quasigeostrophic evolution equations is
 
     .. math::
@@ -20,14 +21,14 @@ class BTModel(model.Model):
     .. math::
 
        q = \nabla^2 \psi - \kappa_d^2 \psi
-       
+
     """
-    
+
     def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
         """
         Parameters
         ----------
-        
+
         beta : number, optional
             Gradient of coriolis parameter. Units: meters :sup:`-1`
             seconds :sup:`-1`
@@ -41,36 +42,36 @@ class BTModel(model.Model):
         self.rd = rd
         self.H = H
         self.U = U
-        
+
         self.nz = 1
-       
+
         # deformation wavenumber
         if rd:
             self.kd2 = rd**-2
         else:
             self.kd2 = 0.
-    
+
         super(BTModel, self).__init__(**kwargs)
-     
+
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
- 
+
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
-        
+
         # the meridional PV gradients in each layer
         self.Qy = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
-        self.set_U(self.U)        
+        self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
         self.ikQy = self.Qy * 1j * self.k
-        
+
         self.ilQx = 0.
 
     def _initialize_inversion_matrix(self):
-        """ the inversion """ 
+        """ the inversion """
         # The bt model is diagonal. The inversion is simply qh = -kappa**2 ph
         self.a = -(self.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
 
@@ -90,10 +91,10 @@ class BTModel(model.Model):
 
     def set_U(self, U):
         """Set background zonal flow.
-        
+
         Parameters
         ----------
-        
+
         U : number
             Upper layer flow. Units meters.
         """
@@ -115,7 +116,7 @@ class BTModel(model.Model):
         ke = .5*self.spec_var(self.wv*self.ph)
         return ke.sum()
 
-    # calculate eddy turn over time 
+    # calculate eddy turn over time
     # (perhaps should change to fraction of year...)
     def _calc_eddy_time(self):
         """ estimate the eddy turn-over time in days """
@@ -127,7 +128,3 @@ class BTModel(model.Model):
     #     self.xi =self.ifft2( -self.wv2*self.ph)
     #     self.Jptpc = -self.advect(self.p,self.u,self.v)
     #     self.Jpxi = self.advect(self.xi, self.u, self.v)
-
-        
-
-

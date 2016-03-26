@@ -1,8 +1,17 @@
+from __future__ import print_function
 import numpy as np
 from numpy import pi
 import time
-import pyfftw
+import pytest
 
+# hack to skip tests if we don't have pyfft
+try:
+    import pyfftw
+    skip=False
+except ImportError:
+    skip=True
+
+@pytest.mark.skipif(skip, reason="Can't test fftw without pyfftw")
 def test_fftw_rfft2(Nx = 64, Ny = None, n = 7200):
     """ A verification of rfft2/irfft2 pyfftw accuracy lost... """
 
@@ -29,6 +38,7 @@ def test_fftw_rfft2(Nx = 64, Ny = None, n = 7200):
     print("Relative error after %i Forward/Inverse FFTs = %e " %(n,rel_err))
     print(" ")
 
+@pytest.mark.skipif(skip, reason="Can't test fftw without pyfftw")
 def test_fftw_rfft(Nx = 64, n = 100000):
     """ A verification of rfft/irfft accuracy lost """
 

@@ -1,3 +1,4 @@
+from __future__ import print_function
 """Utility functions for pyqg model data."""
 
 import numpy as np
@@ -5,14 +6,14 @@ from numpy import pi
 
 def spec_var(model, ph):
     """Compute variance of ``p`` from Fourier coefficients ``ph``.
-    
+
     Parameters
     ----------
     model : pyqg.Model instance
         The model object from which `ph` originates
     ph : complex array
         The field on which to compute the variance
-        
+
     Returns
     -------
     var_dens : float
@@ -24,24 +25,24 @@ def spec_var(model, ph):
     var_dens[...,0] /= 2
     var_dens[...,-1] /= 2
     return var_dens.sum(axis=(-1,-2))
-   
+
 
 def spec_sum(ph2):
     """Compute total spectral sum of the real spectral quantity``ph^2``.
-    
+
     Parameters
     ----------
     model : pyqg.Model instance
         The model object from which `ph` originates
     ph2 : real array
         The field on which to compute the sum
-        
+
     Returns
     -------
     var_dens : float
         The sum of `ph2`
-    """    
-    
+    """
+
     ph2 = 2.*ph2
     ph2[...,0] = ph2[...,0]/2.
     ph2[...,-1] = ph2[...,-1]/2.
@@ -51,14 +52,14 @@ def spec_sum(ph2):
 
 def calc_ispec(model, ph):
     """Compute isotropic spectrum `phr` of `ph` from 2D spectrum.
-    
+
     Parameters
     ----------
     model : pyqg.Model instance
         The model object from which `ph` originates
     ph : complex array
         The field on which to compute the variance
-        
+
     Returns
     -------
     kr : array
@@ -66,7 +67,7 @@ def calc_ispec(model, ph):
     phr : array
         isotropic spectrum
     """
-    
+
     if model.kk.max()>model.ll.max():
         kmax = model.ll.max()
     else:
@@ -81,5 +82,5 @@ def calc_ispec(model, ph):
         fkr =  (model.wv>=kr[i]-dkr/2) & (model.wv<=kr[i]+dkr/2)
         dth = pi / (fkr.sum()-1)
         phr[i] = ph[fkr].sum() * kr[i] * dth
-        
+
     return kr, phr

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 import numpy as np
 import pyqg
@@ -8,14 +9,14 @@ class VerticalModesTester(unittest.TestCase):
 
         self.m = pyqg.LayeredModel(
                     nz = 2,
-                    U  = [.1,.05],                    
-                    V  = [.1,.0],                    
+                    U  = [.1,.05],
+                    V  = [.1,.0],
                     H  = [1.,1.],
                     delta = 1.,
                     rd = 5.,
                     f  = 1.,
                     beta = 0.,)
-       
+
         self.atol=1.e-16
 
         self.m.set_q(np.random.randn(self.m.nz,self.m.ny,self.m.nx))
@@ -25,7 +26,7 @@ class VerticalModesTester(unittest.TestCase):
     def test_radii(self):
         """ Check deformation radii are computed correctly """
 
-        
+
         radii = np.array([self.m.g*self.m.H/np.abs(self.m.f), self.m.rd])
         np.testing.assert_allclose(self.m.radii,radii,atol=self.atol,
                 err_msg=' Wrong deformation radii')
@@ -35,7 +36,7 @@ class VerticalModesTester(unittest.TestCase):
 
         p = (self.m.Hi[:,np.newaxis]*self.m.pmodes)/self.m.H
 
-        print p
+        print(p)
 
         # barotropic mode must be depth invariant
         np.testing.assert_allclose(p[0,0],p[1,0],atol=self.atol,

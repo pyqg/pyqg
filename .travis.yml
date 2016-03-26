@@ -44,8 +44,8 @@ install:
 # It is very complicated and confusing.
 
 script:
-#  - py.test xgcm --cov=xgcm --cov-config .coveragerc --cov-report term-missing
-  - py.test
+  - py.test pyqg --cov==pyqg  --cov-config .coveragerc --cov-report term-missing
+#  - py.test
 
 after_success:
-#  - codecov
+  - codecov

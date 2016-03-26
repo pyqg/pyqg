@@ -44,7 +44,7 @@ install:
 # It is very complicated and confusing.
 
 script:
-  - py.test pyqg --cov==pyqg  --cov-config .coveragerc --cov-report term-missing
+  - py.test pyqg --cov=pyqg  --cov-config .coveragerc --cov-report term-missing
 #  - py.test
 
 after_success:

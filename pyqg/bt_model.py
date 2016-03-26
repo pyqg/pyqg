@@ -41,6 +41,7 @@ class BTModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.H = H
+        self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
 
         self.nz = 1

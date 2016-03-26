@@ -35,6 +35,7 @@ class SQGModel(model.Model):
         #self.rek = rek
         self.rd = rd
         self.H = H
+        self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
         #self.filterfac = filterfac
 

@@ -1,13 +1,19 @@
 from __future__ import print_function
 from builtins import range
 import unittest
+import pytest
 import numpy as np
 import pyqg
+
+missing_scipy=False
+try:
+    import scipy.ndimage
+except ImportError:
+    missing_scipy=True
 
 def constant_velocity_function(u, v):
     """Return a function that returns a constant velocity field."""
     return (lambda x, y: (u, v))
-
 
 def solid_body_rotation_velocity_function(om):
     """Return a function that returns solid body rotation at angular
@@ -73,8 +79,8 @@ class ParticleTester(unittest.TestCase):
                 atol=atol
             )
 
+    @pytest.mark.skipif(missing_scipy, reason="requires scipy")
     def test_interpolation(self, rtol=1e-14, atol=1e-7):
-
         # set up grid
         Lx = 10.
         Ly = 5.
@@ -123,6 +129,7 @@ class ParticleTester(unittest.TestCase):
             atol=1e-1
         )
 
+    @pytest.mark.skipif(missing_scipy, reason="requires scipy")
     def test_gridded_integration(self, atol=1e-10):
 
         # set up grid

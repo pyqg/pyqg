@@ -1,5 +1,5 @@
 import numpy as np
 import pyqg
 import time
-import cProfile
-import pstats
+
+""" This is a benchamrking code (work in progress) for pyqg using airspeed velocity """

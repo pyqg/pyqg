@@ -265,7 +265,7 @@ class QGModel(model.Model):
         self.add_diagnostic('APEgenspec',
             description='spectrum of APE generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[0]) *
+                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
                                   np.conj(self.ph[0] - self.ph[1])) )
         )
 

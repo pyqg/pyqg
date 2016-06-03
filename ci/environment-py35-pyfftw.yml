@@ -2,7 +2,8 @@ name: test_env
 channels:
 # for pyfftw
 #  - mforbes # old, doesn't support 3.5
-  - nanshe
+#  - nanshe # broke
+  - conda-forge
 dependencies:
   - python=3.5
   - numpy

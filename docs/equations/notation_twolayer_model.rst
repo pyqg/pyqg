@@ -48,7 +48,7 @@ with the deformation wavenumber
 .. math::
 
 
-   k_d^2 \equiv\frac{f_0^2}{g}\frac{H_1+H_2}{H_1 H_2}\,,
+   k_d^2 \equiv\frac{f_0^2}{g'}\frac{H_1+H_2}{H_1 H_2}\,,
 
 where :math:`H = H_1 + H_2` is the total depth at rest.
 

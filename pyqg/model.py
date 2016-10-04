@@ -67,6 +67,7 @@ class Model(PseudoSpectralKernel):
     def __init__(
         self,
         # grid size parameters
+        nz=1,
         nx=64,                     # grid resolution
         ny=None,
         L=1e6,                     # domain size is L [m]
@@ -140,8 +141,14 @@ class Model(PseudoSpectralKernel):
         if ny is None: ny = nx
         if W is None: W = L
 
+        # TODO: be more clear about what attributes are cython and what
+        # attributes are python
+        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd)
+
         # put all the parameters into the object
         # grid
+        # (This is redundant!)
+        self.nz = nz
         self.nx = nx
         self.ny = ny
         self.L = L
@@ -177,11 +184,12 @@ class Model(PseudoSpectralKernel):
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
-        self._initialize_inversion_matrix()
         self._initialize_time()
 
         # call the underlying cython kernel
         self._initialize_kernel()
+        # refactoring: need to start initializing kernel first
+        self._initialize_inversion_matrix()
 
         self._initialize_diagnostics(diagnostics_list)
 
@@ -421,13 +429,11 @@ class Model(PseudoSpectralKernel):
     def _initialize_kernel(self):
         #super(spectral_kernel.PseudoSpectralKernel, self).__init__(
         self._kernel_init(
-            self.nz, self.ny, self.nx,
-            self.a, self.kk, self.ll,
+            self.kk, self.ll,
             self.Ubg, self.Qy,
             self.filtr,
             dt=self.dt,
-            rek=self.rek,
-            fftw_num_threads=self.ntd
+            rek=self.rek
         )
 
         # still need to initialize a few state variables here, outside kernel

@@ -98,6 +98,13 @@ class PyqgModelTester(unittest.TestCase):
         # need to think about how to implement this
         pass
 
+    def test_change_inversion_matrix(self):
+        """Make sure we can change the inversion matrix after kernel has been
+        initialized."""
+        a_new = np.random.rand(self.m.Nz, self.m.Nz, self.m.Nl, self.m.Nk)
+        self.m.a = a_new
+        np.testing.assert_allclose(a_new, self.m.a)
+
     def test_advection(self, rtol=1e-15):
         """Check whether calculating advection tendency gives the descired result."""
         # sin(2 a) = 2 sin(a) cos(a)

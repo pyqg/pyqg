@@ -151,6 +151,8 @@ class PyqgModelTester(unittest.TestCase):
                 tabs_mask.mask[1,2*lwave,0] = 1
                 tabs_mask.mask[1,-2*lwave,0] = 1
                 # and make sure everything else is zero
+                if np.any(np.isnan(tabs_mask.filled(0.))):
+                    print("Found NaNs")
                 np.testing.assert_allclose(tabs_mask.filled(0.), 0.,
                     rtol=0., atol=rtol,
                     err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
@@ -197,7 +199,6 @@ class PyqgModelTester(unittest.TestCase):
         self.assertEqual(self.m.tc, 0)
         # step forward first time (should use forward Euler)
         self.m._forward_timestep()
-        print('here')
 
         np.testing.assert_allclose(self.m.qh, 1*self.m.dt*dqhdt,
             err_msg='First timestep incorrect')

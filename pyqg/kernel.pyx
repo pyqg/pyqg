@@ -77,6 +77,7 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :] _ikQy
 
     # spectral filter
+    # TODO: figure out if this really needs to be public
     cdef public DTYPE_real_t [:, :] filtr
 
     # friction parameter
@@ -256,18 +257,6 @@ cdef class PseudoSpectralKernel:
         # return a copy of the output
         return np.asarray(self._dummy_ifft_out).copy()
 
-    # the only way to set q and qh
-    def set_qh(self, np.ndarray[DTYPE_com_t, ndim=3] b):
-        cdef  DTYPE_com_t [:, :, :] b_view = b
-        self.qh[:] = b_view
-        self.ifft_qh_to_q()
-        # input might have been destroyed, have to re-assign
-        self.qh[:] = b_view
-
-    def set_q(self, np.ndarray[DTYPE_real_t, ndim=3] b):
-        cdef  DTYPE_real_t [:, :, :] b_view = b
-        self.q[:] = b_view
-        self.fft_q_to_qh()
 
     def _invert(self):
         self.__invert()

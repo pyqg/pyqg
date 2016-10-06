@@ -2,6 +2,8 @@ from __future__ import print_function
 import numpy as np
 from numpy import pi
 import logging
+import warnings
+
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 try:
     import mkl
@@ -28,8 +30,6 @@ class Model(PseudoSpectralKernel):
         Number of vertical levels (cython)
     kk, ll : real array
         Zonal and meridional wavenumbers (`nk`) (cython)
-    ll : real array
-        meridional wavenumbers (`nl`) (cython)
     a : real array
         inversion matrix (`nk`, `nk`, `nl`, `nk`) (cython)
     q : real array
@@ -42,6 +42,8 @@ class Model(PseudoSpectralKernel):
         Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
     Ubg : real array
         Background zonal velocity (`nk`) (cython)
+    Qy : real array
+        Background potential vorticity gradient (`nk`) (cython)
     ufull, vfull : real arrays
         Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
     uh, vh : complex arrays
@@ -658,3 +660,15 @@ class Model(PseudoSpectralKernel):
         var_dens[...,0] = var_dens[...,0]/2.
         var_dens[...,-1] = var_dens[...,-1]/2.
         return var_dens.sum()
+
+
+    def set_qh(self, qh):
+        warnings.warn("Method deprecated. Set model.qh directly instead. ",
+            DeprecationWarning)
+        self.qh = qh
+
+
+    def set_q(self, q):
+        warnings.warn("Method deprecated. Set model.q directly instead. ",
+            DeprecationWarning)
+        self.q = q

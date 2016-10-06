@@ -48,8 +48,8 @@ cdef class PseudoSpectralKernel:
     # pv fluxes
     cdef DTYPE_real_t [:, :, :] uq
     cdef DTYPE_real_t [:, :, :] vq
-    cdef DTYPE_com_t [:, :, :] uqh
-    cdef DTYPE_com_t [:, :, :] vqh
+    cdef readonly DTYPE_com_t [:, :, :] uqh
+    cdef readonly DTYPE_com_t [:, :, :] vqh
     # the tendencies
     cdef DTYPE_com_t [:, :, :] dqhdt
     cdef DTYPE_com_t [:, :, :] dqhdt_p
@@ -68,13 +68,13 @@ cdef class PseudoSpectralKernel:
     # the variables needed for inversion and advection
     # store a as complex so we don't have to typecast in inversion
     cdef DTYPE_com_t [:, :, :, :] a
-    cdef DTYPE_com_t [:] _ik
-    cdef DTYPE_com_t [:] _il
+    cdef readonly DTYPE_com_t [:] _ik
+    cdef readonly DTYPE_com_t [:] _il
     cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
     cdef DTYPE_real_t [:] Ubg
     cdef DTYPE_real_t [:] Qy
-    cdef DTYPE_com_t [:, :] _ikQy
+    cdef readonly DTYPE_com_t [:, :] _ikQy
 
     # spectral filter
     # TODO: figure out if this really needs to be public
@@ -223,19 +223,23 @@ cdef class PseudoSpectralKernel:
         """Allocate a space-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.ny, self.ny)
         IF PYQG_USE_PYFFTW:
-            return pyfftw.n_byte_align_empty(shape,
+            out = pyfftw.n_byte_align_empty(shape,
                                  pyfftw.simd_alignment, dtype=DTYPE_real)
+            out.flat[:] = 0.
+            return out
         ELSE:
-            return np.empty(shape, dtype=DTYPE_real)
+            return np.zeros(shape, dtype=DTYPE_real)
 
     def _empty_com(self):
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.nl, self.nk)
         IF PYQG_USE_PYFFTW:
-            return pyfftw.n_byte_align_empty(shape,
+            out = pyfftw.n_byte_align_empty(shape,
                                  pyfftw.simd_alignment, dtype=DTYPE_com)
+            out.flat[:] = 0.+0.j
+            return out
         ELSE:
-            return np.empty(shape, dtype=DTYPE_com)
+            return np.zeros(shape, dtype=DTYPE_com)
 
     def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):
         """"Generic FFT function for real grid-sized variables.

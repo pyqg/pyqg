@@ -101,7 +101,7 @@ class PyqgModelTester(unittest.TestCase):
     def test_change_inversion_matrix(self):
         """Make sure we can change the inversion matrix after kernel has been
         initialized."""
-        a_new = np.random.rand(self.m.Nz, self.m.Nz, self.m.Nl, self.m.Nk)
+        a_new = np.random.rand(self.m.nz, self.m.nz, self.m.nl, self.m.nk)
         self.m.a = a_new
         np.testing.assert_allclose(a_new, self.m.a)
 
@@ -197,6 +197,8 @@ class PyqgModelTester(unittest.TestCase):
         self.assertEqual(self.m.tc, 0)
         # step forward first time (should use forward Euler)
         self.m._forward_timestep()
+        print('here')
+
         np.testing.assert_allclose(self.m.qh, 1*self.m.dt*dqhdt,
             err_msg='First timestep incorrect')
         # step forward second time (should use AB2)

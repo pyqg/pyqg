@@ -98,6 +98,13 @@ class PyqgModelTester(unittest.TestCase):
         # need to think about how to implement this
         pass
 
+    def test_change_inversion_matrix(self):
+        """Make sure we can change the inversion matrix after kernel has been
+        initialized."""
+        a_new = np.random.rand(self.m.nz, self.m.nz, self.m.nl, self.m.nk)
+        self.m.a = a_new
+        np.testing.assert_allclose(a_new, self.m.a)
+
     def test_advection(self, rtol=1e-15):
         """Check whether calculating advection tendency gives the descired result."""
         # sin(2 a) = 2 sin(a) cos(a)
@@ -144,6 +151,8 @@ class PyqgModelTester(unittest.TestCase):
                 tabs_mask.mask[1,2*lwave,0] = 1
                 tabs_mask.mask[1,-2*lwave,0] = 1
                 # and make sure everything else is zero
+                if np.any(np.isnan(tabs_mask.filled(0.))):
+                    print("Found NaNs")
                 np.testing.assert_allclose(tabs_mask.filled(0.), 0.,
                     rtol=0., atol=rtol,
                     err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
@@ -190,6 +199,7 @@ class PyqgModelTester(unittest.TestCase):
         self.assertEqual(self.m.tc, 0)
         # step forward first time (should use forward Euler)
         self.m._forward_timestep()
+
         np.testing.assert_allclose(self.m.qh, 1*self.m.dt*dqhdt,
             err_msg='First timestep incorrect')
         # step forward second time (should use AB2)

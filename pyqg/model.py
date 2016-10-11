@@ -2,6 +2,8 @@ from __future__ import print_function
 import numpy as np
 from numpy import pi
 import logging
+import warnings
+
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 try:
     import mkl
@@ -20,28 +22,44 @@ class Model(PseudoSpectralKernel):
 
     Attributes
     ----------
-    q : real array
-        Potential vorticity in real space
-    qh : complex array
-        Potential vorticity in spectral space
-    ph : complex array
-        Streamfunction in spectral space
-    u, v : real arrays
-        Velocity anomaly components in real space
-    ufull, vfull : real arrays
-        Full velocity components in real space
-    uh, vh : complex arrays
-        Velocity anomaly components in spectral space
     nx, ny : int
-        Number of grid points in the x and y directions
+        Number of real space grid points in the `x`, `y` directions (cython)
+    nk, nl : int
+        Number of spectal space grid points in the `k`, `l` directions (cython)
+    nz : int
+        Number of vertical levels (cython)
+    kk, ll : real array
+        Zonal and meridional wavenumbers (`nk`) (cython)
+    a : real array
+        inversion matrix (`nk`, `nk`, `nl`, `nk`) (cython)
+    q : real array
+        Potential vorticity in real space (`nz`, `ny`, `nx`) (cython)
+    qh : complex array
+        Potential vorticity in spectral space (`nk`, `nl`, `nk`) (cython)
+    ph : complex array
+        Streamfunction in spectral space (`nk`, `nl`, `nk`) (cython)
+    u, v : real array
+        Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
+    Ubg : real array
+        Background zonal velocity (`nk`) (cython)
+    Qy : real array
+        Background potential vorticity gradient (`nk`) (cython)
+    ufull, vfull : real arrays
+        Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
+    uh, vh : complex arrays
+        Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (cython)
+    rek : float
+        Linear drag in lower layer (cython)
+    t : float
+        Model time (cython)
+    tc : int
+        Model timestep (cython)
+    dt : float
+        Numerical timestep (cython)
     L, W : float
         Domain length in x and y directions
-    rek : float
-        Linear drag in lower layer
     filterfac : float
         Amplitdue of the spectral spherical filter
-    dt : float
-        Numerical timstep
     twrite : int
         Interval for cfl writeout (units: number of timesteps)
     tmax : float
@@ -67,6 +85,7 @@ class Model(PseudoSpectralKernel):
     def __init__(
         self,
         # grid size parameters
+        nz=1,
         nx=64,                     # grid resolution
         ny=None,
         L=1e6,                     # domain size is L [m]
@@ -137,13 +156,15 @@ class Model(PseudoSpectralKernel):
             your machine.
         """
 
-        if ny is None: ny = nx
-        if W is None: W = L
+        if ny is None:
+            ny = nx
+        if W is None:
+            W = L
 
-        # put all the parameters into the object
-        # grid
-        self.nx = nx
-        self.ny = ny
+        # TODO: be more clear about what attributes are cython and what
+        # attributes are python
+        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd)
+
         self.L = L
         self.W = W
 
@@ -156,9 +177,6 @@ class Model(PseudoSpectralKernel):
         self.logfile = logfile
         self.log_level = log_level
         self.useAB2 = useAB2
-        # fft
-        #self.use_fftw = use_fftw
-        #self.teststyle= teststyle
         self.ntd = ntd
 
         # friction
@@ -171,19 +189,18 @@ class Model(PseudoSpectralKernel):
             self.f = f
             self.f2 = f**2
 
-
+        # TODO: make this less complicated!
+        # Really we just need to initialize the grid here. It's not necessary
+        # to have all these silly methods. Maybe we need "hooks" instead.
         self._initialize_logger()
         self._initialize_grid()
         self._initialize_background()
         self._initialize_forcing()
         self._initialize_filter()
-        self._initialize_inversion_matrix()
         self._initialize_time()
-
-        # call the underlying cython kernel
-        self._initialize_kernel()
-
+        self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
+
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
@@ -355,6 +372,7 @@ class Model(PseudoSpectralKernel):
         self.taveints = np.ceil(self.taveint/self.dt)
 
     ### initialization routines, only called once at the beginning ###
+    # TODO: clean up and simplify this whole routine
     def _initialize_grid(self):
         """Set up spatial and spectral grids and related constants"""
         self.x,self.y = np.meshgrid(
@@ -367,8 +385,9 @@ class Model(PseudoSpectralKernel):
         self.dl = 2.*pi/self.W
 
         # wavenumber grids
-        self.nl = self.ny
-        self.nk = int(self.nx/2+1)
+        # set in kernel
+        #self.nl = self.ny
+        #self.nk = int(self.nx/2+1)
         self.ll = self.dl*np.append( np.arange(0.,self.nx/2),
             np.arange(-self.nx/2,0.) )
         self.kk = self.dk*np.arange(0.,self.nk)
@@ -409,35 +428,15 @@ class Model(PseudoSpectralKernel):
         # this defines the spectral filter (following Arbic and Flierl, 2003)
         cphi=0.65*pi
         wvx=np.sqrt((self.k*self.dx)**2.+(self.l*self.dy)**2.)
-        self.filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
-        self.filtr[wvx<=cphi] = 1.
+        filtr = np.exp(-self.filterfac*(wvx-cphi)**4.)
+        filtr[wvx<=cphi] = 1.
+        self.filtr = filtr
 
     def _filter(self, q):
         return self.filtr * q
 
     def _do_external_forcing(self):
         pass
-
-    def _initialize_kernel(self):
-        #super(spectral_kernel.PseudoSpectralKernel, self).__init__(
-        self._kernel_init(
-            self.nz, self.ny, self.nx,
-            self.a, self.kk, self.ll,
-            self.Ubg, self.Qy,
-            self.filtr,
-            dt=self.dt,
-            rek=self.rek,
-            fftw_num_threads=self.ntd
-        )
-
-        # still need to initialize a few state variables here, outside kernel
-        # this is sloppy
-        #self.dqhdt_forc = np.zeros_like(self.qh)
-        #self.dqhdt_p = np.zeros_like(self.qh)
-        #self.dqhdt_pp = np.zeros_like(self.qh)
-
-        self.logger.info(' Kernel initialized')
-
 
     # logger
     def _initialize_logger(self):
@@ -661,3 +660,15 @@ class Model(PseudoSpectralKernel):
         var_dens[...,0] = var_dens[...,0]/2.
         var_dens[...,-1] = var_dens[...,-1]/2.
         return var_dens.sum()
+
+
+    def set_qh(self, qh):
+        warnings.warn("Method deprecated. Set model.qh directly instead. ",
+            DeprecationWarning)
+        self.qh = qh
+
+
+    def set_q(self, q):
+        warnings.warn("Method deprecated. Set model.q directly instead. ",
+            DeprecationWarning)
+        self.q = q

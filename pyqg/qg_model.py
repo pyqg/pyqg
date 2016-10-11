@@ -98,9 +98,8 @@ class QGModel(model.Model):
         self.U2 = U2
         #self.filterfac = filterfac
 
-        self.nz = 2
 
-        super(QGModel, self).__init__(**kwargs)
+        super(QGModel, self).__init__(nz=2, **kwargs)
 
         # initial conditions: (PV anomalies)
         self.set_q1q2(

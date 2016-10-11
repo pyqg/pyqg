@@ -114,13 +114,12 @@ class LayeredModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.delta = delta
-        self.nz = nz
         self.Ubg = np.array(U)
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
-        super(LayeredModel, self).__init__(**kwargs)
+        super(LayeredModel, self).__init__(nz=nz, **kwargs)
 
         self.vertical_modes()
 

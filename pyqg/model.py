@@ -342,7 +342,6 @@ class Model(PseudoSpectralKernel):
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
-
         self._invert()
         # find streamfunction from pv
 

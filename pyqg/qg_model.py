@@ -128,8 +128,8 @@ class QGModel(model.Model):
         self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
         self.Qy = np.array([self.Qy1, self.Qy2])
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy1 = self.Qy1 * 1j * self.k
-        self.ikQy2 = self.Qy2 * 1j * self.k
+        self.ikQy1 = self.Qy1[:,np.newaxis] * 1j * self.k
+        self.ikQy2 = self.Qy2[:,np.newaxis] * 1j * self.k
 
         # vector version
         self.ikQy = np.vstack([self.ikQy1[np.newaxis,...],
@@ -208,7 +208,7 @@ class QGModel(model.Model):
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
-            np.hstack([self.u + self.Ubg[:,np.newaxis,np.newaxis], self.v])
+            np.hstack([self.u + self.Ubg[:,:,np.newaxis], self.v])
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}
@@ -260,10 +260,10 @@ class QGModel(model.Model):
               np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
               np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
         )
-
+        
         self.add_diagnostic('APEgenspec',
             description='spectrum of APE generation',
-            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
+            function= (lambda self: self.U[:,np.newaxis] * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
                                   np.conj(self.ph[0] - self.ph[1])) )
         )

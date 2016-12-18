@@ -516,7 +516,7 @@ cdef class PseudoSpectralKernel:
     property ufull:
         def __get__(self):
             return np.asarray(self.u) + \
-                np.asarray(self.Ubg)[:,np.newaxis,np.newaxis]
+                np.expand_dims(np.asarray(self.Ubg),axis=2)
     property vfull:
         def __get__(self):
             return np.asarray(self.v)

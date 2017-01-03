@@ -124,8 +124,9 @@ class QGModel(model.Model):
         self.F2 = self.delta*self.F1
 
         # the meridional PV gradients in each layer
-        self.Qy1 = self.beta + self.F1*(self.U1 - self.U2)
-        self.Qy2 = self.beta - self.F2*(self.U1 - self.U2)
+        # need to calculate actual PV gradient
+        self.Qy1 = self.beta + self.F1*(self.U1 - self.U2) + np.gradient(np.gradient(self.U1,self.dy),self.dy)
+        self.Qy2 = self.beta - self.F2*(self.U1 - self.U2) + np.gradient(np.gradient(self.U2,self.dy),self.dy)
         self.Qy = np.array([self.Qy1, self.Qy2])
         # complex versions, multiplied by k, speeds up computations to precompute
         self.ikQy1 = self.Qy1[:,np.newaxis] * 1j * self.k

@@ -2,14 +2,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pyqg
 from pyqg.diagnostic_tools import spec_var
+import subprocess
 
 a = 0.5
-c=20.
+c=5.
 nx = 256.
 b=nx/2.
-U1 = 0.0 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)/(2*c**2))
-U2 = U1 / 2.0
-m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)
+U1 = 0.01 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)/(2*c**2))
+U2 = 0.005 * np.ones((nx))
+m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4)
 
 fk = m.wv != 0
 ckappa = np.zeros_like(m.wv2)
@@ -30,35 +31,27 @@ qi = m.ifft(qih)
 m.set_q(qi)
 i=0
 plt.figure(figsize=[12,10])
-clevels = np.arange(-0.0005, 0.00075, 0.000025)
-levels = np.arange(-0.0005,0.0008,0.0001)
+clevels = np.arange(-0.0005, 0.00125, 0.000025)
+levels = np.arange(-0.0005,0.0013,0.0001)
 for snapshot in m.run_with_snapshots(
         tsnapstart=0, tsnapint=250*m.dt):
     plt.clf()
-    # plt.imshow(m.ufull[0,:])
     Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)
-    # plt.imshow(m.q[0] + Q1)
     f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')
     plt.contour(Q1 + m.q[0,:],levels=levels, extend='both', colors='#444444')
-    # f = plt.contourf(m.q[0,:],levels=clevels, extend='both')
-    # plt.contour(m.q[0,:],levels=levels, extend='both', colors='#444444')
-    # plt.imshow(m.q[0,:])
-    # plt.imshow(m.ufull[0,:])
-    # plt.imshow(m.q[0,:])
-    # plt.clim([-0.00175,0.00175])
-    plt.clim([-0.0005,0.00075])
+    plt.clim([-0.0005,0.00125])
     plt.colorbar(f)
     plt.pause(0.01)
     plt.draw()
-    plt.savefig('Q_full_2x_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
+    plt.savefig('Q_full_with_surf_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
     plt.clf()
     f = plt.contourf(m.q[0,:],levels=clevels, extend='both')
     plt.contour(m.q[0,:],levels=levels, extend='both', colors='#444444')
-    plt.clim([-0.0005,0.00075])
+    plt.clim([-0.0005,0.00125])
     plt.colorbar(f)
     plt.pause(0.01)
     plt.draw()
-    plt.savefig('Q_2x_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
+    plt.savefig('Q_with_surf_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
     i += 1
-
-# now the model is done
+subprocess.call("ffmpeg -y -f image2 -i Q_full_with_surf_jet_%04d.png -f mp4 -vcodec libx264 -r 10 -pix_fmt yuv420p -vf scale=978:844 q_full_with_surf_jet.mp4",shell=True)
+subprocess.call("ffmpeg -y -f image2 -i Q_with_surf_jet_%04d.png -f mp4 -vcodec libx264 -r 10 -pix_fmt yuv420p -vf scale=978:844 q_with_surf_jet.mp4",shell=True)

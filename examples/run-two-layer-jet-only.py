@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 import pyqg
 from pyqg.diagnostic_tools import spec_var
 
-a = 0.5
+a = 0.25
 c=20.
 nx = 256.
 b=nx/2.
@@ -50,7 +50,7 @@ for snapshot in m.run_with_snapshots(
     plt.colorbar(f)
     plt.pause(0.01)
     plt.draw()
-    plt.savefig('Q_full_2x_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
+    plt.savefig('Q_full_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
     plt.clf()
     f = plt.contourf(m.q[0,:],levels=clevels, extend='both')
     plt.contour(m.q[0,:],levels=levels, extend='both', colors='#444444')
@@ -58,7 +58,7 @@ for snapshot in m.run_with_snapshots(
     plt.colorbar(f)
     plt.pause(0.01)
     plt.draw()
-    plt.savefig('Q_2x_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
+    plt.savefig('Q_with_jet_' + ('%04d' % i) + '.png', bbox_inches='tight')
     i += 1
 
 # now the model is done

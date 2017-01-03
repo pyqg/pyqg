@@ -64,3 +64,6 @@ target/
 
 # notebooks
 */.ipynb_checkpoints/*
+
+*.png
+*.mp4

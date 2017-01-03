@@ -22,6 +22,10 @@ GriddedLagrangianParticleArray2D	pyqg/particles.py	/^class GriddedLagrangianPart
 KEaux	examples/McWilliams1984.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:25
 KEaux	examples/multiple_jets.py	/^KEaux = m.spec_var( m.wv*Pi_hat )$/;"	kind:variable	line:25
 KEaux	examples/rossby_wave.py	/^KEaux = m.spec_var(m.wv*Pi_hat )$/;"	kind:variable	line:24
+KEaux	examples/run-two-layer-jet-only.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:25
+KEaux	examples/run-two-layer-surface-jet.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:26
+KEaux	examples/run-two-layer.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:25
+KEaux	examples/run_two-layer.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:22
 LICENSE	setup.py	/^LICENSE='MIT'$/;"	kind:variable	line:16
 LagrangianParticleArray2D	pyqg/__init__.py	/^from .particles import LagrangianParticleArray2D, GriddedLagrangianParticleArray2D$/;"	kind:namespace	line:7
 LagrangianParticleArray2D	pyqg/particles.py	/^class LagrangianParticleArray2D(object):$/;"	kind:class	line:15
@@ -46,15 +50,35 @@ Pi	examples/multiple_jets.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:23
 Pi	examples/multiple_jets.py	/^Pi = m.ifft( Pi_hat[np.newaxis,:,:] )$/;"	kind:variable	line:20
 Pi	examples/rossby_wave.py	/^Pi = -np.exp(-((m.x-3*pi\/2)**2 + (m.y-pi)**2)\/R**2)$/;"	kind:variable	line:20
 Pi	examples/rossby_wave.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:22
+Pi	examples/run-two-layer-jet-only.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:23
+Pi	examples/run-two-layer-jet-only.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:22
+Pi	examples/run-two-layer-surface-jet.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:24
+Pi	examples/run-two-layer-surface-jet.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:23
+Pi	examples/run-two-layer.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:23
+Pi	examples/run-two-layer.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:22
+Pi	examples/run_two-layer.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:20
+Pi	examples/run_two-layer.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:19
 Pi_hat	examples/McWilliams1984.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
 Pi_hat	examples/McWilliams1984.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:20
 Pi_hat	examples/multiple_jets.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
 Pi_hat	examples/multiple_jets.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:18
 Pi_hat	examples/rossby_wave.py	/^Pi_hat = m.fft( Pi[np.newaxis,:,:] )$/;"	kind:variable	line:23
+Pi_hat	examples/run-two-layer-jet-only.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
+Pi_hat	examples/run-two-layer-jet-only.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:20
+Pi_hat	examples/run-two-layer-surface-jet.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:25
+Pi_hat	examples/run-two-layer-surface-jet.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:21
+Pi_hat	examples/run-two-layer.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
+Pi_hat	examples/run-two-layer.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:20
+Pi_hat	examples/run_two-layer.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:21
+Pi_hat	examples/run_two-layer.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:17
 PointVortexArray2D	pyqg/point_vortex.py	/^class PointVortexArray2D(LagrangianParticleArray2D):$/;"	kind:class	line:5
 PseudoSpectralKernel	pyqg/kernel.pyx	/^cdef class PseudoSpectralKernel:$/;"	kind:class	line:32
 PseudoSpectralKernel	pyqg/model.py	/^from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3$/;"	kind:namespace	line:7
 PyqgModelTester	pyqg/tests/test_model.py	/^class PyqgModelTester(unittest.TestCase):$/;"	kind:class	line:6
+Q1	examples/run-two-layer-jet-only.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run-two-layer-surface-jet.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run-two-layer.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run_two-layer.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:36
 QGModel	pyqg/__init__.py	/^from .qg_model import QGModel$/;"	kind:namespace	line:3
 QGModel	pyqg/qg_model.py	/^class QGModel(model.Model):$/;"	kind:class	line:18
 QGModelFFTTester	pyqg/tests/test_fft2.py	/^class QGModelFFTTester(ModelFFTMixin, unittest.TestCase):$/;"	kind:class	line:48
@@ -63,8 +87,14 @@ ReferenceSolutionsTester	pyqg/tests/test_reference_solns.py	/^class ReferenceSol
 SQGModel	pyqg/__init__.py	/^from .sqg_model import SQGModel$/;"	kind:namespace	line:5
 SQGModel	pyqg/sqg_model.py	/^class SQGModel(model.Model):$/;"	kind:class	line:7
 SQG_ellipticalvortex.py	examples/SQG_ellipticalvortex.py	1;"	kind:file	line:1
-U1	examples/run-two-layer.py	/^U1 = a * np.exp(-(np.arange(nx)-b)**2\/(2*c**2))$/;"	kind:variable	line:9
-U2	examples/run-two-layer.py	/^U2 = U1\/2$/;"	kind:variable	line:10
+U1	examples/run-two-layer-jet-only.py	/^U1 = 0.0 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:10
+U1	examples/run-two-layer-surface-jet.py	/^U1 = 0.1 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
+U1	examples/run-two-layer.py	/^U1 = 0.0 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:10
+U1	examples/run_two-layer.py	/^U1 = 0.0 * np.ones((nx))$/;"	kind:variable	line:7
+U2	examples/run-two-layer-jet-only.py	/^U2 = U1 \/ 2.0$/;"	kind:variable	line:11
+U2	examples/run-two-layer-surface-jet.py	/^U2 = 0.075 * np.ones((nx))$/;"	kind:variable	line:12
+U2	examples/run-two-layer.py	/^U2 = U1 \/ 2.0$/;"	kind:variable	line:11
+U2	examples/run_two-layer.py	/^U2 = U1 \/ 2.0 $/;"	kind:variable	line:8
 URL	setup.py	/^URL='http:\/\/github.com\/pyqg\/pyqg'$/;"	kind:variable	line:11
 VERSION	setup.py	/^VERSION='0.2.0'$/;"	kind:variable	line:8
 VerticalModesTester	pyqg/tests/test_vertical_modes.py	/^class VerticalModesTester(unittest.TestCase):$/;"	kind:class	line:6
@@ -118,22 +148,22 @@ _advect	pyqg/model.py	/^    def _advect(self, q, u, v):$/;"	kind:member	line:468
 _calc_cfl	pyqg/bt_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:110
 _calc_cfl	pyqg/layered_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:235
 _calc_cfl	pyqg/model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:537
-_calc_cfl	pyqg/qg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:209
+_calc_cfl	pyqg/qg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:210
 _calc_cfl	pyqg/sqg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:83
 _calc_derived_fields	pyqg/layered_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:258
 _calc_derived_fields	pyqg/model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:597
-_calc_derived_fields	pyqg/qg_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:231
+_calc_derived_fields	pyqg/qg_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:232
 _calc_diagnostics	pyqg/bt_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:104
 _calc_diagnostics	pyqg/model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:502
 _calc_diagnostics	pyqg/sqg_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:77
 _calc_eddy_time	pyqg/bt_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:122
 _calc_eddy_time	pyqg/layered_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:250
-_calc_eddy_time	pyqg/qg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:223
+_calc_eddy_time	pyqg/qg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:224
 _calc_eddy_time	pyqg/sqg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:95
 _calc_ke	pyqg/bt_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:116
 _calc_ke	pyqg/layered_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:242
 _calc_ke	pyqg/model.py	/^    def _calc_ke(self):$/;"	kind:member	line:551
-_calc_ke	pyqg/qg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:216
+_calc_ke	pyqg/qg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:217
 _calc_ke	pyqg/sqg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:89
 _distance	pyqg/particles.py	/^    def _distance(self, x0, y0, x1, y1):$/;"	kind:member	line:124
 _do_advection	pyqg/kernel.pyx	/^    def _do_advection(self):$/;"	kind:member	line:310
@@ -157,18 +187,18 @@ _initialize_filter	pyqg/model.py	/^    def _initialize_filter(self):$/;"	kind:me
 _initialize_forcing	pyqg/bt_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:79
 _initialize_forcing	pyqg/layered_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:225
 _initialize_forcing	pyqg/model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:421
-_initialize_forcing	pyqg/qg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:160
+_initialize_forcing	pyqg/qg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:161
 _initialize_forcing	pyqg/sqg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:70
 _initialize_grid	pyqg/model.py	/^    def _initialize_grid(self):$/;"	kind:member	line:375
 _initialize_inversion_matrix	pyqg/bt_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:74
 _initialize_inversion_matrix	pyqg/layered_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:205
 _initialize_inversion_matrix	pyqg/model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:417
-_initialize_inversion_matrix	pyqg/qg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:143
+_initialize_inversion_matrix	pyqg/qg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:144
 _initialize_inversion_matrix	pyqg/sqg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:65
 _initialize_logger	pyqg/model.py	/^    def _initialize_logger(self):$/;"	kind:member	line:441
 _initialize_model_diagnostics	pyqg/layered_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:272
 _initialize_model_diagnostics	pyqg/model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:601
-_initialize_model_diagnostics	pyqg/qg_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:241
+_initialize_model_diagnostics	pyqg/qg_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:242
 _initialize_stretching_matrix	pyqg/layered_model.py	/^    def _initialize_stretching_matrix(self):$/;"	kind:member	line:130
 _initialize_time	pyqg/model.py	/^    def _initialize_time(self):$/;"	kind:member	line:367
 _invert	pyqg/kernel.pyx	/^    def _invert(self):$/;"	kind:member	line:265
@@ -179,18 +209,24 @@ _set_active_diagnostics	pyqg/model.py	/^    def _set_active_diagnostics(self, di
 _step_forward	pyqg/model.py	/^    def _step_forward(self):$/;"	kind:member	line:344
 _wrap_x	pyqg/particles.py	/^    def _wrap_x(self, x):$/;"	kind:member	line:110
 _wrap_y	pyqg/particles.py	/^    def _wrap_y(self, y):$/;"	kind:member	line:117
-a	examples/run-two-layer.py	/^a = 0.25$/;"	kind:variable	line:5
+a	examples/run-two-layer-jet-only.py	/^a = 0.25$/;"	kind:variable	line:6
+a	examples/run-two-layer-surface-jet.py	/^a = 0.5$/;"	kind:variable	line:7
+a	examples/run-two-layer.py	/^a = 0.5$/;"	kind:variable	line:6
 add_diagnostic	pyqg/model.py	/^    def add_diagnostic(self, diag_name, description=None, units=None, function=None):$/;"	kind:member	line:609
 and	docs/conf.py	/^if not on_rtd:  # only import and set the theme if we're building docs locally$/;"	kind:namespace	line:140
 author	setup.py	/^      author=AUTHOR,$/;"	kind:variable	line:147
 author_email	setup.py	/^      author_email=AUTHOR_EMAIL,$/;"	kind:variable	line:148
 autoclass_content	docs/conf.py	/^autoclass_content = 'both'$/;"	kind:variable	line:307
 autosummary_generate	docs/conf.py	/^autosummary_generate = True$/;"	kind:variable	line:68
-b	examples/run-two-layer.py	/^b=nx\/2$/;"	kind:variable	line:8
+b	examples/run-two-layer-jet-only.py	/^b=nx\/2.$/;"	kind:variable	line:9
+b	examples/run-two-layer-surface-jet.py	/^b=nx\/2.$/;"	kind:variable	line:10
+b	examples/run-two-layer.py	/^b=nx\/2.$/;"	kind:variable	line:9
 be	setup.py	/^        warnings.warn('Could not import pyfftw. Model will be slow.')$/;"	kind:namespace	line:73
 benchmark.py	benchmark/benchmark.py	1;"	kind:file	line:1
 bt_model.py	pyqg/bt_model.py	1;"	kind:file	line:1
-c	examples/run-two-layer.py	/^c=5$/;"	kind:variable	line:6
+c	examples/run-two-layer-jet-only.py	/^c=20.$/;"	kind:variable	line:7
+c	examples/run-two-layer-surface-jet.py	/^c=20.$/;"	kind:variable	line:8
+c	examples/run-two-layer.py	/^c=20.$/;"	kind:variable	line:7
 cProfile	benchmark/benchmark.py	/^import cProfile$/;"	kind:namespace	line:3
 calc_ispec	pyqg/diagnostic_tools.py	/^def calc_ispec(model, ph):$/;"	kind:function	line:53
 calc_uv	pyqg/point_vortex.py	/^    def calc_uv(self, x, y, prev=False):$/;"	kind:member	line:32
@@ -198,7 +234,15 @@ check_for_openmp	setup.py	/^def check_for_openmp():$/;"	kind:function	line:90
 ckappa	examples/McWilliams1984.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:15
 ckappa	examples/multiple_jets.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:13
 ckappa	examples/rossby_wave.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:14
+ckappa	examples/run-two-layer-jet-only.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:15
+ckappa	examples/run-two-layer-surface-jet.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:16
+ckappa	examples/run-two-layer.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:15
+ckappa	examples/run_two-layer.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:12
 classifiers	setup.py	/^      classifiers=CLASSIFIERS,$/;"	kind:variable	line:143
+clevels	examples/run-two-layer-jet-only.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:33
+clevels	examples/run-two-layer-surface-jet.py	/^clevels = np.arange(-0.0005, 0.00125, 0.000025)$/;"	kind:variable	line:34
+clevels	examples/run-two-layer.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:33
+clevels	examples/run_two-layer.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:30
 conf.py	docs/conf.py	1;"	kind:file	line:1
 constant_velocity_function	pyqg/tests/test_particles.py	/^def constant_velocity_function(u, v):$/;"	kind:function	line:14
 copyright	docs/conf.py	/^copyright = u'2015, PyQG team'$/;"	kind:variable	line:86
@@ -218,6 +262,14 @@ extensions	docs/conf.py	/^extensions = [$/;"	kind:variable	line:57
 extlinks	docs/conf.py	/^extlinks = {'issue': ('https:\/\/github.com\/pyqg\/pyqg\/issues\/%s', 'GH')}$/;"	kind:variable	line:66
 extra_compile_args	setup.py	/^extra_compile_args = []$/;"	kind:variable	line:111
 extra_link_args	setup.py	/^extra_link_args = []$/;"	kind:variable	line:112
+f	examples/run-two-layer-jet-only.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:41
+f	examples/run-two-layer-jet-only.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:55
+f	examples/run-two-layer-surface-jet.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:40
+f	examples/run-two-layer-surface-jet.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:48
+f	examples/run-two-layer.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:41
+f	examples/run-two-layer.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:55
+f	examples/run_two-layer.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:39
+f	examples/run_two-layer.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:53
 fft	pyqg/kernel.pyx	/^    def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):$/;"	kind:member	line:244
 fft_q_to_qh	pyqg/kernel.pyx	/^        def fft_q_to_qh(self):$/;"	kind:function	line:205
 fft_uq_to_uqh	pyqg/kernel.pyx	/^        def fft_uq_to_uqh(self):$/;"	kind:function	line:213
@@ -227,6 +279,10 @@ html_static_path	docs/conf.py	/^html_static_path = ['_static']$/;"	kind:variable
 html_theme	docs/conf.py	/^    html_theme = 'sphinx_rtd_theme'$/;"	kind:variable	line:142
 html_theme_path	docs/conf.py	/^    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]$/;"	kind:variable	line:143
 htmlhelp_basename	docs/conf.py	/^htmlhelp_basename = 'pyqgdoc'$/;"	kind:variable	line:225
+i	examples/run-two-layer-jet-only.py	/^i=0$/;"	kind:variable	line:31
+i	examples/run-two-layer-surface-jet.py	/^i=0$/;"	kind:variable	line:32
+i	examples/run-two-layer.py	/^i=0$/;"	kind:variable	line:31
+i	examples/run_two-layer.py	/^i=0$/;"	kind:variable	line:28
 if	docs/conf.py	/^if not on_rtd:  # only import and set the theme if we're building docs locally$/;"	kind:namespace	line:140
 ifft	pyqg/kernel.pyx	/^    def ifft(self, np.ndarray[DTYPE_com_t, ndim=3] v):$/;"	kind:member	line:254
 ifft_qh_to_q	pyqg/kernel.pyx	/^        def ifft_qh_to_q(self):$/;"	kind:function	line:207
@@ -241,6 +297,10 @@ kernel.pyx	pyqg/kernel.pyx	1;"	kind:file	line:1
 latex_documents	docs/conf.py	/^latex_documents = [$/;"	kind:variable	line:244
 latex_elements	docs/conf.py	/^latex_elements = {$/;"	kind:variable	line:230
 layered_model.py	pyqg/layered_model.py	1;"	kind:file	line:1
+levels	examples/run-two-layer-jet-only.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:34
+levels	examples/run-two-layer-surface-jet.py	/^levels = np.arange(-0.0005,0.0013,0.0001)$/;"	kind:variable	line:35
+levels	examples/run-two-layer.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:34
+levels	examples/run_two-layer.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:31
 license	setup.py	/^      license=LICENSE,$/;"	kind:variable	line:149
 logging	pyqg/model.py	/^import logging$/;"	kind:namespace	line:4
 long_description	setup.py	/^      long_description=LONG_DESCRIPTION,$/;"	kind:variable	line:144
@@ -249,8 +309,10 @@ m	examples/McWilliams1984.py	/^m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 200*year,
 m	examples/SQG_ellipticalvortex.py	/^m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 40.005,$/;"	kind:variable	line:8
 m	examples/multiple_jets.py	/^m = pyqg.BTModel(L=2.*pi,nx=256, tmax = 50*year,$/;"	kind:variable	line:8
 m	examples/rossby_wave.py	/^m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 1*year,$/;"	kind:variable	line:8
-m	examples/run-two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=8000, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:11
-m	examples/run_two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=8000)$/;"	kind:variable	line:5
+m	examples/run-two-layer-jet-only.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:12
+m	examples/run-two-layer-surface-jet.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx, tmax=250*500*1000, ntd=4)$/;"	kind:variable	line:13
+m	examples/run-two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:12
+m	examples/run_two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:9
 man_pages	docs/conf.py	/^man_pages = [$/;"	kind:variable	line:274
 master_doc	docs/conf.py	/^master_doc = 'index'$/;"	kind:variable	line:82
 matplotlib	examples/McWilliams1984.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
@@ -279,6 +341,8 @@ np	examples/McWilliams1984.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/SQG_ellipticalvortex.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/multiple_jets.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/rossby_wave.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	examples/run-two-layer-jet-only.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	examples/run-two-layer-surface-jet.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	examples/run-two-layer.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	examples/run_two-layer.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	pyqg/bt_model.py	/^import numpy as np$/;"	kind:namespace	line:2
@@ -305,7 +369,10 @@ npfft	pyqg/kernel.pyx	/^    import numpy.fft as npfft$/;"	kind:namespace	line:18
 numpy	pyqg/kernel.pyx	/^    import numpy.fft as npfft$/;"	kind:namespace	line:18
 numpydoc_class_members_toctree	docs/conf.py	/^numpydoc_class_members_toctree = True$/;"	kind:variable	line:69
 numpydoc_show_class_members	docs/conf.py	/^numpydoc_show_class_members = False$/;"	kind:variable	line:70
-nx	examples/run-two-layer.py	/^nx = 128$/;"	kind:variable	line:7
+nx	examples/run-two-layer-jet-only.py	/^nx = 256.$/;"	kind:variable	line:8
+nx	examples/run-two-layer-surface-jet.py	/^nx = 256.$/;"	kind:variable	line:9
+nx	examples/run-two-layer.py	/^nx = 256.$/;"	kind:variable	line:8
+nx	examples/run_two-layer.py	/^nx = 256.$/;"	kind:variable	line:6
 on_rtd	docs/conf.py	/^on_rtd = os.environ.get('READTHEDOCS', None) == 'True'$/;"	kind:variable	line:138
 os	docs/conf.py	/^import os$/;"	kind:namespace	line:16
 os	setup.py	/^import os$/;"	kind:namespace	line:5
@@ -327,10 +394,16 @@ pi	pyqg/tests/test_fftw.py	/^from numpy import pi$/;"	kind:namespace	line:3
 pih	examples/McWilliams1984.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:variable	line:27
 pih	examples/multiple_jets.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:variable	line:27
 pih	examples/rossby_wave.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:variable	line:26
+pih	examples/run-two-layer-jet-only.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:27
+pih	examples/run-two-layer-surface-jet.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:28
+pih	examples/run-two-layer.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:27
+pih	examples/run_two-layer.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:24
 plt	examples/McWilliams1984.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/SQG_ellipticalvortex.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/multiple_jets.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/rossby_wave.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
+plt	examples/run-two-layer-jet-only.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	examples/run-two-layer-surface-jet.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	examples/run-two-layer.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	examples/run_two-layer.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 point_vortex.py	pyqg/point_vortex.py	1;"	kind:file	line:1
@@ -364,6 +437,8 @@ pyqg	docs/conf.py	/^import pyqg$/;"	kind:namespace	line:47
 pyqg	examples/McWilliams1984.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/multiple_jets.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/rossby_wave.py	/^import pyqg$/;"	kind:namespace	line:4
+pyqg	examples/run-two-layer-jet-only.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	examples/run-two-layer-surface-jet.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	examples/run-two-layer.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	examples/run_two-layer.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	pyqg/tests/test_advection.py	/^import pyqg$/;"	kind:namespace	line:3
@@ -376,15 +451,22 @@ pyqg	pyqg/tests/test_stability.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	pyqg/tests/test_vertical_modes.py	/^import pyqg$/;"	kind:namespace	line:4
 pytest	pyqg/tests/test_fftw.py	/^import pytest$/;"	kind:namespace	line:5
 pytest	pyqg/tests/test_particles.py	/^import pytest$/;"	kind:namespace	line:4
-q_upper	examples/run-two-layer.py	/^    q_upper = m.q[0] $/;"	kind:variable	line:15
 qg_model.py	pyqg/qg_model.py	1;"	kind:file	line:1
 qi	examples/McWilliams1984.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
 qi	examples/SQG_ellipticalvortex.py	/^qi = -np.exp(-(x**2 + (4.0*y)**2)\/(m.L\/6.0)**2)$/;"	kind:variable	line:21
 qi	examples/multiple_jets.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
 qi	examples/rossby_wave.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:28
+qi	examples/run-two-layer-jet-only.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
+qi	examples/run-two-layer-surface-jet.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:30
+qi	examples/run-two-layer.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
+qi	examples/run_two-layer.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:26
 qih	examples/McWilliams1984.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
 qih	examples/multiple_jets.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
 qih	examples/rossby_wave.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:27
+qih	examples/run-two-layer-jet-only.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
+qih	examples/run-two-layer-surface-jet.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:29
+qih	examples/run-two-layer.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
+qih	examples/run_two-layer.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:25
 r_twopi	pyqg/point_vortex.py	/^r_twopi = (2*np.pi)**-1$/;"	kind:variable	line:3
 range	pyqg/tests/test_particles.py	/^from builtins import range$/;"	kind:namespace	line:2
 readme	setup.py	/^def readme():$/;"	kind:function	line:129
@@ -392,6 +474,8 @@ release	docs/conf.py	/^release = '0.1'$/;"	kind:variable	line:95
 res	benchmark/benchmark.py	/^res = np.zeros((len(mynx), 5))$/;"	kind:variable	line:13
 rossby_wave.py	examples/rossby_wave.py	1;"	kind:file	line:1
 run	pyqg/model.py	/^    def run(self):$/;"	kind:member	line:225
+run-two-layer-jet-only.py	examples/run-two-layer-jet-only.py	1;"	kind:file	line:1
+run-two-layer-surface-jet.py	examples/run-two-layer-surface-jet.py	1;"	kind:file	line:1
 run-two-layer.py	examples/run-two-layer.py	1;"	kind:file	line:1
 run_two-layer.py	examples/run_two-layer.py	1;"	kind:file	line:1
 run_with_snapshots	pyqg/model.py	/^    def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):$/;"	kind:member	line:205
@@ -409,9 +493,9 @@ setUp	pyqg/tests/test_stability.py	/^    def setUp(self):$/;"	kind:member	line:8
 setUp	pyqg/tests/test_vertical_modes.py	/^    def setUp(self):$/;"	kind:member	line:8
 set_U	pyqg/bt_model.py	/^    def set_U(self, U):$/;"	kind:member	line:93
 set_U	pyqg/sqg_model.py	/^    def set_U(self, U):$/;"	kind:member	line:73
-set_U1U2	pyqg/qg_model.py	/^    def set_U1U2(self, U1, U2):$/;"	kind:member	line:192
+set_U1U2	pyqg/qg_model.py	/^    def set_U1U2(self, U1, U2):$/;"	kind:member	line:193
 set_q	pyqg/model.py	/^    def set_q(self, q):$/;"	kind:member	line:670
-set_q1q2	pyqg/qg_model.py	/^    def set_q1q2(self, q1, q2, check=False):$/;"	kind:member	line:169
+set_q1q2	pyqg/qg_model.py	/^    def set_q1q2(self, q1, q2, check=False):$/;"	kind:member	line:170
 set_qh	pyqg/model.py	/^    def set_qh(self, qh):$/;"	kind:member	line:664
 setup	setup.py	/^from setuptools import setup, Extension$/;"	kind:namespace	line:1
 setup.py	setup.py	1;"	kind:file	line:1
@@ -423,6 +507,10 @@ solid_body_rotation_velocity_function	pyqg/tests/test_particles.py	/^def solid_b
 source_suffix	docs/conf.py	/^source_suffix = '.rst'$/;"	kind:variable	line:76
 spec_sum	pyqg/diagnostic_tools.py	/^def spec_sum(ph2):$/;"	kind:function	line:30
 spec_var	examples/McWilliams1984.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:5
+spec_var	examples/run-two-layer-jet-only.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer-surface-jet.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run_two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	pyqg/diagnostic_tools.py	/^def spec_var(model, ph):$/;"	kind:function	line:7
 spec_var	pyqg/model.py	/^    def spec_var(self, ph):$/;"	kind:member	line:655
 spec_var	pyqg/tests/test_fft2.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:5
@@ -434,6 +522,7 @@ stability_analysis	pyqg/model.py	/^    def stability_analysis(self,bottom_fricti
 step_forward_vortices	pyqg/point_vortex.py	/^    def step_forward_vortices(self, dt):       $/;"	kind:member	line:20
 step_forward_with_function	pyqg/particles.py	/^    def step_forward_with_function(self, uv0fun, uv1fun, dt):$/;"	kind:member	line:65
 step_forward_with_gridded_uv	pyqg/particles.py	/^    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt, order=1):       $/;"	kind:member	line:223
+subprocess	examples/run-two-layer-surface-jet.py	/^import subprocess$/;"	kind:namespace	line:5
 subprocess	setup.py	/^import tempfile, subprocess, shutil$/;"	kind:namespace	line:6
 sys	docs/conf.py	/^import sys$/;"	kind:namespace	line:15
 taveint	benchmark/benchmark.py	/^                         taveint=np.inf,)$/;"	kind:variable	line:29

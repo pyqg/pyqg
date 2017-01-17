@@ -23,6 +23,10 @@ KEaux	examples/McWilliams1984.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;
 KEaux	examples/multiple_jets.py	/^KEaux = m.spec_var( m.wv*Pi_hat )$/;"	kind:variable	line:25
 KEaux	examples/rossby_wave.py	/^KEaux = m.spec_var(m.wv*Pi_hat )$/;"	kind:variable	line:24
 KEaux	examples/run-two-layer-jet-only.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:25
+KEaux	examples/run-two-layer-surface-jet-rev-s.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:26
+KEaux	examples/run-two-layer-surface-jet-rev.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:26
+KEaux	examples/run-two-layer-surface-jet-s-2.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:28
+KEaux	examples/run-two-layer-surface-jet-s.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:31
 KEaux	examples/run-two-layer-surface-jet.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:26
 KEaux	examples/run-two-layer.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:25
 KEaux	examples/run_two-layer.py	/^KEaux = spec_var( m, m.filtr*m.wv*Pi_hat )$/;"	kind:variable	line:22
@@ -52,6 +56,14 @@ Pi	examples/rossby_wave.py	/^Pi = -np.exp(-((m.x-3*pi\/2)**2 + (m.y-pi)**2)\/R**
 Pi	examples/rossby_wave.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:22
 Pi	examples/run-two-layer-jet-only.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:23
 Pi	examples/run-two-layer-jet-only.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:22
+Pi	examples/run-two-layer-surface-jet-rev-s.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:24
+Pi	examples/run-two-layer-surface-jet-rev-s.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:23
+Pi	examples/run-two-layer-surface-jet-rev.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:24
+Pi	examples/run-two-layer-surface-jet-rev.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:23
+Pi	examples/run-two-layer-surface-jet-s-2.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:26
+Pi	examples/run-two-layer-surface-jet-s-2.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:25
+Pi	examples/run-two-layer-surface-jet-s.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:29
+Pi	examples/run-two-layer-surface-jet-s.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:28
 Pi	examples/run-two-layer-surface-jet.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:24
 Pi	examples/run-two-layer-surface-jet.py	/^Pi = m.ifft( Pi_hat[np.newaxis] )$/;"	kind:variable	line:23
 Pi	examples/run-two-layer.py	/^Pi = Pi - Pi.mean()$/;"	kind:variable	line:23
@@ -65,6 +77,14 @@ Pi_hat	examples/multiple_jets.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*
 Pi_hat	examples/rossby_wave.py	/^Pi_hat = m.fft( Pi[np.newaxis,:,:] )$/;"	kind:variable	line:23
 Pi_hat	examples/run-two-layer-jet-only.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
 Pi_hat	examples/run-two-layer-jet-only.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:20
+Pi_hat	examples/run-two-layer-surface-jet-rev-s.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:25
+Pi_hat	examples/run-two-layer-surface-jet-rev-s.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:21
+Pi_hat	examples/run-two-layer-surface-jet-rev.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:25
+Pi_hat	examples/run-two-layer-surface-jet-rev.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:21
+Pi_hat	examples/run-two-layer-surface-jet-s-2.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:27
+Pi_hat	examples/run-two-layer-surface-jet-s-2.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:23
+Pi_hat	examples/run-two-layer-surface-jet-s.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:30
+Pi_hat	examples/run-two-layer-surface-jet-s.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:26
 Pi_hat	examples/run-two-layer-surface-jet.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:25
 Pi_hat	examples/run-two-layer-surface-jet.py	/^Pi_hat = np.random.randn(nhx,nhy)*ckappa +1j*np.random.randn(nhx,nhy)*ckappa$/;"	kind:variable	line:21
 Pi_hat	examples/run-two-layer.py	/^Pi_hat = m.fft( Pi )$/;"	kind:variable	line:24
@@ -76,6 +96,10 @@ PseudoSpectralKernel	pyqg/kernel.pyx	/^cdef class PseudoSpectralKernel:$/;"	kind
 PseudoSpectralKernel	pyqg/model.py	/^from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3$/;"	kind:namespace	line:7
 PyqgModelTester	pyqg/tests/test_model.py	/^class PyqgModelTester(unittest.TestCase):$/;"	kind:class	line:6
 Q1	examples/run-two-layer-jet-only.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run-two-layer-surface-jet-rev-s.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run-two-layer-surface-jet-rev.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
+Q1	examples/run-two-layer-surface-jet-s-2.py	/^Q1 = np.expand_dims(m.beta + m.F1*(m.U1 - m.U2), axis=1) * m.y + np.expand_dims(np.gradient(m.U1, m.dy),axis=1) * np.ones((nx))$/;"	kind:variable	line:15
+Q1	examples/run-two-layer-surface-jet-s.py	/^Q1 = np.expand_dims(m.beta + m.F1*(m.U1 - m.U2), axis=1) * m.y + np.expand_dims(np.gradient(m.U1, m.dy),axis=1)$/;"	kind:variable	line:15
 Q1	examples/run-two-layer-surface-jet.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
 Q1	examples/run-two-layer.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:39
 Q1	examples/run_two-layer.py	/^    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)$/;"	kind:variable	line:36
@@ -88,11 +112,19 @@ SQGModel	pyqg/__init__.py	/^from .sqg_model import SQGModel$/;"	kind:namespace	l
 SQGModel	pyqg/sqg_model.py	/^class SQGModel(model.Model):$/;"	kind:class	line:7
 SQG_ellipticalvortex.py	examples/SQG_ellipticalvortex.py	1;"	kind:file	line:1
 U1	examples/run-two-layer-jet-only.py	/^U1 = 0.0 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:10
-U1	examples/run-two-layer-surface-jet.py	/^U1 = 0.1 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
+U1	examples/run-two-layer-surface-jet-rev-s.py	/^U1 = -0.01 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
+U1	examples/run-two-layer-surface-jet-rev.py	/^U1 = -0.01 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
+U1	examples/run-two-layer-surface-jet-s-2.py	/^U1 = 0.005 + jet$/;"	kind:variable	line:12
+U1	examples/run-two-layer-surface-jet-s.py	/^U1 = 0.005 + jet$/;"	kind:variable	line:12
+U1	examples/run-two-layer-surface-jet.py	/^U1 = 0.01 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
 U1	examples/run-two-layer.py	/^U1 = 0.0 + a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:10
 U1	examples/run_two-layer.py	/^U1 = 0.0 * np.ones((nx))$/;"	kind:variable	line:7
 U2	examples/run-two-layer-jet-only.py	/^U2 = U1 \/ 2.0$/;"	kind:variable	line:11
-U2	examples/run-two-layer-surface-jet.py	/^U2 = 0.075 * np.ones((nx))$/;"	kind:variable	line:12
+U2	examples/run-two-layer-surface-jet-rev-s.py	/^U2 = -0.005 * np.ones((nx))$/;"	kind:variable	line:12
+U2	examples/run-two-layer-surface-jet-rev.py	/^U2 = -0.005 * np.ones((nx))$/;"	kind:variable	line:12
+U2	examples/run-two-layer-surface-jet-s-2.py	/^U2 = 0.000 + jet*0.99$/;"	kind:variable	line:13
+U2	examples/run-two-layer-surface-jet-s.py	/^U2 = 0.000 + jet*0.75$/;"	kind:variable	line:13
+U2	examples/run-two-layer-surface-jet.py	/^U2 = 0.005 * np.ones((nx))$/;"	kind:variable	line:12
 U2	examples/run-two-layer.py	/^U2 = U1 \/ 2.0$/;"	kind:variable	line:11
 U2	examples/run_two-layer.py	/^U2 = U1 \/ 2.0 $/;"	kind:variable	line:8
 URL	setup.py	/^URL='http:\/\/github.com\/pyqg\/pyqg'$/;"	kind:variable	line:11
@@ -210,6 +242,10 @@ _step_forward	pyqg/model.py	/^    def _step_forward(self):$/;"	kind:member	line:
 _wrap_x	pyqg/particles.py	/^    def _wrap_x(self, x):$/;"	kind:member	line:110
 _wrap_y	pyqg/particles.py	/^    def _wrap_y(self, y):$/;"	kind:member	line:117
 a	examples/run-two-layer-jet-only.py	/^a = 0.25$/;"	kind:variable	line:6
+a	examples/run-two-layer-surface-jet-rev-s.py	/^a = -0.5$/;"	kind:variable	line:7
+a	examples/run-two-layer-surface-jet-rev.py	/^a = -0.5$/;"	kind:variable	line:7
+a	examples/run-two-layer-surface-jet-s-2.py	/^a = 0.05$/;"	kind:variable	line:7
+a	examples/run-two-layer-surface-jet-s.py	/^a = 0.01$/;"	kind:variable	line:7
 a	examples/run-two-layer-surface-jet.py	/^a = 0.5$/;"	kind:variable	line:7
 a	examples/run-two-layer.py	/^a = 0.5$/;"	kind:variable	line:6
 add_diagnostic	pyqg/model.py	/^    def add_diagnostic(self, diag_name, description=None, units=None, function=None):$/;"	kind:member	line:609
@@ -219,13 +255,21 @@ author_email	setup.py	/^      author_email=AUTHOR_EMAIL,$/;"	kind:variable	line:
 autoclass_content	docs/conf.py	/^autoclass_content = 'both'$/;"	kind:variable	line:307
 autosummary_generate	docs/conf.py	/^autosummary_generate = True$/;"	kind:variable	line:68
 b	examples/run-two-layer-jet-only.py	/^b=nx\/2.$/;"	kind:variable	line:9
+b	examples/run-two-layer-surface-jet-rev-s.py	/^b=nx\/2.$/;"	kind:variable	line:10
+b	examples/run-two-layer-surface-jet-rev.py	/^b=nx\/2.$/;"	kind:variable	line:10
+b	examples/run-two-layer-surface-jet-s-2.py	/^b=nx\/2.$/;"	kind:variable	line:10
+b	examples/run-two-layer-surface-jet-s.py	/^b=nx\/2.$/;"	kind:variable	line:10
 b	examples/run-two-layer-surface-jet.py	/^b=nx\/2.$/;"	kind:variable	line:10
 b	examples/run-two-layer.py	/^b=nx\/2.$/;"	kind:variable	line:9
 be	setup.py	/^        warnings.warn('Could not import pyfftw. Model will be slow.')$/;"	kind:namespace	line:73
 benchmark.py	benchmark/benchmark.py	1;"	kind:file	line:1
 bt_model.py	pyqg/bt_model.py	1;"	kind:file	line:1
 c	examples/run-two-layer-jet-only.py	/^c=20.$/;"	kind:variable	line:7
-c	examples/run-two-layer-surface-jet.py	/^c=20.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet-rev-s.py	/^c=5.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet-rev.py	/^c=5.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet-s-2.py	/^c=5.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet-s.py	/^c=5.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet.py	/^c=5.$/;"	kind:variable	line:8
 c	examples/run-two-layer.py	/^c=20.$/;"	kind:variable	line:7
 cProfile	benchmark/benchmark.py	/^import cProfile$/;"	kind:namespace	line:3
 calc_ispec	pyqg/diagnostic_tools.py	/^def calc_ispec(model, ph):$/;"	kind:function	line:53
@@ -235,11 +279,20 @@ ckappa	examples/McWilliams1984.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:varia
 ckappa	examples/multiple_jets.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:13
 ckappa	examples/rossby_wave.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:14
 ckappa	examples/run-two-layer-jet-only.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:15
+ckappa	examples/run-two-layer-surface-jet-rev-s.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:16
+ckappa	examples/run-two-layer-surface-jet-rev.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:16
+ckappa	examples/run-two-layer-surface-jet-s-2.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:18
+ckappa	examples/run-two-layer-surface-jet-s.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:21
 ckappa	examples/run-two-layer-surface-jet.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:16
 ckappa	examples/run-two-layer.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:15
 ckappa	examples/run_two-layer.py	/^ckappa = np.zeros_like(m.wv2)$/;"	kind:variable	line:12
 classifiers	setup.py	/^      classifiers=CLASSIFIERS,$/;"	kind:variable	line:143
 clevels	examples/run-two-layer-jet-only.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:33
+clevels	examples/run-two-layer-surface-jet-rev-s.py	/^clevels = np.arange(-0.00125, 0.0005, 0.000025)$/;"	kind:variable	line:34
+clevels	examples/run-two-layer-surface-jet-rev.py	/^clevels = np.arange(-0.00125, 0.0005, 0.000025)$/;"	kind:variable	line:34
+clevels	examples/run-two-layer-surface-jet-s-2.py	/^    clevels = np.arange(-0.0005, 0.00125, 0.000025)$/;"	kind:variable	line:51
+clevels	examples/run-two-layer-surface-jet-s-2.py	/^    clevels = np.arange(0.0000, 0.000005, 0.0000005)$/;"	kind:variable	line:38
+clevels	examples/run-two-layer-surface-jet-s.py	/^clevels = np.arange(-0.0005, 0.00125, 0.000025)$/;"	kind:variable	line:39
 clevels	examples/run-two-layer-surface-jet.py	/^clevels = np.arange(-0.0005, 0.00125, 0.000025)$/;"	kind:variable	line:34
 clevels	examples/run-two-layer.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:33
 clevels	examples/run_two-layer.py	/^clevels = np.arange(-0.0005, 0.00075, 0.000025)$/;"	kind:variable	line:30
@@ -264,6 +317,13 @@ extra_compile_args	setup.py	/^extra_compile_args = []$/;"	kind:variable	line:111
 extra_link_args	setup.py	/^extra_link_args = []$/;"	kind:variable	line:112
 f	examples/run-two-layer-jet-only.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:41
 f	examples/run-two-layer-jet-only.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:55
+f	examples/run-two-layer-surface-jet-rev-s.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:40
+f	examples/run-two-layer-surface-jet-rev.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:40
+f	examples/run-two-layer-surface-jet-rev.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:48
+f	examples/run-two-layer-surface-jet-s-2.py	/^    f = plt.contourf(Q1,levels=clevels, extend='both')$/;"	kind:variable	line:42
+f	examples/run-two-layer-surface-jet-s-2.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:53
+f	examples/run-two-layer-surface-jet-s.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:44
+f	examples/run-two-layer-surface-jet-s.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:53
 f	examples/run-two-layer-surface-jet.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:40
 f	examples/run-two-layer-surface-jet.py	/^    f = plt.contourf(m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:48
 f	examples/run-two-layer.py	/^    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')$/;"	kind:variable	line:41
@@ -280,6 +340,10 @@ html_theme	docs/conf.py	/^    html_theme = 'sphinx_rtd_theme'$/;"	kind:variable	
 html_theme_path	docs/conf.py	/^    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]$/;"	kind:variable	line:143
 htmlhelp_basename	docs/conf.py	/^htmlhelp_basename = 'pyqgdoc'$/;"	kind:variable	line:225
 i	examples/run-two-layer-jet-only.py	/^i=0$/;"	kind:variable	line:31
+i	examples/run-two-layer-surface-jet-rev-s.py	/^i=0$/;"	kind:variable	line:32
+i	examples/run-two-layer-surface-jet-rev.py	/^i=0$/;"	kind:variable	line:32
+i	examples/run-two-layer-surface-jet-s-2.py	/^i=0$/;"	kind:variable	line:34
+i	examples/run-two-layer-surface-jet-s.py	/^i=0$/;"	kind:variable	line:37
 i	examples/run-two-layer-surface-jet.py	/^i=0$/;"	kind:variable	line:32
 i	examples/run-two-layer.py	/^i=0$/;"	kind:variable	line:31
 i	examples/run_two-layer.py	/^i=0$/;"	kind:variable	line:28
@@ -293,11 +357,18 @@ install_requires	setup.py	/^      install_requires=install_requires,$/;"	kind:va
 install_requires	setup.py	/^install_requires = [$/;"	kind:variable	line:60
 interpolate_gridded_scalar	pyqg/particles.py	/^    def interpolate_gridded_scalar(self, x, y, c, order=1, pad=1, offset=0):$/;"	kind:member	line:180
 iteritems	pyqg/tests/test_reference_solns.py	/^from future.utils import iteritems$/;"	kind:namespace	line:2
+jet	examples/run-two-layer-surface-jet-s-2.py	/^jet = a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
+jet	examples/run-two-layer-surface-jet-s.py	/^jet = a * np.exp(-((np.arange(nx,dtype=float)-b)**2)\/(2*c**2))$/;"	kind:variable	line:11
 kernel.pyx	pyqg/kernel.pyx	1;"	kind:file	line:1
 latex_documents	docs/conf.py	/^latex_documents = [$/;"	kind:variable	line:244
 latex_elements	docs/conf.py	/^latex_elements = {$/;"	kind:variable	line:230
 layered_model.py	pyqg/layered_model.py	1;"	kind:file	line:1
 levels	examples/run-two-layer-jet-only.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:34
+levels	examples/run-two-layer-surface-jet-rev-s.py	/^levels = np.arange(-0.0013,0.0005,0.0001)$/;"	kind:variable	line:35
+levels	examples/run-two-layer-surface-jet-rev.py	/^levels = np.arange(-0.0013,0.0005,0.0001)$/;"	kind:variable	line:35
+levels	examples/run-two-layer-surface-jet-s-2.py	/^    levels = np.arange(-0.0005,0.0013,0.0001)$/;"	kind:variable	line:52
+levels	examples/run-two-layer-surface-jet-s-2.py	/^    levels = np.arange(0.000,0.000005,0.000001)$/;"	kind:variable	line:39
+levels	examples/run-two-layer-surface-jet-s.py	/^levels = np.arange(-0.0005,0.0013,0.0001)$/;"	kind:variable	line:40
 levels	examples/run-two-layer-surface-jet.py	/^levels = np.arange(-0.0005,0.0013,0.0001)$/;"	kind:variable	line:35
 levels	examples/run-two-layer.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:34
 levels	examples/run_two-layer.py	/^levels = np.arange(-0.0005,0.0008,0.0001)$/;"	kind:variable	line:31
@@ -310,7 +381,11 @@ m	examples/SQG_ellipticalvortex.py	/^m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax
 m	examples/multiple_jets.py	/^m = pyqg.BTModel(L=2.*pi,nx=256, tmax = 50*year,$/;"	kind:variable	line:8
 m	examples/rossby_wave.py	/^m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 1*year,$/;"	kind:variable	line:8
 m	examples/run-two-layer-jet-only.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:12
-m	examples/run-two-layer-surface-jet.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx, tmax=250*500*1000, ntd=4)$/;"	kind:variable	line:13
+m	examples/run-two-layer-surface-jet-rev-s.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4, beta=-1.5e-11)$/;"	kind:variable	line:13
+m	examples/run-two-layer-surface-jet-rev.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4)$/;"	kind:variable	line:13
+m	examples/run-two-layer-surface-jet-s-2.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4, beta=-1.45e-11)$/;"	kind:variable	line:14
+m	examples/run-two-layer-surface-jet-s.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4, beta=-1.45e-11)$/;"	kind:variable	line:14
+m	examples/run-two-layer-surface-jet.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4)$/;"	kind:variable	line:13
 m	examples/run-two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:12
 m	examples/run_two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:9
 man_pages	docs/conf.py	/^man_pages = [$/;"	kind:variable	line:274
@@ -342,6 +417,10 @@ np	examples/SQG_ellipticalvortex.py	/^import numpy as np$/;"	kind:namespace	line
 np	examples/multiple_jets.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/rossby_wave.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/run-two-layer-jet-only.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	examples/run-two-layer-surface-jet-rev-s.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	examples/run-two-layer-surface-jet-rev.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	examples/run-two-layer-surface-jet-s-2.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	examples/run-two-layer-surface-jet-s.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	examples/run-two-layer-surface-jet.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	examples/run-two-layer.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	examples/run_two-layer.py	/^import numpy as np$/;"	kind:namespace	line:1
@@ -370,6 +449,10 @@ numpy	pyqg/kernel.pyx	/^    import numpy.fft as npfft$/;"	kind:namespace	line:18
 numpydoc_class_members_toctree	docs/conf.py	/^numpydoc_class_members_toctree = True$/;"	kind:variable	line:69
 numpydoc_show_class_members	docs/conf.py	/^numpydoc_show_class_members = False$/;"	kind:variable	line:70
 nx	examples/run-two-layer-jet-only.py	/^nx = 256.$/;"	kind:variable	line:8
+nx	examples/run-two-layer-surface-jet-rev-s.py	/^nx = 256.$/;"	kind:variable	line:9
+nx	examples/run-two-layer-surface-jet-rev.py	/^nx = 256.$/;"	kind:variable	line:9
+nx	examples/run-two-layer-surface-jet-s-2.py	/^nx = 256.$/;"	kind:variable	line:9
+nx	examples/run-two-layer-surface-jet-s.py	/^nx = 256.$/;"	kind:variable	line:9
 nx	examples/run-two-layer-surface-jet.py	/^nx = 256.$/;"	kind:variable	line:9
 nx	examples/run-two-layer.py	/^nx = 256.$/;"	kind:variable	line:8
 nx	examples/run_two-layer.py	/^nx = 256.$/;"	kind:variable	line:6
@@ -395,6 +478,10 @@ pih	examples/McWilliams1984.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:varia
 pih	examples/multiple_jets.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:variable	line:27
 pih	examples/rossby_wave.py	/^pih = ( Pi_hat\/np.sqrt(KEaux) )$/;"	kind:variable	line:26
 pih	examples/run-two-layer-jet-only.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:27
+pih	examples/run-two-layer-surface-jet-rev-s.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:28
+pih	examples/run-two-layer-surface-jet-rev.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:28
+pih	examples/run-two-layer-surface-jet-s-2.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:30
+pih	examples/run-two-layer-surface-jet-s.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:33
 pih	examples/run-two-layer-surface-jet.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:28
 pih	examples/run-two-layer.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:27
 pih	examples/run_two-layer.py	/^pih = ( Pi_hat\/np.sqrt(KEaux[:,np.newaxis,np.newaxis]) )$/;"	kind:variable	line:24
@@ -403,6 +490,10 @@ plt	examples/SQG_ellipticalvortex.py	/^import matplotlib.pyplot as plt$/;"	kind:
 plt	examples/multiple_jets.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/rossby_wave.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/run-two-layer-jet-only.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	examples/run-two-layer-surface-jet-rev-s.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	examples/run-two-layer-surface-jet-rev.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	examples/run-two-layer-surface-jet-s-2.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	examples/run-two-layer-surface-jet-s.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	examples/run-two-layer-surface-jet.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	examples/run-two-layer.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	examples/run_two-layer.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
@@ -438,6 +529,10 @@ pyqg	examples/McWilliams1984.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/multiple_jets.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/rossby_wave.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/run-two-layer-jet-only.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	examples/run-two-layer-surface-jet-rev-s.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	examples/run-two-layer-surface-jet-rev.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	examples/run-two-layer-surface-jet-s-2.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	examples/run-two-layer-surface-jet-s.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	examples/run-two-layer-surface-jet.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	examples/run-two-layer.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	examples/run_two-layer.py	/^import pyqg$/;"	kind:namespace	line:3
@@ -457,6 +552,10 @@ qi	examples/SQG_ellipticalvortex.py	/^qi = -np.exp(-(x**2 + (4.0*y)**2)\/(m.L\/6
 qi	examples/multiple_jets.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
 qi	examples/rossby_wave.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:28
 qi	examples/run-two-layer-jet-only.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
+qi	examples/run-two-layer-surface-jet-rev-s.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:30
+qi	examples/run-two-layer-surface-jet-rev.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:30
+qi	examples/run-two-layer-surface-jet-s-2.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:32
+qi	examples/run-two-layer-surface-jet-s.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:35
 qi	examples/run-two-layer-surface-jet.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:30
 qi	examples/run-two-layer.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:29
 qi	examples/run_two-layer.py	/^qi = m.ifft(qih)$/;"	kind:variable	line:26
@@ -464,6 +563,10 @@ qih	examples/McWilliams1984.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
 qih	examples/multiple_jets.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
 qih	examples/rossby_wave.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:27
 qih	examples/run-two-layer-jet-only.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
+qih	examples/run-two-layer-surface-jet-rev-s.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:29
+qih	examples/run-two-layer-surface-jet-rev.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:29
+qih	examples/run-two-layer-surface-jet-s-2.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:31
+qih	examples/run-two-layer-surface-jet-s.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:34
 qih	examples/run-two-layer-surface-jet.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:29
 qih	examples/run-two-layer.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:28
 qih	examples/run_two-layer.py	/^qih = -m.wv2*pih$/;"	kind:variable	line:25
@@ -475,6 +578,10 @@ res	benchmark/benchmark.py	/^res = np.zeros((len(mynx), 5))$/;"	kind:variable	li
 rossby_wave.py	examples/rossby_wave.py	1;"	kind:file	line:1
 run	pyqg/model.py	/^    def run(self):$/;"	kind:member	line:225
 run-two-layer-jet-only.py	examples/run-two-layer-jet-only.py	1;"	kind:file	line:1
+run-two-layer-surface-jet-rev-s.py	examples/run-two-layer-surface-jet-rev-s.py	1;"	kind:file	line:1
+run-two-layer-surface-jet-rev.py	examples/run-two-layer-surface-jet-rev.py	1;"	kind:file	line:1
+run-two-layer-surface-jet-s-2.py	examples/run-two-layer-surface-jet-s-2.py	1;"	kind:file	line:1
+run-two-layer-surface-jet-s.py	examples/run-two-layer-surface-jet-s.py	1;"	kind:file	line:1
 run-two-layer-surface-jet.py	examples/run-two-layer-surface-jet.py	1;"	kind:file	line:1
 run-two-layer.py	examples/run-two-layer.py	1;"	kind:file	line:1
 run_two-layer.py	examples/run_two-layer.py	1;"	kind:file	line:1
@@ -508,6 +615,10 @@ source_suffix	docs/conf.py	/^source_suffix = '.rst'$/;"	kind:variable	line:76
 spec_sum	pyqg/diagnostic_tools.py	/^def spec_sum(ph2):$/;"	kind:function	line:30
 spec_var	examples/McWilliams1984.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:5
 spec_var	examples/run-two-layer-jet-only.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer-surface-jet-rev-s.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer-surface-jet-rev.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer-surface-jet-s-2.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	examples/run-two-layer-surface-jet-s.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	examples/run-two-layer-surface-jet.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	examples/run-two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	examples/run_two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
@@ -522,6 +633,10 @@ stability_analysis	pyqg/model.py	/^    def stability_analysis(self,bottom_fricti
 step_forward_vortices	pyqg/point_vortex.py	/^    def step_forward_vortices(self, dt):       $/;"	kind:member	line:20
 step_forward_with_function	pyqg/particles.py	/^    def step_forward_with_function(self, uv0fun, uv1fun, dt):$/;"	kind:member	line:65
 step_forward_with_gridded_uv	pyqg/particles.py	/^    def step_forward_with_gridded_uv(self, U0, V0, U1, V1, dt, order=1):       $/;"	kind:member	line:223
+subprocess	examples/run-two-layer-surface-jet-rev-s.py	/^import subprocess$/;"	kind:namespace	line:5
+subprocess	examples/run-two-layer-surface-jet-rev.py	/^import subprocess$/;"	kind:namespace	line:5
+subprocess	examples/run-two-layer-surface-jet-s-2.py	/^import subprocess$/;"	kind:namespace	line:5
+subprocess	examples/run-two-layer-surface-jet-s.py	/^import subprocess$/;"	kind:namespace	line:5
 subprocess	examples/run-two-layer-surface-jet.py	/^import subprocess$/;"	kind:namespace	line:5
 subprocess	setup.py	/^import tempfile, subprocess, shutil$/;"	kind:namespace	line:6
 sys	docs/conf.py	/^import sys$/;"	kind:namespace	line:15

@@ -114,7 +114,7 @@ class LayeredModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.delta = delta
-        self.Ubg = np.array(U)
+        self.U = np.array(U)
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
@@ -165,6 +165,8 @@ class LayeredModel(model.Model):
         """Set up background state (zonal flow and PV gradients)."""
 
         self.H = self.Hi.sum()
+        self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
+        print(self.Ubg.size)
 
         if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
@@ -180,7 +182,7 @@ class LayeredModel(model.Model):
             assert self.rhoi.size == self.nz, self.logger.error('size of rhoi does not' +
                      'match number of vertical levels nz')
 
-            assert self.Ubg.size == self.nz, self.logger.error('size of Ubg does not' +
+            assert self.Ubg.size == self.nz * self.ny, self.logger.error('size of Ubg does not' +
                      'match number of vertical levels nz')
 
             assert self.Vbg.size == self.nz, self.logger.error('size of Vbg does not' +

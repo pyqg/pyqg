@@ -244,7 +244,7 @@ _wrap_y	pyqg/particles.py	/^    def _wrap_y(self, y):$/;"	kind:member	line:117
 a	examples/run-two-layer-jet-only.py	/^a = 0.25$/;"	kind:variable	line:6
 a	examples/run-two-layer-surface-jet-rev-s.py	/^a = -0.5$/;"	kind:variable	line:7
 a	examples/run-two-layer-surface-jet-rev.py	/^a = -0.5$/;"	kind:variable	line:7
-a	examples/run-two-layer-surface-jet-s-2.py	/^a = 0.05$/;"	kind:variable	line:7
+a	examples/run-two-layer-surface-jet-s-2.py	/^a = 0.25$/;"	kind:variable	line:7
 a	examples/run-two-layer-surface-jet-s.py	/^a = 0.01$/;"	kind:variable	line:7
 a	examples/run-two-layer-surface-jet.py	/^a = 0.5$/;"	kind:variable	line:7
 a	examples/run-two-layer.py	/^a = 0.5$/;"	kind:variable	line:6
@@ -267,7 +267,7 @@ bt_model.py	pyqg/bt_model.py	1;"	kind:file	line:1
 c	examples/run-two-layer-jet-only.py	/^c=20.$/;"	kind:variable	line:7
 c	examples/run-two-layer-surface-jet-rev-s.py	/^c=5.$/;"	kind:variable	line:8
 c	examples/run-two-layer-surface-jet-rev.py	/^c=5.$/;"	kind:variable	line:8
-c	examples/run-two-layer-surface-jet-s-2.py	/^c=5.$/;"	kind:variable	line:8
+c	examples/run-two-layer-surface-jet-s-2.py	/^c=10.$/;"	kind:variable	line:8
 c	examples/run-two-layer-surface-jet-s.py	/^c=5.$/;"	kind:variable	line:8
 c	examples/run-two-layer-surface-jet.py	/^c=5.$/;"	kind:variable	line:8
 c	examples/run-two-layer.py	/^c=20.$/;"	kind:variable	line:7

@@ -60,14 +60,16 @@ class BTModel(model.Model):
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
 
+        if len(np.shape(self.U)) == 0:
+          self.U = self.U * np.ones((self.ny)) 
         # the meridional PV gradients in each layer
-        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        self.Qy1 = self.beta + np.gradient(np.gradient(self.U,self.dy),self.dy)
 
         # background vel.
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikQy1 = self.Qy1[:,np.newaxis] * 1j * self.k
 
         self.ilQx = 0.
 

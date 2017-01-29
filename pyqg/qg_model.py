@@ -201,9 +201,13 @@ class QGModel(model.Model):
         U2 : number
             Lower layer flow. Units: m/s
         """
+        if len(np.shape(U1)) == 0:
+          U1 = U1 * np.ones((self.ny)) 
+        if len(np.shape(U2)) == 0:
+          U2 = U2 * np.ones((self.ny)) 
+        #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
         self.U1 = U1
         self.U2 = U2
-        #self.Ubg = np.array([U1,U2])[:,np.newaxis,np.newaxis]
         self.Ubg = np.array([U1,U2])
 
     ### All the diagnostic stuff follows. ###

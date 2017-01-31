@@ -48,9 +48,10 @@ class LayeredModelTester(unittest.TestCase):
 
     def test_init_background(self):
         """ Check the initialization of the mean PV gradiends  """
-
-        Qy = -np.einsum('ij,j->i',self.S,self.m.Ubg)
-        Qx = np.einsum('ij,j->i',self.S,self.m.Vbg)
+        print(self.S.shape)
+        print(self.m.Ubg.shape)
+        Qy = -np.einsum('ij...,j...->i...',self.S,self.m.Ubg)
+        Qx = np.einsum('ij...,j...->i...',self.S,self.m.Vbg)
 
         np.testing.assert_allclose(Qy,self.m.Qy,atol=self.atol,
                 err_msg=' Unmatched Qy')

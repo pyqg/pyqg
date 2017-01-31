@@ -177,25 +177,25 @@ __set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndi
 __set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=4] b):$/;"	kind:function	line:467
 __version__	pyqg/__init__.py	/^__version__='0.1.3'$/;"	kind:variable	line:1
 _advect	pyqg/model.py	/^    def _advect(self, q, u, v):$/;"	kind:member	line:468
-_calc_cfl	pyqg/bt_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:110
-_calc_cfl	pyqg/layered_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:235
+_calc_cfl	pyqg/bt_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:112
+_calc_cfl	pyqg/layered_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:236
 _calc_cfl	pyqg/model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:537
-_calc_cfl	pyqg/qg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:210
+_calc_cfl	pyqg/qg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:214
 _calc_cfl	pyqg/sqg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:83
-_calc_derived_fields	pyqg/layered_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:258
+_calc_derived_fields	pyqg/layered_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:259
 _calc_derived_fields	pyqg/model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:597
-_calc_derived_fields	pyqg/qg_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:232
-_calc_diagnostics	pyqg/bt_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:104
+_calc_derived_fields	pyqg/qg_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:236
+_calc_diagnostics	pyqg/bt_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:106
 _calc_diagnostics	pyqg/model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:502
 _calc_diagnostics	pyqg/sqg_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:77
-_calc_eddy_time	pyqg/bt_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:122
-_calc_eddy_time	pyqg/layered_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:250
-_calc_eddy_time	pyqg/qg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:224
+_calc_eddy_time	pyqg/bt_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:124
+_calc_eddy_time	pyqg/layered_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:251
+_calc_eddy_time	pyqg/qg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:228
 _calc_eddy_time	pyqg/sqg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:95
-_calc_ke	pyqg/bt_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:116
-_calc_ke	pyqg/layered_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:242
+_calc_ke	pyqg/bt_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:118
+_calc_ke	pyqg/layered_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:243
 _calc_ke	pyqg/model.py	/^    def _calc_ke(self):$/;"	kind:member	line:551
-_calc_ke	pyqg/qg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:217
+_calc_ke	pyqg/qg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:221
 _calc_ke	pyqg/sqg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:89
 _distance	pyqg/particles.py	/^    def _distance(self, x0, y0, x1, y1):$/;"	kind:member	line:124
 _do_advection	pyqg/kernel.pyx	/^    def _do_advection(self):$/;"	kind:member	line:310
@@ -216,21 +216,21 @@ _initialize_background	pyqg/sqg_model.py	/^    def _initialize_background(self):
 _initialize_core_diagnostics	pyqg/model.py	/^    def _initialize_core_diagnostics(self):$/;"	kind:member	line:569
 _initialize_diagnostics	pyqg/model.py	/^    def _initialize_diagnostics(self, diagnostics_list):$/;"	kind:member	line:555
 _initialize_filter	pyqg/model.py	/^    def _initialize_filter(self):$/;"	kind:member	line:425
-_initialize_forcing	pyqg/bt_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:79
-_initialize_forcing	pyqg/layered_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:225
+_initialize_forcing	pyqg/bt_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:81
+_initialize_forcing	pyqg/layered_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:226
 _initialize_forcing	pyqg/model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:421
 _initialize_forcing	pyqg/qg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:161
 _initialize_forcing	pyqg/sqg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:70
 _initialize_grid	pyqg/model.py	/^    def _initialize_grid(self):$/;"	kind:member	line:375
-_initialize_inversion_matrix	pyqg/bt_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:74
-_initialize_inversion_matrix	pyqg/layered_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:205
+_initialize_inversion_matrix	pyqg/bt_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:76
+_initialize_inversion_matrix	pyqg/layered_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:206
 _initialize_inversion_matrix	pyqg/model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:417
 _initialize_inversion_matrix	pyqg/qg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:144
 _initialize_inversion_matrix	pyqg/sqg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:65
 _initialize_logger	pyqg/model.py	/^    def _initialize_logger(self):$/;"	kind:member	line:441
-_initialize_model_diagnostics	pyqg/layered_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:272
+_initialize_model_diagnostics	pyqg/layered_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:273
 _initialize_model_diagnostics	pyqg/model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:601
-_initialize_model_diagnostics	pyqg/qg_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:242
+_initialize_model_diagnostics	pyqg/qg_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:246
 _initialize_stretching_matrix	pyqg/layered_model.py	/^    def _initialize_stretching_matrix(self):$/;"	kind:member	line:130
 _initialize_time	pyqg/model.py	/^    def _initialize_time(self):$/;"	kind:member	line:367
 _invert	pyqg/kernel.pyx	/^    def _invert(self):$/;"	kind:member	line:265
@@ -598,7 +598,7 @@ setUp	pyqg/tests/test_model.py	/^    def setUp(self):$/;"	kind:member	line:8
 setUp	pyqg/tests/test_particles.py	/^    def setUp(self):$/;"	kind:member	line:34
 setUp	pyqg/tests/test_stability.py	/^    def setUp(self):$/;"	kind:member	line:8
 setUp	pyqg/tests/test_vertical_modes.py	/^    def setUp(self):$/;"	kind:member	line:8
-set_U	pyqg/bt_model.py	/^    def set_U(self, U):$/;"	kind:member	line:93
+set_U	pyqg/bt_model.py	/^    def set_U(self, U):$/;"	kind:member	line:95
 set_U	pyqg/sqg_model.py	/^    def set_U(self, U):$/;"	kind:member	line:73
 set_U1U2	pyqg/qg_model.py	/^    def set_U1U2(self, U1, U2):$/;"	kind:member	line:193
 set_q	pyqg/model.py	/^    def set_q(self, q):$/;"	kind:member	line:670
@@ -652,7 +652,6 @@ tendency_forward_euler	pyqg/model.py	/^from .kernel import PseudoSpectralKernel,
 test_advect	pyqg/tests/test_advection.py	/^def test_advect(rtol=1.e-13):$/;"	kind:function	line:5
 test_advection	pyqg/tests/test_model.py	/^    def test_advection(self, rtol=1e-15):$/;"	kind:member	line:108
 test_advection.py	pyqg/tests/test_advection.py	1;"	kind:file	line:1
-test_bt	pyqg/tests/test_reference_solns.py	/^    def test_bt(self):$/;"	kind:member	line:95
 test_change_inversion_matrix	pyqg/tests/test_model.py	/^    def test_change_inversion_matrix(self):$/;"	kind:member	line:101
 test_fft2	pyqg/tests/test_model.py	/^    def test_fft2(self, rtol=1e-15):$/;"	kind:member	line:16
 test_fft2.py	pyqg/tests/test_fft2.py	1;"	kind:file	line:1
@@ -667,7 +666,7 @@ test_integration	pyqg/tests/test_particles.py	/^    def test_integration(self, r
 test_interpolation	pyqg/tests/test_particles.py	/^    def test_interpolation(self, rtol=1e-14, atol=1e-7):$/;"	kind:member	line:83
 test_inversion_baroclinic	pyqg/tests/test_model.py	/^    def test_inversion_baroclinic(self, rtol=1e-13):$/;"	kind:member	line:96
 test_inversion_barotropic	pyqg/tests/test_model.py	/^    def test_inversion_barotropic(self, rtol=1e-13):$/;"	kind:member	line:67
-test_inversion_matrix	pyqg/tests/test_layered.py	/^    def test_inversion_matrix(self):$/;"	kind:member	line:61
+test_inversion_matrix	pyqg/tests/test_layered.py	/^    def test_inversion_matrix(self):$/;"	kind:member	line:62
 test_layered.py	pyqg/tests/test_layered.py	1;"	kind:file	line:1
 test_model.py	pyqg/tests/test_model.py	1;"	kind:file	line:1
 test_modes	pyqg/tests/test_vertical_modes.py	/^    def test_modes(self):$/;"	kind:member	line:34
@@ -676,7 +675,7 @@ test_particles.py	pyqg/tests/test_particles.py	1;"	kind:file	line:1
 test_projection	pyqg/tests/test_vertical_modes.py	/^    def test_projection(self):$/;"	kind:member	line:54
 test_radii	pyqg/tests/test_vertical_modes.py	/^    def test_radii(self):$/;"	kind:member	line:26
 test_reference_solns.py	pyqg/tests/test_reference_solns.py	1;"	kind:file	line:1
-test_sqg	pyqg/tests/test_reference_solns.py	/^    def test_sqg(self):$/;"	kind:member	line:136
+test_sqg	pyqg/tests/test_reference_solns.py	/^    def test_sqg(self):$/;"	kind:member	line:138
 test_stability.py	pyqg/tests/test_stability.py	1;"	kind:file	line:1
 test_stretching	pyqg/tests/test_layered.py	/^    def test_stretching(self):$/;"	kind:member	line:33
 test_suite	setup.py	/^      test_suite = 'nose.collector',$/;"	kind:variable	line:155

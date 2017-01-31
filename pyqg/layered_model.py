@@ -166,7 +166,6 @@ class LayeredModel(model.Model):
 
         self.H = self.Hi.sum()
         self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
-        print(self.Ubg.size)
 
         if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
@@ -196,12 +195,12 @@ class LayeredModel(model.Model):
         self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
-        self.Qy = self.beta - np.dot(self.S,self.Ubg)
+        self.Qy = self.beta - np.dot(self.S, self.Ubg) + np.gradient(np.gradient(self.Ubg, self.dy, axis=1), self.dy, axis=1)
         self.Qx = np.dot(self.S,self.Vbg)
 
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
+        self.ikQy = self.Qy[:,:,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 
     def _initialize_inversion_matrix(self):

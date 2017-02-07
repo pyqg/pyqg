@@ -7,9 +7,9 @@ is
 .. math::
 
    \begin{aligned}
-   {q_1} &= {\nabla^2}\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-\psi_1}{g'_{1}}\right)\,,  \qquad & i =1{\, ,}\nonumber \\
-   {q_n} &= {\nabla^2}\psi_n + \frac{f_0^2}{H_n} \left(\frac{\psi_{n-1}-\psi_n}{g'_{n-1}}  - \frac{\psi_{i}-\psi_{n+1}}{g'_{i}}\right)\,,  \qquad &i = 2,{\mathrm{N}}-1 {\, ,}\nonumber \\
-   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\textsf{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) + \frac{f_0}{H_{\mathrm{N}}}h_b (x,y)\,,  \qquad & i ={\mathrm{N}}\,,\end{aligned}
+   {q_1} &= {\nabla^2}\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-\psi_1}{g'_{1}}\right)\,,  \qquad & n =1{\, ,}\nonumber \\
+   {q_n} &= {\nabla^2}\psi_n + \frac{f_0^2}{H_n} \left(\frac{\psi_{n-1}-\psi_n}{g'_{n-1}}  - \frac{\psi_{n}-\psi_{n+1}}{g'_{n}}\right)\,,  \qquad &n = 2,{\mathrm{N}}-1 {\, ,}\nonumber \\
+   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\textsf{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) + \frac{f_0}{H_{\mathrm{N}}}h_b (x,y)\,,  \qquad & n ={\mathrm{N}}\,,\end{aligned}
 
 where :math:`q_n` is the n’th layer QG potential vorticity, and
 :math:`\psi_n` is the streamfunction, :math:`f_0` is the inertial

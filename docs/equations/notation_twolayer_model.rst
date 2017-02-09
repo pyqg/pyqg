@@ -155,7 +155,7 @@ We use a third-order Adams-Bashford scheme
 .. math::
 
 
-   {\hat{q}_i}^{n+1} = E_f\times\left[{\hat{q}_i}^{n} + \frac{\Delta t}{2}\left(23\, \hat{Q}_i^{n} -  16\hat{Q}_i^{n-1} + 5 \hat{Q}_i^{n-2}\right)\right]\,,
+   {\hat{q}_i}^{n+1} = E_f\times\left[{\hat{q}_i}^{n} + \frac{\Delta t}{12}\left(23\, \hat{Q}_i^{n} -  16\hat{Q}_i^{n-1} + 5 \hat{Q}_i^{n-2}\right)\right]\,,
 
 where
 

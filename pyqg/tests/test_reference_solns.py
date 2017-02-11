@@ -92,45 +92,45 @@ class ReferenceSolutionsTester(unittest.TestCase):
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
 
 
-#     def test_bt(self):
-#         """ Tests against some statistics of a reference barotropic solution """
+    def test_bt(self):
+        """ Tests against some statistics of a reference barotropic solution """
 
-#         m = pyqg.BTModel(L=2.*np.pi,nx=64, tmax = 5,
-#                 beta = 0., H = 1., rek = 0., rd = None, dt = 0.0025,
-#                 twrite=1000)
+        m = pyqg.BTModel(L=2.*np.pi,nx=64, tmax = 5,
+                beta = 0., H = 1., rek = 0., rd = None, dt = 0.0025,
+                twrite=1000)
 
-#         # IC
-#         p = np.exp(-(2.*(m.x-1.75*np.pi/2))**2.-(2.*(m.y-np.pi))**2) +\
-#                 np.exp(-(2.*(m.x-2.25*np.pi/2))**2.-(2.*(m.y-np.pi))**2)
+        # IC
+        p = np.exp(-(2.*(m.x-1.75*np.pi/2))**2.-(2.*(m.y-np.pi))**2) +\
+                np.exp(-(2.*(m.x-2.25*np.pi/2))**2.-(2.*(m.y-np.pi))**2)
 
-#         ph = m.fft(p[np.newaxis,...])
-#         KEaux = m.spec_var(m.filtr*m.wv*ph )/2.
-#         pih = ( ph/np.sqrt(KEaux) )
-#         qih = -m.wv2*pih
-#         qi = m.ifft(qih)
-#         m.set_q(qi)
+        ph = m.fft(p[np.newaxis,...])
+        KEaux = m.spec_var(m.filtr*m.wv*ph )/2.
+        pih = ( ph/np.sqrt(KEaux) )
+        qih = -m.wv2*pih
+        qi = m.ifft(qih)
+        m.set_q(qi)
 
-#         rtol = 1.e-5
-#         atol = 1.e-14
+        rtol = 1.e-5
+        atol = 1.e-14
 
-#         np.testing.assert_allclose(m.q, qi, rtol, atol)
+        np.testing.assert_allclose(m.q, qi, rtol, atol)
 
-#         m.run()
+        m.run()
 
-#         qnorm = (m.q**2).sum()
-#         mp = m.ifft(m.ph)
-#         pnorm = (mp**2).sum()
-#         ke = m._calc_ke()
+        qnorm = (m.q**2).sum()
+        mp = m.ifft(m.ph)
+        pnorm = (mp**2).sum()
+        ke = m._calc_ke()
 
-#         print('time:       %g' % m.t)
-#         assert m.t == 5.000000000000082
+        print('time:       %g' % m.t)
+        assert m.t == 5.000000000000082
 
-#         np.testing.assert_allclose(qnorm, 89101.741238768518, rtol, atol,
-#                 err_msg= ' Inconsistent with reference solution')
-#         np.testing.assert_allclose(pnorm, 1493.217664248918, rtol, atol,
-#                 err_msg= ' Inconsistent with reference solution')
-#         np.testing.assert_allclose(ke, 0.9950360837282386, rtol, atol,
-#                 err_msg= ' Inconsistent with reference solution')
+        np.testing.assert_allclose(qnorm, 89101.741238768518, rtol, atol,
+                err_msg= ' Inconsistent with reference solution')
+        np.testing.assert_allclose(pnorm, 1493.217664248918, rtol, atol,
+                err_msg= ' Inconsistent with reference solution')
+        np.testing.assert_allclose(ke, 0.9950360837282386, rtol, atol,
+                err_msg= ' Inconsistent with reference solution')
 
 
     def test_sqg(self):

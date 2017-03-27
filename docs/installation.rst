@@ -73,17 +73,13 @@ The `nanshe <https://anaconda.org/nanshe/pyfftw>`__ channel version is the most
 popular and appears to have the broadest cross-platform support. We don't know
 who nanshe is, but we are greatful to him/her.
 
-To install pyfftw from the nanshe channel, open a terminal and run
-the command
+To install pyfftw from the `conda-forge <https://conda-forge.github.io/>`_
+channel, open a terminal and run the command
 
 .. code-block:: bash
 
-    $ conda install -c nanshe pyfftw
+    $ conda install -c conda-forge pyfftw
 
-If this doesn't work for you, or if it asks you to upgrade / downgrade more of
-your core pacakges (e.g. numpy) than you would like, you can easily try
-replacing ``nanshe`` with one of the other `channels
-<https://anaconda.org/search?q=pyfftw>`__.
 
 The hard way: installing from source
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -131,29 +131,29 @@ URL	setup.py	/^URL='http:\/\/github.com\/pyqg\/pyqg'$/;"	kind:variable	line:11
 VERSION	setup.py	/^VERSION='0.2.0'$/;"	kind:variable	line:8
 VerticalModesTester	pyqg/tests/test_vertical_modes.py	/^class VerticalModesTester(unittest.TestCase):$/;"	kind:class	line:6
 __call__	docs/conf.py	/^    def __call__(self, *args, **kwargs):$/;"	kind:member	line:24
-__do_advection	pyqg/kernel.pyx	/^    cdef void __do_advection(self) nogil:$/;"	kind:member	line:313
-__do_friction	pyqg/kernel.pyx	/^    cdef void __do_friction(self) nogil:$/;"	kind:member	line:353
-__forward_timestep	pyqg/kernel.pyx	/^    cdef void __forward_timestep(self) nogil:$/;"	kind:member	line:373
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:435
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:443
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:454
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:464
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:471
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:476
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:483
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:490
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:499
+__do_advection	pyqg/kernel.pyx	/^    cdef void __do_advection(self) nogil:$/;"	kind:member	line:316
+__do_friction	pyqg/kernel.pyx	/^    cdef void __do_friction(self) nogil:$/;"	kind:member	line:356
+__forward_timestep	pyqg/kernel.pyx	/^    cdef void __forward_timestep(self) nogil:$/;"	kind:member	line:376
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:438
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:446
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:457
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:467
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:474
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:479
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:486
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:493
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:502
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:505
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:508
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:511
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:514
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:517
-__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:521
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:520
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:524
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:527
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:530
 __get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:533
+__get__	pyqg/kernel.pyx	/^        def __get__(self):$/;"	kind:function	line:536
 __getattr__	docs/conf.py	/^    def __getattr__(cls, name):$/;"	kind:member	line:28
 __init__	docs/conf.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:21
 __init__	pyqg/bt_model.py	/^    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):$/;"	kind:member	line:27
@@ -167,78 +167,78 @@ __init__	pyqg/qg_model.py	/^    def __init__($/;"	kind:member	line:61
 __init__	pyqg/sqg_model.py	/^    def __init__($/;"	kind:member	line:10
 __init__.py	pyqg/__init__.py	1;"	kind:file	line:1
 __invert	pyqg/kernel.pyx	/^    cdef void __invert(self) nogil:$/;"	kind:member	line:268
-__set__	pyqg/kernel.pyx	/^        def __set__(self, dt):$/;"	kind:function	line:437
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_com_t, ndim=3] b):$/;"	kind:function	line:492
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] k):$/;"	kind:function	line:445
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] l):$/;"	kind:function	line:456
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Qy):$/;"	kind:function	line:478
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Ubg):$/;"	kind:function	line:473
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=3] b):$/;"	kind:function	line:485
-__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=4] b):$/;"	kind:function	line:467
+__set__	pyqg/kernel.pyx	/^        def __set__(self, dt):$/;"	kind:function	line:440
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_com_t, ndim=3] b):$/;"	kind:function	line:495
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] k):$/;"	kind:function	line:448
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] l):$/;"	kind:function	line:459
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Qy):$/;"	kind:function	line:481
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Ubg):$/;"	kind:function	line:476
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=3] b):$/;"	kind:function	line:488
+__set__	pyqg/kernel.pyx	/^        def __set__(self, np.ndarray[DTYPE_real_t, ndim=4] b):$/;"	kind:function	line:470
 __version__	pyqg/__init__.py	/^__version__='0.1.3'$/;"	kind:variable	line:1
-_advect	pyqg/model.py	/^    def _advect(self, q, u, v):$/;"	kind:member	line:472
-_calc_cfl	pyqg/bt_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:112
+_advect	pyqg/model.py	/^    def _advect(self, q, u, v):$/;"	kind:member	line:468
+_calc_cfl	pyqg/bt_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:111
 _calc_cfl	pyqg/layered_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:236
-_calc_cfl	pyqg/model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:541
+_calc_cfl	pyqg/model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:537
 _calc_cfl	pyqg/qg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:214
 _calc_cfl	pyqg/sqg_model.py	/^    def _calc_cfl(self):$/;"	kind:member	line:87
 _calc_derived_fields	pyqg/layered_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:259
-_calc_derived_fields	pyqg/model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:601
+_calc_derived_fields	pyqg/model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:597
 _calc_derived_fields	pyqg/qg_model.py	/^    def _calc_derived_fields(self):$/;"	kind:member	line:236
-_calc_diagnostics	pyqg/bt_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:106
-_calc_diagnostics	pyqg/model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:506
+_calc_diagnostics	pyqg/bt_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:105
+_calc_diagnostics	pyqg/model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:502
 _calc_diagnostics	pyqg/sqg_model.py	/^    def _calc_diagnostics(self):$/;"	kind:member	line:81
-_calc_eddy_time	pyqg/bt_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:124
+_calc_eddy_time	pyqg/bt_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:123
 _calc_eddy_time	pyqg/layered_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:251
 _calc_eddy_time	pyqg/qg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:228
 _calc_eddy_time	pyqg/sqg_model.py	/^    def _calc_eddy_time(self):$/;"	kind:member	line:99
-_calc_ke	pyqg/bt_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:118
+_calc_ke	pyqg/bt_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:117
 _calc_ke	pyqg/layered_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:243
-_calc_ke	pyqg/model.py	/^    def _calc_ke(self):$/;"	kind:member	line:555
+_calc_ke	pyqg/model.py	/^    def _calc_ke(self):$/;"	kind:member	line:551
 _calc_ke	pyqg/qg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:221
 _calc_ke	pyqg/sqg_model.py	/^    def _calc_ke(self):$/;"	kind:member	line:93
 _distance	pyqg/particles.py	/^    def _distance(self, x0, y0, x1, y1):$/;"	kind:member	line:124
-_do_advection	pyqg/kernel.pyx	/^    def _do_advection(self):$/;"	kind:member	line:310
-_do_external_forcing	pyqg/model.py	/^    def _do_external_forcing(self):$/;"	kind:member	line:441
-_do_friction	pyqg/kernel.pyx	/^    def _do_friction(self):$/;"	kind:member	line:350
+_do_advection	pyqg/kernel.pyx	/^    def _do_advection(self):$/;"	kind:member	line:313
+_do_external_forcing	pyqg/model.py	/^    def _do_external_forcing(self):$/;"	kind:member	line:437
+_do_friction	pyqg/kernel.pyx	/^    def _do_friction(self):$/;"	kind:member	line:353
 _dummy_fft	pyqg/kernel.pyx	/^        def _dummy_fft(self):$/;"	kind:function	line:217
 _dummy_ifft	pyqg/kernel.pyx	/^        def _dummy_ifft(self):$/;"	kind:function	line:219
 _empty_com	pyqg/kernel.pyx	/^    def _empty_com(self):$/;"	kind:member	line:233
 _empty_real	pyqg/kernel.pyx	/^    def _empty_real(self):$/;"	kind:member	line:222
-_filter	pyqg/model.py	/^    def _filter(self, q):$/;"	kind:member	line:438
-_forward_timestep	pyqg/kernel.pyx	/^    def _forward_timestep(self):$/;"	kind:member	line:369
-_increment_diagnostics	pyqg/model.py	/^    def _increment_diagnostics(self):$/;"	kind:member	line:641
+_filter	pyqg/model.py	/^    def _filter(self, q):$/;"	kind:member	line:434
+_forward_timestep	pyqg/kernel.pyx	/^    def _forward_timestep(self):$/;"	kind:member	line:372
+_increment_diagnostics	pyqg/model.py	/^    def _increment_diagnostics(self):$/;"	kind:member	line:637
 _initialize_background	pyqg/bt_model.py	/^    def _initialize_background(self):$/;"	kind:member	line:60
 _initialize_background	pyqg/layered_model.py	/^    def _initialize_background(self):$/;"	kind:member	line:164
-_initialize_background	pyqg/model.py	/^    def _initialize_background(self):$/;"	kind:member	line:417
+_initialize_background	pyqg/model.py	/^    def _initialize_background(self):$/;"	kind:member	line:413
 _initialize_background	pyqg/qg_model.py	/^    def _initialize_background(self):$/;"	kind:member	line:114
 _initialize_background	pyqg/sqg_model.py	/^    def _initialize_background(self):$/;"	kind:member	line:51
-_initialize_core_diagnostics	pyqg/model.py	/^    def _initialize_core_diagnostics(self):$/;"	kind:member	line:573
-_initialize_diagnostics	pyqg/model.py	/^    def _initialize_diagnostics(self, diagnostics_list):$/;"	kind:member	line:559
-_initialize_filter	pyqg/model.py	/^    def _initialize_filter(self):$/;"	kind:member	line:429
-_initialize_forcing	pyqg/bt_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:81
+_initialize_core_diagnostics	pyqg/model.py	/^    def _initialize_core_diagnostics(self):$/;"	kind:member	line:569
+_initialize_diagnostics	pyqg/model.py	/^    def _initialize_diagnostics(self, diagnostics_list):$/;"	kind:member	line:555
+_initialize_filter	pyqg/model.py	/^    def _initialize_filter(self):$/;"	kind:member	line:425
+_initialize_forcing	pyqg/bt_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:80
 _initialize_forcing	pyqg/layered_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:226
-_initialize_forcing	pyqg/model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:425
+_initialize_forcing	pyqg/model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:421
 _initialize_forcing	pyqg/qg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:161
 _initialize_forcing	pyqg/sqg_model.py	/^    def _initialize_forcing(self):$/;"	kind:member	line:74
-_initialize_grid	pyqg/model.py	/^    def _initialize_grid(self):$/;"	kind:member	line:379
-_initialize_inversion_matrix	pyqg/bt_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:76
+_initialize_grid	pyqg/model.py	/^    def _initialize_grid(self):$/;"	kind:member	line:375
+_initialize_inversion_matrix	pyqg/bt_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:75
 _initialize_inversion_matrix	pyqg/layered_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:206
-_initialize_inversion_matrix	pyqg/model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:421
+_initialize_inversion_matrix	pyqg/model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:417
 _initialize_inversion_matrix	pyqg/qg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:144
 _initialize_inversion_matrix	pyqg/sqg_model.py	/^    def _initialize_inversion_matrix(self):$/;"	kind:member	line:69
-_initialize_logger	pyqg/model.py	/^    def _initialize_logger(self):$/;"	kind:member	line:445
+_initialize_logger	pyqg/model.py	/^    def _initialize_logger(self):$/;"	kind:member	line:441
 _initialize_model_diagnostics	pyqg/layered_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:273
-_initialize_model_diagnostics	pyqg/model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:605
+_initialize_model_diagnostics	pyqg/model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:601
 _initialize_model_diagnostics	pyqg/qg_model.py	/^    def _initialize_model_diagnostics(self):$/;"	kind:member	line:246
 _initialize_stretching_matrix	pyqg/layered_model.py	/^    def _initialize_stretching_matrix(self):$/;"	kind:member	line:130
-_initialize_time	pyqg/model.py	/^    def _initialize_time(self):$/;"	kind:member	line:371
+_initialize_time	pyqg/model.py	/^    def _initialize_time(self):$/;"	kind:member	line:367
 _invert	pyqg/kernel.pyx	/^    def _invert(self):$/;"	kind:member	line:265
 _pad_field	pyqg/particles.py	/^    def _pad_field(self, c, pad=5):$/;"	kind:member	line:220
-_print_status	pyqg/model.py	/^    def _print_status(self):$/;"	kind:member	line:493
+_print_status	pyqg/model.py	/^    def _print_status(self):$/;"	kind:member	line:489
 _rk4_integrate	pyqg/particles.py	/^    def _rk4_integrate(self, x, y, uv0fun, uv1fun, dt):$/;"	kind:member	line:83
-_set_active_diagnostics	pyqg/model.py	/^    def _set_active_diagnostics(self, diagnostics_list):$/;"	kind:member	line:609
-_step_forward	pyqg/model.py	/^    def _step_forward(self):$/;"	kind:member	line:348
+_set_active_diagnostics	pyqg/model.py	/^    def _set_active_diagnostics(self, diagnostics_list):$/;"	kind:member	line:605
+_step_forward	pyqg/model.py	/^    def _step_forward(self):$/;"	kind:member	line:344
 _wrap_x	pyqg/particles.py	/^    def _wrap_x(self, x):$/;"	kind:member	line:110
 _wrap_y	pyqg/particles.py	/^    def _wrap_y(self, y):$/;"	kind:member	line:117
 a	experiments/run-two-layer-jet-only.py	/^a = 0.25$/;"	kind:variable	line:6
@@ -248,7 +248,7 @@ a	experiments/run-two-layer-surface-jet-s-2.py	/^a = 0.25$/;"	kind:variable	line
 a	experiments/run-two-layer-surface-jet-s.py	/^a = 0.01$/;"	kind:variable	line:7
 a	experiments/run-two-layer-surface-jet.py	/^a = 0.5$/;"	kind:variable	line:7
 a	experiments/run-two-layer.py	/^a = 0.5$/;"	kind:variable	line:6
-add_diagnostic	pyqg/model.py	/^    def add_diagnostic(self, diag_name, description=None, units=None, function=None):$/;"	kind:member	line:613
+add_diagnostic	pyqg/model.py	/^    def add_diagnostic(self, diag_name, description=None, units=None, function=None):$/;"	kind:member	line:609
 and	docs/conf.py	/^if not on_rtd:  # only import and set the theme if we're building docs locally$/;"	kind:namespace	line:140
 author	setup.py	/^      author=AUTHOR,$/;"	kind:variable	line:147
 author_email	setup.py	/^      author_email=AUTHOR_EMAIL,$/;"	kind:variable	line:148
@@ -301,7 +301,7 @@ constant_velocity_function	pyqg/tests/test_particles.py	/^def constant_velocity_
 copyright	docs/conf.py	/^copyright = u'2015, PyQG team'$/;"	kind:variable	line:86
 cython	pyqg/kernel.pyx	/^import cython$/;"	kind:namespace	line:8
 cythonize	setup.py	/^from Cython.Build import cythonize$/;"	kind:namespace	line:2
-describe_diagnostics	pyqg/model.py	/^    def describe_diagnostics(self):$/;"	kind:member	line:630
+describe_diagnostics	pyqg/model.py	/^    def describe_diagnostics(self):$/;"	kind:member	line:626
 description	setup.py	/^      description=DESCRIPTION,$/;"	kind:variable	line:142
 diag	pyqg/tests/test_reference_solns.py	/^from pyqg import diagnostic_tools as diag$/;"	kind:namespace	line:6
 diagnostic_tools.py	pyqg/diagnostic_tools.py	1;"	kind:file	line:1
@@ -334,7 +334,7 @@ fft	pyqg/kernel.pyx	/^    def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):$/;"
 fft_q_to_qh	pyqg/kernel.pyx	/^        def fft_q_to_qh(self):$/;"	kind:function	line:205
 fft_uq_to_uqh	pyqg/kernel.pyx	/^        def fft_uq_to_uqh(self):$/;"	kind:function	line:213
 fft_vq_to_vqh	pyqg/kernel.pyx	/^        def fft_vq_to_vqh(self):$/;"	kind:function	line:215
-get_diagnostic	pyqg/model.py	/^    def get_diagnostic(self, dname):$/;"	kind:member	line:655
+get_diagnostic	pyqg/model.py	/^    def get_diagnostic(self, dname):$/;"	kind:member	line:651
 html_static_path	docs/conf.py	/^html_static_path = ['_static']$/;"	kind:variable	line:176
 html_theme	docs/conf.py	/^    html_theme = 'sphinx_rtd_theme'$/;"	kind:variable	line:142
 html_theme_path	docs/conf.py	/^    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]$/;"	kind:variable	line:143
@@ -381,6 +381,7 @@ m	examples/SQG_ellipticalvortex.py	/^m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax
 m	examples/multiple_jets.py	/^m = pyqg.BTModel(L=2.*pi,nx=256, tmax = 50*year,$/;"	kind:variable	line:8
 m	examples/rossby_wave.py	/^m = pyqg.BTModel(L=2.*pi,nx=128, tmax = 1*year,$/;"	kind:variable	line:8
 m	examples/run_two-layer.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:9
+m	experiments/run-bt.py	/^m = pyqg.BTModel(L=2. * np.pi, nx=64, tmax=5,$/;"	kind:variable	line:6
 m	experiments/run-two-layer-jet-only.py	/^m = pyqg.QGModel(tavestart=0,  dt=500, U1=U1,U2=U2, nx=nx)$/;"	kind:variable	line:12
 m	experiments/run-two-layer-surface-jet-rev-s.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4, beta=-1.5e-11)$/;"	kind:variable	line:13
 m	experiments/run-two-layer-surface-jet-rev.py	/^m = pyqg.QGModel(tavestart=0, dt=500, U1=U1,U2=U2, nx=nx, tmax=500*500*1000, ntd=4)$/;"	kind:variable	line:13
@@ -417,6 +418,7 @@ np	examples/SQG_ellipticalvortex.py	/^import numpy as np$/;"	kind:namespace	line
 np	examples/multiple_jets.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/rossby_wave.py	/^import numpy as np$/;"	kind:namespace	line:2
 np	examples/run_two-layer.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	experiments/run-bt.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	experiments/run-two-layer-jet-only.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	experiments/run-two-layer-surface-jet-rev-s.py	/^import numpy as np$/;"	kind:namespace	line:1
 np	experiments/run-two-layer-surface-jet-rev.py	/^import numpy as np$/;"	kind:namespace	line:1
@@ -490,6 +492,7 @@ plt	examples/SQG_ellipticalvortex.py	/^import matplotlib.pyplot as plt$/;"	kind:
 plt	examples/multiple_jets.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/rossby_wave.py	/^import matplotlib.pyplot as plt$/;"	kind:namespace	line:1
 plt	examples/run_two-layer.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
+plt	experiments/run-bt.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	experiments/run-two-layer-jet-only.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	experiments/run-two-layer-surface-jet-rev-s.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
 plt	experiments/run-two-layer-surface-jet-rev.py	/^from matplotlib import pyplot as plt$/;"	kind:namespace	line:2
@@ -529,6 +532,7 @@ pyqg	examples/McWilliams1984.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/multiple_jets.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/rossby_wave.py	/^import pyqg$/;"	kind:namespace	line:4
 pyqg	examples/run_two-layer.py	/^import pyqg$/;"	kind:namespace	line:3
+pyqg	experiments/run-bt.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	experiments/run-two-layer-jet-only.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	experiments/run-two-layer-surface-jet-rev-s.py	/^import pyqg$/;"	kind:namespace	line:3
 pyqg	experiments/run-two-layer-surface-jet-rev.py	/^import pyqg$/;"	kind:namespace	line:3
@@ -577,6 +581,7 @@ release	docs/conf.py	/^release = '0.1'$/;"	kind:variable	line:95
 res	benchmark/benchmark.py	/^res = np.zeros((len(mynx), 5))$/;"	kind:variable	line:13
 rossby_wave.py	examples/rossby_wave.py	1;"	kind:file	line:1
 run	pyqg/model.py	/^    def run(self):$/;"	kind:member	line:225
+run-bt.py	experiments/run-bt.py	1;"	kind:file	line:1
 run-two-layer-jet-only.py	experiments/run-two-layer-jet-only.py	1;"	kind:file	line:1
 run-two-layer-surface-jet-rev-s.py	experiments/run-two-layer-surface-jet-rev-s.py	1;"	kind:file	line:1
 run-two-layer-surface-jet-rev.py	experiments/run-two-layer-surface-jet-rev.py	1;"	kind:file	line:1
@@ -598,12 +603,12 @@ setUp	pyqg/tests/test_model.py	/^    def setUp(self):$/;"	kind:member	line:8
 setUp	pyqg/tests/test_particles.py	/^    def setUp(self):$/;"	kind:member	line:34
 setUp	pyqg/tests/test_stability.py	/^    def setUp(self):$/;"	kind:member	line:8
 setUp	pyqg/tests/test_vertical_modes.py	/^    def setUp(self):$/;"	kind:member	line:8
-set_U	pyqg/bt_model.py	/^    def set_U(self, U):$/;"	kind:member	line:95
+set_U	pyqg/bt_model.py	/^    def set_U(self, U):$/;"	kind:member	line:94
 set_U	pyqg/sqg_model.py	/^    def set_U(self, U):$/;"	kind:member	line:77
 set_U1U2	pyqg/qg_model.py	/^    def set_U1U2(self, U1, U2):$/;"	kind:member	line:193
-set_q	pyqg/model.py	/^    def set_q(self, q):$/;"	kind:member	line:674
+set_q	pyqg/model.py	/^    def set_q(self, q):$/;"	kind:member	line:670
 set_q1q2	pyqg/qg_model.py	/^    def set_q1q2(self, q1, q2, check=False):$/;"	kind:member	line:170
-set_qh	pyqg/model.py	/^    def set_qh(self, qh):$/;"	kind:member	line:668
+set_qh	pyqg/model.py	/^    def set_qh(self, qh):$/;"	kind:member	line:664
 setup	setup.py	/^from setuptools import setup, Extension$/;"	kind:namespace	line:1
 setup.py	setup.py	1;"	kind:file	line:1
 shutil	setup.py	/^import tempfile, subprocess, shutil$/;"	kind:namespace	line:6
@@ -615,6 +620,7 @@ source_suffix	docs/conf.py	/^source_suffix = '.rst'$/;"	kind:variable	line:76
 spec_sum	pyqg/diagnostic_tools.py	/^def spec_sum(ph2):$/;"	kind:function	line:30
 spec_var	examples/McWilliams1984.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:5
 spec_var	examples/run_two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
+spec_var	experiments/run-bt.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	experiments/run-two-layer-jet-only.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	experiments/run-two-layer-surface-jet-rev-s.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	experiments/run-two-layer-surface-jet-rev.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
@@ -623,7 +629,7 @@ spec_var	experiments/run-two-layer-surface-jet-s.py	/^from pyqg.diagnostic_tools
 spec_var	experiments/run-two-layer-surface-jet.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	experiments/run-two-layer.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:4
 spec_var	pyqg/diagnostic_tools.py	/^def spec_var(model, ph):$/;"	kind:function	line:7
-spec_var	pyqg/model.py	/^    def spec_var(self, ph):$/;"	kind:member	line:659
+spec_var	pyqg/model.py	/^    def spec_var(self, ph):$/;"	kind:member	line:655
 spec_var	pyqg/tests/test_fft2.py	/^from pyqg.diagnostic_tools import spec_var$/;"	kind:namespace	line:5
 sphinx_rtd_theme	docs/conf.py	/^    import sphinx_rtd_theme$/;"	kind:namespace	line:141
 sqg_model	examples/SQG_ellipticalvortex.py	/^from pyqg import sqg_model$/;"	kind:namespace	line:4
@@ -643,15 +649,16 @@ sys	docs/conf.py	/^import sys$/;"	kind:namespace	line:15
 taveint	benchmark/benchmark.py	/^                         taveint=np.inf,)$/;"	kind:variable	line:29
 tempfile	setup.py	/^import tempfile, subprocess, shutil$/;"	kind:namespace	line:6
 templates_path	docs/conf.py	/^templates_path = ['_templates']$/;"	kind:variable	line:73
-tendency_ab2	pyqg/kernel.pyx	/^def tendency_ab2(DTYPE_real_t dt,$/;"	kind:function	line:544
+tendency_ab2	pyqg/kernel.pyx	/^def tendency_ab2(DTYPE_real_t dt,$/;"	kind:function	line:547
 tendency_ab2	pyqg/model.py	/^from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3$/;"	kind:namespace	line:7
-tendency_ab3	pyqg/kernel.pyx	/^def tendency_ab3(DTYPE_real_t dt,$/;"	kind:function	line:552
+tendency_ab3	pyqg/kernel.pyx	/^def tendency_ab3(DTYPE_real_t dt,$/;"	kind:function	line:555
 tendency_ab3	pyqg/model.py	/^from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3$/;"	kind:namespace	line:7
-tendency_forward_euler	pyqg/kernel.pyx	/^def tendency_forward_euler(DTYPE_real_t dt,$/;"	kind:function	line:539
+tendency_forward_euler	pyqg/kernel.pyx	/^def tendency_forward_euler(DTYPE_real_t dt,$/;"	kind:function	line:542
 tendency_forward_euler	pyqg/model.py	/^from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3$/;"	kind:namespace	line:7
 test_advect	pyqg/tests/test_advection.py	/^def test_advect(rtol=1.e-13):$/;"	kind:function	line:5
 test_advection	pyqg/tests/test_model.py	/^    def test_advection(self, rtol=1e-15):$/;"	kind:member	line:108
 test_advection.py	pyqg/tests/test_advection.py	1;"	kind:file	line:1
+test_bt	pyqg/tests/test_reference_solns.py	/^    def test_bt(self):$/;"	kind:member	line:95
 test_change_inversion_matrix	pyqg/tests/test_model.py	/^    def test_change_inversion_matrix(self):$/;"	kind:member	line:101
 test_fft2	pyqg/tests/test_model.py	/^    def test_fft2(self, rtol=1e-15):$/;"	kind:member	line:16
 test_fft2.py	pyqg/tests/test_fft2.py	1;"	kind:file	line:1
@@ -696,6 +703,7 @@ tmax	benchmark/benchmark.py	/^tmax = 8000*1000$/;"	kind:variable	line:7
 toc	benchmark/benchmark.py	/^        toc = time.time()$/;"	kind:variable	line:35
 tottime	benchmark/benchmark.py	/^        tottime = toc-tic$/;"	kind:variable	line:36
 twrite	benchmark/benchmark.py	/^                         twrite=np.inf,$/;"	kind:variable	line:27
+twrite	experiments/run-bt.py	/^                  twrite=1000)$/;"	kind:variable	line:8
 unittest	pyqg/tests/test_fft2.py	/^import unittest$/;"	kind:namespace	line:3
 unittest	pyqg/tests/test_layered.py	/^import unittest$/;"	kind:namespace	line:2
 unittest	pyqg/tests/test_model.py	/^import unittest$/;"	kind:namespace	line:2

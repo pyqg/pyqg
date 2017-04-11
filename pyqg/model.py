@@ -99,6 +99,7 @@ class Model(PseudoSpectralKernel):
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
+        nu=1.0e-6,                # linear drag in lower layer
         filterfac=23.6,             # the factor for use in the exponential filter
         # constants
         f = None,                   # coriolis parameter (not necessary for two-layer model
@@ -181,6 +182,7 @@ class Model(PseudoSpectralKernel):
 
         # friction
         self.rek = rek
+        self.nu = nu
         self.filterfac = filterfac
 
         # constants

@@ -38,7 +38,7 @@ cdef class PseudoSpectralKernel:
     # pv
     cdef DTYPE_real_t [:, :, :] q
     cdef DTYPE_com_t [:, :, :] qh
-    cdef DTYPE_com_t [:, :,] Qh
+    cdef DTYPE_com_t [:, :, :] Qh
     # streamfunction
     cdef DTYPE_com_t [:, :, :] ph
     cdef DTYPE_com_t [:, :, :] Ph
@@ -302,7 +302,7 @@ cdef class PseudoSpectralKernel:
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
                             self.a[k2,k1,j,i] * self.qh[k1,j,i] )
                         self.Ph[k2,j,i] = ( self.Ph[k2,j,i] +
-                            self.a[k2,k1,j,i] * self.Qh[k1,j] )
+                            self.a[k2,k1,j,i] * self.Qh[k1,j,i] )
 
         # calculate spectral velocities
         for k in range(self.nz):
@@ -385,15 +385,16 @@ cdef class PseudoSpectralKernel:
 
     cdef void __do_viscosity(self) nogil:
         """Apply viscous restoring between eddy and background flows"""
-        cdef Py_ssize_t k
-        if self.nu:
+        cdef Py_ssize_t k, j
+        if self.rek:
             for k in range(self.nz):
-                self.dqhdt[k,0,0] = (
-                self.dqhdt[k,0,0] +
-                        (self.nu *
-                        self._k2l2[0,0] *
-                        (self.ph[k,0,0] - self.Ph[k,0,0]) ) )
-
+                for j in prange(self.nl, nogil=True, schedule='static',
+                        chunksize=self.chunksize,
+                        num_threads=self.num_threads):
+                    self.dqhdt[k,j,0] = (
+                    self.dqhdt[k,j,0] +
+                        (self.rek * self.Qh[k,j,0]))
+                    """"(self.Qh[k,j,0] - self.qh[k,j,0])) )"""
 
     def _forward_timestep(self):
         """Step forward based on tendencies"""

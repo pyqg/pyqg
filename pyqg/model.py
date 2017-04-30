@@ -352,6 +352,7 @@ class Model(PseudoSpectralKernel):
 
         self._do_friction()
         # apply friction
+        self._do_viscosity()
 
         self._do_external_forcing()
         # apply external forcing

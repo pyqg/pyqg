@@ -67,3 +67,6 @@ target/
 
 output/
 experiments/
+
+*.png
+*.mp4

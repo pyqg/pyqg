@@ -385,16 +385,14 @@ cdef class PseudoSpectralKernel:
 
     cdef void __do_viscosity(self) nogil:
         """Apply viscous restoring between eddy and background flows"""
-        cdef Py_ssize_t k, j
+        cdef Py_ssize_t k, i
         if self.rek:
             for k in range(self.nz):
-                for j in prange(self.nl, nogil=True, schedule='static',
-                        chunksize=self.chunksize,
-                        num_threads=self.num_threads):
-                    self.dqhdt[k,j,0] = (
-                    self.dqhdt[k,j,0] +
-                        (self.rek * self.Qh[k,j,0]))
-                    """"(self.Qh[k,j,0] - self.qh[k,j,0])) )"""
+                for i in range(self.nk):
+                    self.dqhdt[k,0,i] = (
+                    self.dqhdt[k,0,i] +
+                    self.rek * (self.Qh[k,0,i] - self.qh[k,0,i]))
+                    """(self.rek * self.Qh[k,0,i]))"""
 
     def _forward_timestep(self):
         """Step forward based on tendencies"""

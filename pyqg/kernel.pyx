@@ -390,8 +390,8 @@ cdef class PseudoSpectralKernel:
             for k in range(self.nz):
                 for i in range(self.nk):
                     self.dqhdt[k,0,i] = (
-                    self.dqhdt[k,0,i] +
-                    self.rek * (self.Qh[k,0,i] - self.qh[k,0,i]))
+                    self.dqhdt[k,0,i] -
+                    self.rek * self.Qh[k,0,i])
                     """(self.rek * self.Qh[k,0,i]))"""
 
     def _forward_timestep(self):

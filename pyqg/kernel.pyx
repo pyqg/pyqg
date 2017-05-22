@@ -86,7 +86,7 @@ cdef class PseudoSpectralKernel:
     cdef public DTYPE_real_t rek
 
     # friction parameter
-    cdef public DTYPE_real_t nu
+    cdef public DTYPE_real_t rbg
 
     # time
     # need to have a property to deal with resetting timestep

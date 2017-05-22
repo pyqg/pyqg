@@ -175,7 +175,7 @@ cdef class PseudoSpectralKernel:
 
         # friction
         self.rek = 0.0
-        self.nu = 0.0
+        self.rbg = 0.0
 
         # the tendency
         self.dqhdt = self._empty_com()
@@ -386,13 +386,12 @@ cdef class PseudoSpectralKernel:
     cdef void __do_viscosity(self) nogil:
         """Apply viscous restoring between eddy and background flows"""
         cdef Py_ssize_t k, i
-        if self.rek:
+        if self.rbg:
             for k in range(self.nz):
                 for i in range(self.nk):
                     self.dqhdt[k,0,i] = (
                     self.dqhdt[k,0,i] -
-                    self.rek * self.Qh[k,0,i])
-                    """(self.rek * self.Qh[k,0,i]))"""
+                    self.rbg * self.qh[k,0,i])
 
     def _forward_timestep(self):
         """Step forward based on tendencies"""

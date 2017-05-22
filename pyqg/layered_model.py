@@ -165,7 +165,11 @@ class LayeredModel(model.Model):
         """Set up background state (zonal flow and PV gradients)."""
 
         self.H = self.Hi.sum()
-        self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
+        if np.asarray(self.U).ndim == 2:
+            self.Ubg = self.U * np.ones((self.ny))
+        else:
+            self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
+
 
         if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
@@ -189,7 +193,7 @@ class LayeredModel(model.Model):
 
         else:
             self.f2gpi = np.array(self.rd**-2 *
-                (self.Hi[0]*self.Hi[1])/self.H)[np.newaxis,np.newaxis]
+                (self.Hi[0]*self.Hi[1])/self.H)[np.newaxis]
 
 
         self._initialize_stretching_matrix()

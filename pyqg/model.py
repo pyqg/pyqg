@@ -326,9 +326,6 @@ class Model(PseudoSpectralKernel):
         if bottom_friction:
             L3[-1,-1,:,:] += 1j*self.rek*self.wv2
 
-        if viscous_dissipation:
-            L3 -= 1j*self.rbg*self.wv2
-
         L4 = self.a.T
 
         M = np.einsum('...ij,...jk->...ik',L4,(L3+Q).T)

@@ -16,6 +16,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             L=1e6,
             beta=1.5e-11,
             rek=5.787e-7,
+            rbg=0,
             rd=30000.0,
             delta=0.25,
             U1=0.05,
@@ -40,7 +41,6 @@ class ReferenceSolutionsTester(unittest.TestCase):
         q1norm = (q1**2).sum()
 
         assert m.t == 93312000.0
-
 
         # machine + numpy.version fluctuations
         #   appears to be less than 0.1%

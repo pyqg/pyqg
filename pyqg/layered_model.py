@@ -98,9 +98,9 @@ class LayeredModel(model.Model):
         delta : number
             Layer thickness ratio (H1/H2). Only necessary for the
             two-layer (nz=2) case. Unitless.
-        U : list of size nz
+        U : list of size nz *or* list of size nz by ny
             Base state zonal velocity. Units: meters s :sup:`-1`
-        V : array of size nz
+        V : array of size nz *or* list of size nz by ny
             Base state meridional velocity. Units: meters s :sup:`-1`
         H : array of size nz
             Layer thickness. Units: meters

@@ -82,9 +82,9 @@ class QGModel(model.Model):
             Deformation radius. Units: meters.
         delta : number
             Layer thickness ratio (H1/H2)
-        U1 : number
+        U1 : number *or* aray-like
             Upper layer flow. Units: m/s
-        U2 : number
+        U2 : number *or* array-like
             Lower layer flow. Units: m/s
         """
 

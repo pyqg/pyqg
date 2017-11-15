@@ -41,9 +41,9 @@ class Model(PseudoSpectralKernel):
     u, v : real array
         Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
     Ubg : real array
-        Background zonal velocity (`nk`) (cython)
+        Background zonal velocity (`nk`, `ny`) (cython)
     Qy : real array
-        Background potential vorticity gradient (`nk`) (cython)
+        Background potential vorticity gradient (`nk`, `nl`) (cython)
     ufull, vfull : real arrays
         Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
     uh, vh : complex arrays

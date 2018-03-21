@@ -24,6 +24,6 @@ The inversion relationship in Fourier space is
 .. math::
 
 
-   \hat{q} = -\left(\kappa + \kappa_d^2\right) \hat{\psi}\,.
+   \hat{q} = -\left(\kappa^2 + \kappa_d^2\right) \hat{\psi}\,.
 
 The system is marched forward in time similarly to the two-layer model.

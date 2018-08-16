@@ -72,18 +72,22 @@ Visualize Output
 
 We access the actual pv values through the attribute ``m.q``. The first
 axis of ``q`` corresponds with the layer number. (Remeber that in
-python, numbering starts at 0.)
+python, numbering starts at 0.). We then add the calculated PV of the background
+current to the planetary PV.
 
 .. code:: python
 
-    q_upper = m.q[0] + m.Qy[0]*m.y
-    plt.contourf(m.x, m.y, q_upper, 12, cmap='RdBu_r')
-    plt.xlabel('x'); plt.ylabel('y'); plt.title('Upper Layer PV')
-    plt.colorbar();
+    Q1 = np.expand_dims(m.Qy1 - np.gradient(np.gradient(m.U1, m.dy), m.dy), axis=1) * m.y + np.gradient(m.U1, m.dy)
+    clevels = np.arange(-0.0005, 0.00075, 0.000025)
+    levels = np.arange(-0.0005,0.0008,0.0001)
+    f = plt.contourf(Q1 + m.q[0,:],levels=clevels, extend='both')
+    plt.contour(Q1 + m.q[0,:],levels=levels, extend='both', colors='#444444')
+    plt.clim([-0.0005,0.00075])
+    plt.colorbar(f)
 
 
 
-.. image:: zonal-jet_files/Q_with_jet_0000.png
+.. image:: zonal-jet_files/Q_full_with_jet_0000.png
 
 
 Plot Diagnostics

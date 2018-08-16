@@ -83,7 +83,7 @@ python, numbering starts at 0.)
 
 
 
-.. image:: two-layer_files/two-layer_6_0.png
+.. image:: zonal-jet_files/Q_with_jet_0000.png
 
 
 Plot Diagnostics

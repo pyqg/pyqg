@@ -9,3 +9,4 @@ Examples
     examples/barotropic
     examples/sqg
     examples/linear_stability
+    examples/zonal-jet

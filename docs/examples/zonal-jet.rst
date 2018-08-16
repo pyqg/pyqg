@@ -130,7 +130,7 @@ does not give us a true *isotropic* wavenumber spectrum.)
 
 
 
-.. image:: two-layer_files/two-layer_10_0.png
+.. image:: zonal-jet_files/diag.png
 
 
 We can also plot the spectral fluxes of energy.
@@ -151,6 +151,6 @@ We can also plot the spectral fluxes of energy.
 
 
 
-.. image:: two-layer_files/two-layer_12_0.png
+.. image:: zonal-jet_files/spec.png
 
 

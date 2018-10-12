@@ -98,9 +98,9 @@ class LayeredModel(model.Model):
         delta : number
             Layer thickness ratio (H1/H2). Only necessary for the
             two-layer (nz=2) case. Unitless.
-        U : list of size nz
+        U : list of size nz *or* list of size nz by ny
             Base state zonal velocity. Units: meters s :sup:`-1`
-        V : array of size nz
+        V : array of size nz *or* list of size nz by ny
             Base state meridional velocity. Units: meters s :sup:`-1`
         H : array of size nz
             Layer thickness. Units: meters
@@ -114,7 +114,7 @@ class LayeredModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.delta = delta
-        self.Ubg = np.array(U)
+        self.U = np.array(U)
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
@@ -165,6 +165,11 @@ class LayeredModel(model.Model):
         """Set up background state (zonal flow and PV gradients)."""
 
         self.H = self.Hi.sum()
+        if np.asarray(self.U).ndim == 2:
+            self.Ubg = self.U * np.ones((self.ny))
+        else:
+            self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
+
 
         if not (self.nz==2):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
@@ -180,7 +185,7 @@ class LayeredModel(model.Model):
             assert self.rhoi.size == self.nz, self.logger.error('size of rhoi does not' +
                      'match number of vertical levels nz')
 
-            assert self.Ubg.size == self.nz, self.logger.error('size of Ubg does not' +
+            assert self.Ubg.size == self.nz * self.ny, self.logger.error('size of Ubg does not' +
                      'match number of vertical levels nz')
 
             assert self.Vbg.size == self.nz, self.logger.error('size of Vbg does not' +
@@ -188,18 +193,18 @@ class LayeredModel(model.Model):
 
         else:
             self.f2gpi = np.array(self.rd**-2 *
-                (self.Hi[0]*self.Hi[1])/self.H)[np.newaxis,np.newaxis]
+                (self.Hi[0]*self.Hi[1])/self.H)[np.newaxis]
 
 
         self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
-        self.Qy = self.beta - np.dot(self.S,self.Ubg)
+        self.Qy = self.beta - np.dot(self.S, self.Ubg) + np.gradient(np.gradient(self.Ubg, self.dy, axis=1), self.dy, axis=1)
         self.Qx = np.dot(self.S,self.Vbg)
 
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
+        self.ikQy = self.Qy[:,:,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 
     def _initialize_inversion_matrix(self):

@@ -27,7 +27,8 @@ class LinearStabilityTester(unittest.TestCase):
         kd4 = kd2**2
         kb4 = kb**4
         omg_ana = np.zeros_like(m.wv2) + 0.j
-        D = 1. +  (4.*wv4*(wv4 - kd4))/(kb4*kd4)
+
+        D = 1. +  (4.*wv4*(wv4 - kd4))/(kb4[:,np.newaxis]*kd4)
 
         fneg = D<0.
         omg_ana[fneg] = 1j*m.k[fneg]*(m.beta/(m.wv2[fneg] + kd2))*( (kd2/(2.*m.wv2[fneg]))*sqrt(-D[fneg]) )

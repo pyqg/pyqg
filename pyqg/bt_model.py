@@ -34,7 +34,7 @@ class BTModel(model.Model):
             seconds :sup:`-1`
         rd : number, optional
             Deformation radius. Units: meters.
-        U : number, optional
+        U : number *or* array-like, optional
             Upper layer flow. Units: meters.
         """
 
@@ -60,14 +60,15 @@ class BTModel(model.Model):
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
 
+        if len(np.shape(self.U)) == 0:
+          self.U = self.U * np.ones((self.ny)) 
         # the meridional PV gradients in each layer
-        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        self.Qy = (self.beta + np.gradient(np.gradient(self.U, self.dy), self.dy))[np.newaxis,...]
 
         # background vel.
         self.set_U(self.U)
-
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikQy = np.expand_dims(self.Qy, axis=2) *  1j * self.k
 
         self.ilQx = 0.
 
@@ -96,7 +97,7 @@ class BTModel(model.Model):
         Parameters
         ----------
 
-        U : number
+        U : number *or* array-like
             Upper layer flow. Units meters.
         """
         self.Ubg = np.asarray(U)[np.newaxis, ...]

@@ -64,3 +64,11 @@ target/
 
 # notebooks
 */.ipynb_checkpoints/*
+
+# output and experiments
+output/
+experiments/
+*.mp4
+
+# development environment
+.vscode/**

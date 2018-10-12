@@ -16,6 +16,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
             L=1e6,
             beta=1.5e-11,
             rek=5.787e-7,
+            rbg=0,
             rd=30000.0,
             delta=0.25,
             U1=0.05,
@@ -40,7 +41,6 @@ class ReferenceSolutionsTester(unittest.TestCase):
         q1norm = (q1**2).sum()
 
         assert m.t == 93312000.0
-
 
         # machine + numpy.version fluctuations
         #   appears to be less than 0.1%
@@ -71,7 +71,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         # first print all output
         for name, des in iteritems(diagnostic_results):
-            res = m.get_diagnostic(name)
+            res = np.mean(np.asarray(m.get_diagnostic(name)))
             print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
         for name, des in iteritems(sum_diagnostic_results):
             res = m.get_diagnostic(name).sum()

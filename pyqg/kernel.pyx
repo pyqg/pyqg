@@ -38,8 +38,10 @@ cdef class PseudoSpectralKernel:
     # pv
     cdef DTYPE_real_t [:, :, :] q
     cdef DTYPE_com_t [:, :, :] qh
+    cdef DTYPE_com_t [:, :, :] Qh
     # streamfunction
     cdef DTYPE_com_t [:, :, :] ph
+    cdef DTYPE_com_t [:, :, :] Ph
     # velocities
     cdef DTYPE_real_t [:, :, :] u
     cdef DTYPE_real_t [:, :, :] v
@@ -72,9 +74,9 @@ cdef class PseudoSpectralKernel:
     cdef readonly DTYPE_com_t [:] _il
     cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
-    cdef DTYPE_real_t [:] Ubg
-    cdef DTYPE_real_t [:] Qy
-    cdef readonly DTYPE_com_t [:, :] _ikQy
+    cdef DTYPE_real_t [:,:] Ubg
+    cdef DTYPE_real_t [:,:] Qy
+    cdef readonly DTYPE_com_t [:, :, :] _ikQy
 
     # spectral filter
     # TODO: figure out if this really needs to be public
@@ -82,6 +84,9 @@ cdef class PseudoSpectralKernel:
 
     # friction parameter
     cdef public DTYPE_real_t rek
+
+    # friction parameter
+    cdef public DTYPE_real_t rbg
 
     # time
     # need to have a property to deal with resetting timestep
@@ -123,9 +128,14 @@ cdef class PseudoSpectralKernel:
         self.q = q
         qh = self._empty_com()
         self.qh = qh
+        Qh = self._empty_com()
+        self.Qh = Qh
 
         ph = self._empty_com()
         self.ph = ph
+
+        Ph = self._empty_com()
+        self.Ph = Ph
 
         u = self._empty_real()
         self.u = u
@@ -165,6 +175,7 @@ cdef class PseudoSpectralKernel:
 
         # friction
         self.rek = 0.0
+        self.rbg = 0.0
 
         # the tendency
         self.dqhdt = self._empty_com()
@@ -266,7 +277,7 @@ cdef class PseudoSpectralKernel:
         self.__invert()
 
     cdef void __invert(self) nogil:
-        ### algorithm
+    ### algorithm
         # invert ph = a * qh
         # uh, vh = -_il * ph, _ik * ph
         # u, v, = ifft(uh), ifft(vh)
@@ -279,6 +290,7 @@ cdef class PseudoSpectralKernel:
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.ph[k,j,i] = (0. + 0.*1j)
+                    self.Ph[k,j,i] = (0. + 0.*1j)
 
         # invert qh to find ph
         for k2 in range(self.nz):
@@ -289,6 +301,8 @@ cdef class PseudoSpectralKernel:
                     for i in range(self.nk):
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
                             self.a[k2,k1,j,i] * self.qh[k1,j,i] )
+                        self.Ph[k2,j,i] = ( self.Ph[k2,j,i] +
+                            self.a[k2,k1,j,i] * self.Qh[k1,j,i] )
 
         # calculate spectral velocities
         for k in range(self.nz):
@@ -327,7 +341,7 @@ cdef class PseudoSpectralKernel:
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nx):
-                    self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
+                    self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k,j]) * self.q[k,j,i]
                     self.vq[k,j,i] = self.v[k,j,i] * self.q[k,j,i]
 
         # transform to get spectral advective flux
@@ -344,7 +358,7 @@ cdef class PseudoSpectralKernel:
                     # overwrite the tendency, since the forcing gets called after
                     self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
-                                    self._ikQy[k,i] * self.ph[k,j,i] )
+                                    self._ikQy[k,j,i] * self.ph[k,j,i] )
         return
 
     def _do_friction(self):
@@ -365,6 +379,19 @@ cdef class PseudoSpectralKernel:
                              self._k2l2[j,i] *
                              self.ph[k,j,i]) )
         return
+
+    def _do_viscosity(self):
+        self.__do_viscosity()
+
+    cdef void __do_viscosity(self) nogil:
+        """Apply viscous restoring between eddy and background flows"""
+        cdef Py_ssize_t k, i
+        if self.rbg:
+            for k in range(self.nz):
+                for i in range(self.nk):
+                    self.dqhdt[k,0,i] = (
+                    self.dqhdt[k,0,i] -
+                    self.rbg * self.qh[k,0,i])
 
     def _forward_timestep(self):
         """Step forward based on tendencies"""
@@ -470,15 +497,15 @@ cdef class PseudoSpectralKernel:
     property Ubg:
         def __get__(self):
             return np.asarray(self.Ubg)
-        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] Ubg):
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Ubg):
             self.Ubg = Ubg
     property Qy:
         def __get__(self):
             return np.asarray(self.Qy)
-        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] Qy):
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Qy):
             self.Qy = Qy
             self._ikQy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
-                               np.asarray(Qy)[:, np.newaxis])
+                               np.asarray(Qy)[:, :, np.newaxis])
     property q:
         def __get__(self):
             return np.asarray(self.q)
@@ -516,7 +543,7 @@ cdef class PseudoSpectralKernel:
     property ufull:
         def __get__(self):
             return np.asarray(self.u) + \
-                np.asarray(self.Ubg)[:,np.newaxis,np.newaxis]
+                np.expand_dims(np.asarray(self.Ubg),axis=2)
     property vfull:
         def __get__(self):
             return np.asarray(self.v)

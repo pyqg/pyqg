@@ -25,7 +25,7 @@ class SQGModel(model.Model):
             seconds :sup:`-1`
         Nb : number
             Buoyancy frequency. Units: seconds :sup:`-1`.
-        U : number
+        U : number *or* array-like
             Background zonal flow. Units: meters.
         """
 
@@ -51,14 +51,18 @@ class SQGModel(model.Model):
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
 
-        # the meridional PV gradients in each layer
-        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
-
         # background vel.
+        if len(np.shape(self.U)) == 0:
+          self.U = (self.U * np.ones((self.ny)))
+        print(np.shape(self.U))
         self.set_U(self.U)
 
+        # the meridional PV gradients in each layer
+        self.Qy = (self.beta + np.gradient(np.gradient(self.U, self.dy), self.dy))[np.newaxis,...]
+
+
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikQy = np.expand_dims(self.Qy, axis=2) *  1j * self.k
 
         self.ilQx = 0.
 

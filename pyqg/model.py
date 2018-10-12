@@ -42,15 +42,17 @@ class Model(PseudoSpectralKernel):
     u, v : real array
         Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
     Ubg : real array
-        Background zonal velocity (`nk`) (cython)
+        Background zonal velocity (`nk`, `ny`) (cython)
     Qy : real array
-        Background potential vorticity gradient (`nk`) (cython)
+        Background potential vorticity gradient (`nk`, `nl`) (cython)
     ufull, vfull : real arrays
         Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
     uh, vh : complex arrays
         Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (cython)
     rek : float
         Linear drag in lower layer (cython)
+    rbg : float
+        Linear drag within each layer (cython)
     t : float
         Model time (cython)
     tc : int
@@ -100,6 +102,7 @@ class Model(PseudoSpectralKernel):
         useAB2=False,               # use second order Adams Bashforth timestepping instead of 3rd
         # friction parameters
         rek=5.787e-7,               # linear drag in lower layer
+        rbg=5.787e-7,               # linear drag in each layer
         filterfac=23.6,             # the factor for use in the exponential filter
         # constants
         f = None,                   # coriolis parameter (not necessary for two-layer model
@@ -182,6 +185,7 @@ class Model(PseudoSpectralKernel):
 
         # friction
         self.rek = rek
+        self.rbg = rbg
         self.filterfac = filterfac
 
         # constants
@@ -316,7 +320,7 @@ class Model(PseudoSpectralKernel):
 
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
 
-        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
+        Uk =(self.Ubg*I[:,:,np.newaxis])[:,:,:,np.newaxis]*self.k
         Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
         L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
 
@@ -343,7 +347,6 @@ class Model(PseudoSpectralKernel):
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
-
         self._invert()
         # find streamfunction from pv
 
@@ -352,6 +355,7 @@ class Model(PseudoSpectralKernel):
 
         self._do_friction()
         # apply friction
+        self._do_viscosity()
 
         self._do_external_forcing()
         # apply external forcing

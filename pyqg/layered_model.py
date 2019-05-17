@@ -72,7 +72,6 @@ class LayeredModel(model.Model):
 
     def __init__(
         self,
-        g = 9.81,
         beta=1.5e-11,               # gradient of coriolis parameter
         nz = 4,                     # number of layers
         rd=15000.0,                 # deformation radius
@@ -110,7 +109,6 @@ class LayeredModel(model.Model):
         """
 
         # physical
-        self.g = g
         self.beta = beta
         self.rd = rd
         self.delta = delta

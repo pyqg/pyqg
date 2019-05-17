@@ -95,7 +95,7 @@ and
 .. math::
 
 
-   \partial_t\,{\hat{q}_2} = \hat{\mathsf{J}}\left(\psi_2\,, q_2\right)- \beta_2\, \text{i}\,k\, {\hat{\psi}_2}  + r_{ek}\,\kappa^2\,\, \hat{\psi}_2 + \hat{\text{ssd}}\,,
+   \partial_t\,{\hat{q}_2} = - \hat{\mathsf{J}}\left(\psi_2\,, q_2\right)-  \text{i}\,k\, \beta_2\, {\hat{\psi}_2}  + r_{ek}\,\kappa^2\,\, \hat{\psi}_2 + \hat{\text{ssd}}\,,
 
 where, in the pseudo-spectral spirit, :math:`\hat{\mathsf{J}}` means the
 Fourier transform of the Jacobian i.e., we compute the products in

@@ -244,7 +244,7 @@ class Model(PseudoSpectralKernel):
         # deformation wavenumbers and radii
         self.kdi2 = evals[asort]
         self.radii = np.zeros_like(self.kdi2)
-        self.radii[0] = self.g*self.H/np.abs(self.f) # barotropic def. radius
+        self.radii[0] = np.sqrt(self.g*self.H)/np.abs(self.f) # barotropic def. radius
         self.radii[1:] = 1./np.sqrt(self.kdi2[1:])
 
         # eigenstructure

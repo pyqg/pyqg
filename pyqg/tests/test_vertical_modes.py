@@ -27,7 +27,7 @@ class VerticalModesTester(unittest.TestCase):
         """ Check deformation radii are computed correctly """
 
 
-        radii = np.array([self.m.g*self.m.H/np.abs(self.m.f), self.m.rd])
+        radii = np.array([np.sqrt(self.m.g*self.m.H)/np.abs(self.m.f), self.m.rd])
         np.testing.assert_allclose(self.m.radii,radii,atol=self.atol,
                 err_msg=' Wrong deformation radii')
 

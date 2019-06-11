@@ -239,7 +239,7 @@ class LayeredModel(model.Model):
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         return np.abs(
-            np.hstack([self.u + self.Ubg[:,np.newaxis,np.newaxis], self.v])
+            np.hstack([self.u + self.Ubg[:,np.newaxis], self.v])
         ).max()*self.dt/self.dx
 
     # calculate KE: this has units of m^2 s^{-2}

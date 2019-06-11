@@ -311,8 +311,8 @@ class LayeredModel(model.Model):
         self.add_diagnostic('APEgenspec',
                     description='the spectrum of the rate of generation of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                                (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
-                                 self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
+                                (self.Ubg[:,np.newaxis,np.newaxis, :, np.newaxis]*self.k +
+                                 self.Vbg[:,np.newaxis,np.newaxis, np.newaxis]*self.l)*
                                 (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H))
 
         self.add_diagnostic('ENSflux',

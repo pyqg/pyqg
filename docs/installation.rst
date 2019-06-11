@@ -54,6 +54,52 @@ Installing fftw and pyfftw
 Once you have installed pyfftw via one of these paths, you can proceed to
 :ref:`install-pyqg`.
 
+The quick way: installing Docker
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are unfamiliar with configuring a Python environment, a preconfigured
+Docker image with all necessary libraries is available. Docker is an environment
+"containerization" platform, that runs virtualized systems (containers) that
+can then be modified, saved, and distrubuted as images. To get started, first
+download the Docker Desktop application from https://hub.docker.com/signup.
+
+Once you have Docker set up:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/pyqg/pyqg ~/pyqg
+    $ docker pull pyqg/pyqg:latest
+    $ docker create -it --name pyqg -v ~/pyqg/:/pyqg/ -w /pyqg/ pyqg/pyqg:latest bash
+    $ docker start pyqg
+    $ docker exec -it pyqg bash
+
+You'll now find yourself inside an Ubuntu bash shell. You don't need to install any
+more prerequisites, and can simply:
+
+..code-block:: bash
+
+    $ python setup.py install
+
+to install pyqg systemwide, or:
+
+..code-block:: bash
+   
+    $ python setup.py develop
+
+to install in developer mode. Take note that you do not need to use the `--user` flag
+as discussed below, as the containerized environment is isolated from the rest of your
+system.
+
+Also of note, is that on container creation we are mounting the pyqg repository
+from your base filesystem into the container (`-v ~/pyqg/:/pyqg/`). Any changes made
+to this directory outside of the container will be reflected within, and vice versa.
+The only pitfall is to be aware of file permissions within this directory, keep an 
+eye on file format discrepencies (especially dos vs unix if you're using Windows),
+and finally that you adjust the `-v` statement if you clone pyqg somewhere other than
+your home directory.
+
+Further details can be found on the pyqg Docker Hub page at https://hub.docker.com/r/pyqg/pyqg.
+
 The easy way: installing with conda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -655,8 +655,11 @@ class Model(PseudoSpectralKernel):
                 self.diagnostics[dname]['count'] += 1
 
     def get_diagnostic(self, dname):
-        return (self.diagnostics[dname]['value'] /
-                self.diagnostics[dname]['count'])
+      if dname in ['APEgenspec'] and not all(np.apply_along_axis(lambda r: all(n == r[0] for n in r), 1, self.Ubg)):
+        raise Warning('Diagnostic ' + dname + ' is not yet allowed when using non-uniform background flow U')
+
+      return (self.diagnostics[dname]['value'] /
+              self.diagnostics[dname]['count'])
 
     def spec_var(self, ph):
         """ compute variance of p from Fourier coefficients ph """

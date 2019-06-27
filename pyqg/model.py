@@ -651,7 +651,6 @@ class Model(PseudoSpectralKernel):
                 if self.diagnostics[dname]['count']==0:
                     self.diagnostics[dname]['value'] = res
                 else:
-                    # self.diagnostics[dname]['value'] += res # TLH
                     self.diagnostics[dname]['value'] = self.diagnostics[dname]['value'] + res
                 self.diagnostics[dname]['count'] += 1
 

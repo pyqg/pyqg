@@ -1,4 +1,4 @@
-sphinx
+sphinx==1.6.7
 ipython
 numpydoc
 cython

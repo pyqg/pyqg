@@ -35,7 +35,7 @@ class BTModel(model.Model):
         rd : number, optional
             Deformation radius. Units: meters.
         U : number *or* array-like, optional
-            Upper layer flow. Units: meters.
+            Upper layer flow. Units: meters seconds :sup:`-1`.
         """
 
         self.beta = beta
@@ -98,7 +98,7 @@ class BTModel(model.Model):
         ----------
 
         U : number *or* array-like
-            Upper layer flow. Units meters.
+            Upper layer flow. Units meters seconds :sup:`-1`.
         """
         self.Ubg = np.asarray(U)[np.newaxis, ...]
 

@@ -37,7 +37,7 @@ Future
 ======
 
 By adopting open-source best practices, we hope pyqg will grow into a widely
-used, communicated-based project. We know that many other research groups have
+used, community-based project. We know that many other research groups have
 their own "in house" QG models. You can get involved by trying out the model,
 filing issues_ if you find problems, and making `pull requests`_ if you make
 improvements.

@@ -14,7 +14,7 @@ Team
 
 .. _Malte Jansen: http://geosci.uchicago.edu/people/malte-jansen/
 .. _Ryan Abernathey: http://rabernat.github.io
-.. _Cesar Rocha: http://https://www.cbrocha.com
+.. _Cesar Rocha: http://www.cbrocha.com
 .. _Francis Poulin: https://uwaterloo.ca/poulin-research-group/
 
 History

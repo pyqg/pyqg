@@ -171,7 +171,7 @@ class LayeredModel(model.Model):
             self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
 
 
-        if not (self.nz==2):
+        if not (self.nz==2 and self.rd and self.delta):
             self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
             self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
 

@@ -1,0 +1,42 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                
+\geometry{a4paper,left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\usepackage{natbib}
+\usepackage{color}
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+\usepackage{epsfig}
+\usepackage{amssymb,amsmath}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{mathtools}
+
+\newcommand{\ssd}{\text{ssd}}
+\newcommand{\sS}{\mathsf{S}}
+\newcommand{\tot}{\text{tot}}
+
+\usepackage{hyperref}
+
+
+\begin{document}
+
+
+\input{symbols}
+
+\section*{Vertical modes}
+
+Standard vertical modes, , $\sp_n (z)$, are the eigenvectors of the ``stretching matrix''
+
+\begin{equation}
+\sS \,\sp_n = -R_n^{-2}\, \sp_n\,,
+\end{equation}
+where the $R_n$ is by definition the n'th deformation radius (e.g., \href{http://www.sciencedirect.com/science/article/pii/0377026578900027}{Flierl 1978}). These orthogonal modes $\sp_n$ are normalized to
+have unitary $L2$-norm
+\begin{equation}
+    \frac{1}{H}\int_{-H}^{0} \sp_n \sp_m \dd z = \delta_{nm}\com
+\end{equation}
+where $\delta_{mn}$.
+
+\end{document}

@@ -74,9 +74,9 @@ cdef class PseudoSpectralKernel:
     cdef readonly DTYPE_com_t [:] _il
     cdef public DTYPE_real_t [:,:] _k2l2
     # background state constants (functions of z only)
-    cdef DTYPE_real_t [:,:] Ubg
-    cdef DTYPE_real_t [:,:] Qy
-    cdef readonly DTYPE_com_t [:, :, :] _ikQy
+    cdef DTYPE_real_t [:] Ubg
+    cdef DTYPE_real_t [:] Qy
+    cdef readonly DTYPE_com_t [:, :] _ikQy
 
     # spectral filter
     # TODO: figure out if this really needs to be public
@@ -341,7 +341,7 @@ cdef class PseudoSpectralKernel:
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nx):
-                    self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k,j]) * self.q[k,j,i]
+                    self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
                     self.vq[k,j,i] = self.v[k,j,i] * self.q[k,j,i]
 
         # transform to get spectral advective flux
@@ -358,7 +358,7 @@ cdef class PseudoSpectralKernel:
                     # overwrite the tendency, since the forcing gets called after
                     self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
-                                    self._ikQy[k,j,i] * self.ph[k,j,i] )
+                                    self._ikQy[k,i] * self.ph[k,j,i] )
         return
 
     def _do_friction(self):
@@ -497,15 +497,15 @@ cdef class PseudoSpectralKernel:
     property Ubg:
         def __get__(self):
             return np.asarray(self.Ubg)
-        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Ubg):
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] Ubg):
             self.Ubg = Ubg
     property Qy:
         def __get__(self):
             return np.asarray(self.Qy)
-        def __set__(self, np.ndarray[DTYPE_real_t, ndim=2] Qy):
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] Qy):
             self.Qy = Qy
             self._ikQy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
-                               np.asarray(Qy)[:, :, np.newaxis])
+                               np.asarray(Qy)[:, np.newaxis])
     property q:
         def __get__(self):
             return np.asarray(self.q)
@@ -543,7 +543,7 @@ cdef class PseudoSpectralKernel:
     property ufull:
         def __get__(self):
             return np.asarray(self.u) + \
-                np.expand_dims(np.asarray(self.Ubg),axis=2)
+                np.asarray(self.Ubg)[:,np.newaxis,np.newaxis]
     property vfull:
         def __get__(self):
             return np.asarray(self.v)

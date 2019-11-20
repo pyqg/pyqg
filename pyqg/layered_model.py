@@ -114,7 +114,7 @@ class LayeredModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.delta = delta
-        self.U = np.array(U)
+        self.Ubg = np.array(U)
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
@@ -165,10 +165,10 @@ class LayeredModel(model.Model):
         """Set up background state (zonal flow and PV gradients)."""
 
         self.H = self.Hi.sum()
-        if np.asarray(self.U).ndim == 2:
-            self.Ubg = self.U * np.ones((self.ny))
-        else:
-            self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
+        #if np.asarray(self.U).ndim == 2:
+        #    self.Ubg = self.U * np.ones((self.ny))
+        #else:
+        #    self.Ubg = np.expand_dims(self.U,axis=1) * np.ones((self.ny))
 
 
         if not (self.nz==2 and self.rd and self.delta):
@@ -185,7 +185,7 @@ class LayeredModel(model.Model):
             assert self.rhoi.size == self.nz, self.logger.error('size of rhoi does not' +
                      'match number of vertical levels nz')
 
-            assert self.Ubg.size == self.nz * self.ny, self.logger.error('size of Ubg does not' +
+            assert self.Ubg.size == self.nz, self.logger.error('size of Ubg does not' +
                      'match number of vertical levels nz')
 
             assert self.Vbg.size == self.nz, self.logger.error('size of Vbg does not' +
@@ -199,12 +199,12 @@ class LayeredModel(model.Model):
         self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
-        self.Qy = self.beta - np.dot(self.S, self.Ubg) + np.gradient(np.gradient(self.Ubg, self.dy, axis=1), self.dy, axis=1)
+        self.Qy = self.beta - np.dot(self.S, self.Ubg) 
         self.Qx = np.dot(self.S,self.Vbg)
 
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,:,np.newaxis]*1j*self.k
+        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
         self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
 
     def _initialize_inversion_matrix(self):

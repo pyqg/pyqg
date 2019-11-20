@@ -63,12 +63,12 @@ class BTModel(model.Model):
         if len(np.shape(self.U)) == 0:
           self.U = self.U * np.ones((self.ny)) 
         # the meridional PV gradients in each layer
-        self.Qy = (self.beta + np.gradient(np.gradient(self.U, self.dy), self.dy))[np.newaxis,...]
+        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
 
         # background vel.
         self.set_U(self.U)
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = np.expand_dims(self.Qy, axis=2) *  1j * self.k
+        self.ikQy = self.Qy * 1j * self.k
 
         self.ilQx = 0.
 
@@ -100,7 +100,7 @@ class BTModel(model.Model):
         U : number *or* array-like
             Upper layer flow. Units meters.
         """
-        self.Ubg = np.asarray(U)[np.newaxis, ...]
+        self.Ubg = np.asarray(U)
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

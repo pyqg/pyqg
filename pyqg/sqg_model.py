@@ -58,11 +58,11 @@ class SQGModel(model.Model):
         self.set_U(self.U)
 
         # the meridional PV gradients in each layer
-        self.Qy = (self.beta + np.gradient(np.gradient(self.U, self.dy), self.dy))[np.newaxis,...]
+        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
 
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = np.expand_dims(self.Qy, axis=2) *  1j * self.k
+        self.ikQy =  self.Qy * 1j * self.k
 
         self.ilQx = 0.
 
@@ -76,7 +76,7 @@ class SQGModel(model.Model):
 
     def set_U(self, U):
         """Set background zonal flow"""
-        self.Ubg = np.asarray(U)[np.newaxis,...]
+        self.Ubg = np.asarray(U)
 
     def _calc_diagnostics(self):
         # here is where we calculate diagnostics

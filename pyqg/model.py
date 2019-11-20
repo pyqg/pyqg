@@ -320,7 +320,7 @@ class Model(PseudoSpectralKernel):
 
         Q =  I[:,:,np.newaxis,np.newaxis]*(self.ikQy - self.ilQx).imag
 
-        Uk =(self.Ubg*I[:,:,np.newaxis])[:,:,:,np.newaxis]*self.k
+        Uk =(self.Ubg*I)[:,:,np.newaxis,np.newaxis]*self.k
         Vl =(self.Vbg*I)[:,:,np.newaxis,np.newaxis]*self.l
         L3 = np.einsum('ij...,jk...->ik...',L2,Uk+Vl) + 0j
 

@@ -43,9 +43,9 @@ It is also useful to analyze the fasted-growing mode:
 
 .. code:: python
 
-    argmax = evals[m.Ny/2,:].argmax()
-    evec = np.fft.fftshift(evecs,axes=(1))[:,m.Ny/2,argmax]
-    kmax = k[m.Ny/2,argmax]
+    argmax = evals[m.ny/2,:].argmax()
+    evec = np.fft.fftshift(evecs,axes=(1))[:,m.ny/2,argmax]
+    kmax = k[m.ny/2,argmax]
     
     x = np.linspace(0,4.*pi/kmax,100)
     mag, phase = np.abs(evec), np.arctan2(evec.imag,evec.real) 
@@ -58,9 +58,9 @@ friction, but the stability method also supports bottom friction:
     evals_fric, evecs_fric = m.stability_analysis(bottom_friction=True)
     evals_fric = np.fft.fftshift(evals_fric.imag,axes=(0,))
     
-    argmax = evals_fric[m.Ny/2,:].argmax()
-    evec_fric = np.fft.fftshift(evecs_fric,axes=(1))[:,m.Ny/2,argmax]
-    kmax_fric = k[m.Ny/2,argmax]
+    argmax = evals_fric[m.ny/2,:].argmax()
+    evec_fric = np.fft.fftshift(evecs_fric,axes=(1))[:,m.ny/2,argmax]
+    kmax_fric = k[m.ny/2,argmax]
     
     mag_fric, phase_fric = np.abs(evec_fric), np.arctan2(evec_fric.imag,evec_fric.real) 
 
@@ -104,8 +104,8 @@ Plotting growth rates
 .. code:: python
 
     plt.figure(figsize=(8,4))
-    plt.plot(k[m.Ny/2,:],evals[m.Ny/2,:],'b',label='without bottom friction')
-    plt.plot(k[m.Ny/2,:],evals_fric[m.Ny/2,:],'b--',label='with bottom friction')
+    plt.plot(k[m.ny/2,:],evals[m.ny/2,:],'b',label='without bottom friction')
+    plt.plot(k[m.ny/2,:],evals_fric[m.ny/2,:],'b--',label='with bottom friction')
     plt.xlim(0.,2.)
     plt.legend()
     plt.xlabel(r'$k\,L_d$')

@@ -11,10 +11,18 @@ matrix:
     env: CONDA_ENV=py27
   - python: 2.7
     env: CONDA_ENV=py27-pyfftw
-  - python: 3.5
-    env: CONDA_ENV=py35
-  - python: 3.5
-    env: CONDA_ENV=py35-pyfftw
+  - python: 3.6
+    env: CONDA_ENV=py36
+  - python: 3.6
+    env: CONDA_ENV=py36-pyfftw
+  - python: 3.7
+    env: CONDA_ENV=py37
+  - python: 3.7
+    env: CONDA_ENV=py37-pyfftw
+  - python: 3.8
+    env: CONDA_ENV=py38
+  - python: 3.8
+    env: CONDA_ENV=py38-pyfftw
 
 before_install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then

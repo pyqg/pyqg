@@ -73,12 +73,12 @@ class LayeredModel(model.Model):
     def __init__(
         self,
         g = 9.81,
-        beta=1.5e-11,               # gradient of coriolis parameter
+        beta = 1.5e-11,             # gradient of coriolis parameter
         nz = 4,                     # number of layers
-        rd=15000.0,                 # deformation radius
+        rd = 15000.0,               # deformation radius
         H = None,                   # layer thickness
-        U=None,                     # zonal base state flow
-        V=None,                     # meridional base state flow
+        U = None,                   # zonal base state flow
+        V = None,                   # meridional base state flow
         rho = None,
         delta = None,
         **kwargs
@@ -99,9 +99,9 @@ class LayeredModel(model.Model):
             Layer thickness ratio (H1/H2). Only necessary for the
             two-layer (nz=2) case. Unitless.
         U : list of size nz *or* list of size nz by ny
-            Base state zonal velocity. Units: meters s :sup:`-1`
+            Base state zonal velocity. Units: meters seconds :sup:`-1`
         V : array of size nz *or* list of size nz by ny
-            Base state meridional velocity. Units: meters s :sup:`-1`
+            Base state meridional velocity. Units: meters seconds :sup:`-1`
         H : array of size nz
             Layer thickness. Units: meters
         rho: array of size nz.

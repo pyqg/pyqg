@@ -82,10 +82,10 @@ class QGModel(model.Model):
             Deformation radius. Units: meters.
         delta : number
             Layer thickness ratio (H1/H2)
-        U1 : number *or* aray-like
-            Upper layer flow. Units: m/s
+        U1 : number *or* array-like
+            Upper layer flow. Units: meters seconds :sup:`-1`
         U2 : number *or* array-like
-            Lower layer flow. Units: m/s
+            Lower layer flow. Units: meters seconds :sup:`-1`
         """
 
         # physical
@@ -197,9 +197,9 @@ class QGModel(model.Model):
         ----------
 
         U1 : number
-            Upper layer flow. Units: m/s
+            Upper layer flow. Units: meters seconds :sup:`-1`
         U2 : number
-            Lower layer flow. Units: m/s
+            Lower layer flow. Units: meters seconds :sup:`-1`
         """
         if len(np.shape(U1)) == 0:
           U1 = U1 * np.ones((self.ny)) 

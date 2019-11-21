@@ -105,7 +105,7 @@ class PyqgModelTester(unittest.TestCase):
         self.m.a = a_new
         np.testing.assert_allclose(a_new, self.m.a)
 
-    def test_advection(self, rtol=1e-15):
+    def test_advection(self, rtol=1e-14):
         """Check whether calculating advection tendency gives the descired result."""
         # sin(2 a) = 2 sin(a) cos(a)
 

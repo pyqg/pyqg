@@ -244,7 +244,7 @@ class Model(PseudoSpectralKernel):
         # deformation wavenumbers and radii
         self.kdi2 = evals[asort]
         self.radii = np.zeros_like(self.kdi2)
-        self.radii[0] = self.g*self.H/np.abs(self.f) # barotropic def. radius
+        self.radii[0] = np.sqrt(self.g*self.H)/np.abs(self.f) # barotropic def. radius
         self.radii[1:] = 1./np.sqrt(self.kdi2[1:])
 
         # eigenstructure
@@ -473,7 +473,7 @@ class Model(PseudoSpectralKernel):
     # *** don't remove! needed for diagnostics (but not forward model) ***
     def _advect(self, q, u, v):
         """Given real inputs q, u, v, returns the advective tendency for
-        q in spectal space."""
+        q in spectral space."""
         uq = u*q
         vq = v*q
         # this is a hack, since fft now requires input to have shape (nz,ny,nx)

@@ -22,11 +22,11 @@ def test_fftw_rfft2(Nx = 64, Ny = None, n = 7200):
     A = np.random.randn(Nx,Ny)
     Ai = A.copy()
 
-    tstart = time.clock()
+    tstart = time.time()
     for i in range(n):
         Ah = pyfftw.interfaces.numpy_fft.rfft2(Ai, threads=1)
         Ai = pyfftw.interfaces.numpy_fft.irfft2(Ah, threads=1)
-    tend = time.clock()
+    tend = time.time()
 
     # error after nmax fft cycles
     abs_err = np.abs((A-Ai)).max()
@@ -46,11 +46,11 @@ def test_fftw_rfft(Nx = 64, n = 100000):
     A = np.random.randn(Nx)
     Ai = A.copy()
 
-    tstart = time.clock()
+    tstart = time.time()
     for i in range(n):
         Ah = pyfftw.interfaces.numpy_fft.rfft(Ai, threads=1)
         Ai = pyfftw.interfaces.numpy_fft.irfft(Ah, threads=1)
-    tend = time.clock()
+    tend = time.time()
 
     # error after nmax fft cycles
     abs_err = np.abs((A-Ai)).max()

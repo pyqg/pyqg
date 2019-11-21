@@ -50,6 +50,10 @@ CLASSIFIERS = [
     'Intended Audience :: Science/Research',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Physics',
     'Topic :: Scientific/Engineering :: Atmospheric Science'
@@ -70,7 +74,7 @@ with open(use_pyfftw_file, 'wb') as f:
         f.write(b'DEF PYQG_USE_PYFFTW = 1')
     except ImportError:
         f.write(b'DEF PYQG_USE_PYFFTW = 0')
-        warnings.warn('Could not import pyfftw. Model will be slow.')
+        warnings.warn('Could not import pyfftw. Model may be slower.')
 
 # check for openmp following
 # http://stackoverflow.com/questions/16549893/programatically-testing-for-openmp-support-from-a-python-setup-script

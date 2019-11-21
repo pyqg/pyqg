@@ -8,13 +8,13 @@ Team
 
 - `Ryan Abernathey`_, Columbia University / LDEO
 
-- `Cesar Rocha`_, Scripps Institution of Oceanography / UCSD
+- `Cesar Rocha`_, Woods Hole Oceanographic Institution
 
 - `Francis Poulin`_, University of Waterloo
 
 .. _Malte Jansen: http://geosci.uchicago.edu/people/malte-jansen/
-.. _Ryan Abernathey: http://ryan.actualscience.net
-.. _Cesar Rocha: http://crocha700.github.io/
+.. _Ryan Abernathey: http://rabernat.github.io
+.. _Cesar Rocha: http://www.cbrocha.com
 .. _Francis Poulin: https://uwaterloo.ca/poulin-research-group/
 
 History
@@ -31,13 +31,13 @@ implemented a cython kernel. Cesar and Francis implemented the barotropic and
 sqg models.
 
 .. _WHOI GFD Summer School: https://www.whoi.edu/gfd/
-.. _Glenn Flierl: http://eaps-www.mit.edu/paoc/people/glenn-r-flierl
+.. _Glenn Flierl: https://eapsweb.mit.edu/people/grflierl
 
 Future
 ======
 
 By adopting open-source best practices, we hope pyqg will grow into a widely
-used, communited-based project. We know that many other research groups have
+used, community-based project. We know that many other research groups have
 their own "in house" QG models. You can get involved by trying out the model,
 filing issues_ if you find problems, and making `pull requests`_ if you make
 improvements.

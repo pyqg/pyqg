@@ -316,7 +316,7 @@ cdef class PseudoSpectralKernel:
         # uqh, vqh, = fft(uq), fft(vq)
         # tend = kj*uqh + _ilQx*ph + lj*vqh + _ilQy*ph
 
-        # the output array: spectal representation of advective tendency
+        # the output array: spectral representation of advective tendency
         #cdef np.ndarray tend = np.zeros((self.nz, self.nl, self.nk), dtype=DTYPE_com)
 
         cdef Py_ssize_t k, j, i

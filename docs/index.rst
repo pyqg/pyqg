@@ -11,7 +11,7 @@ pyqg: Python Quasigeostrophic Model
 
 pyqg is a python solver for quasigeostrophic systems. Quasigeostophic
 equations are an approximation to the full fluid equations of motion in
-the limit of strong rotation and stratitifcation and are most applicable
+the limit of strong rotation and stratification and are most applicable
 to geophysical fluid dynamics problems.
 
 Students and researchers in ocean and atmospheric dynamics are the intended

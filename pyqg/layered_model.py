@@ -73,12 +73,12 @@ class LayeredModel(model.Model):
     def __init__(
         self,
         g = 9.81,
-        beta=1.5e-11,               # gradient of coriolis parameter
+        beta = 1.5e-11,             # gradient of coriolis parameter
         nz = 4,                     # number of layers
-        rd=15000.0,                 # deformation radius
+        rd = 15000.0,               # deformation radius
         H = None,                   # layer thickness
-        U=None,                     # zonal base state flow
-        V=None,                     # meridional base state flow
+        U = None,                   # zonal base state flow
+        V = None,                   # meridional base state flow
         rho = None,
         delta = None,
         **kwargs

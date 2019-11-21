@@ -8,12 +8,12 @@ is
 
    \begin{aligned}
    {q_1} &= {\nabla^2}\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-\psi_1}{g'_{1}}\right)\,,  \qquad & n =1{\, ,}\nonumber \\
-   {q_n} &= {\nabla^2}\psi_n + \frac{f_0^2}{H_n} \left(\frac{\psi_{n-1}-\psi_n}{g'_{n-1}}  - \frac{\psi_{n}-\psi_{n+1}}{g'_{n}}\right)\,,  \qquad &n = 2,{\mathrm{N}}-1 {\, ,}\nonumber \\
-   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\textsf{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) \,,  \qquad & n ={\mathrm{N}}\,,\end{aligned}
+   {q_n} &= {\nabla^2}\psi_n + \frac{f_0^2}{H_n} \left(\frac{\psi_{n-1}-\psi_n}{g'_{n-1}}  - \frac{\psi_{n}-\psi_{n+1}}{g'_{n}}\right)\,,  \qquad &n = 2,\dots,{\mathrm{N}}-1 {\, ,}\nonumber \\
+   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\mathrm{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) \,,  \qquad & n ={\mathrm{N}}\,,\end{aligned}
 
-where :math:`q_n` is the n’th layer QG potential vorticity, and
+where :math:`q_n` is the `n`-th layer QG potential vorticity, and
 :math:`\psi_n` is the streamfunction, :math:`f_0` is the inertial
-frequency, :math:`H_n` is the layer depth. Also the n’th buoyancy jump (reduced gravity) is
+frequency, :math:`H_n` is the layer depth. Also the `n`-th buoyancy jump (reduced gravity) is
 
 .. math:: g'_n \equiv g \frac{\rho_{n}-\rho_{n+1}}{\rho_n}{\, ,}
 
@@ -22,7 +22,7 @@ the layer density.
 
 The dynamics of the system is given by the evolution of PV. In
 particular, assuming a background flow with background velocity
-:math:`\vec{V} = (U,V)` such that
+:math:`\overrightarrow{V} = (U,V)` such that
 
 .. math::
 
@@ -36,7 +36,7 @@ and
 .. math:: q_n^{{\text{tot}}} = Q_n + \delta_{n{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b + q_n {\, ,}
 
 where :math:`Q_n + \delta_{n{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b`
-is n’th layer background PV and :math:`h_b` is the
+is `n`-th layer background PV and :math:`h_b` is the
 bottom topography, we obtain the evolution equations
 
 .. math::
@@ -44,13 +44,13 @@ bottom topography, we obtain the evolution equations
    \begin{aligned}
    \label{eq:qg_dynamics}
    {q_n}_t + \mathsf{J}(\psi_n,q_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_b )& + U_n ({q_n}_x + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{bx}) + V_n ({q_n}_y + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{by}) \nonumber
-   \\ & + {Q_n}_y {\psi_n}_x - {Q_n}_x {\psi_n}_y = {\text{ssd}} - r_{ek} \delta_{n{\mathrm{N}}} {\nabla^2}\psi_n {\, ,}\qquad n = 1,{\mathrm{N}}{\, ,}\end{aligned}
+   \\ & + {Q_n}_y {\psi_n}_x - {Q_n}_x {\psi_n}_y = {\text{ssd}} - r_{ek} \delta_{n{\mathrm{N}}} {\nabla^2}\psi_n {\, ,}\qquad n = 1,\dots,{\mathrm{N}}{\, ,}\end{aligned}
 
 where :math:`{\text{ssd}}` is stands for small-scale dissipation, which
 is achieved by an spectral exponential filter or hyperviscosity, and
 :math:`r_{ek}` is the linear bottom drag coefficient. The Dirac delta,
 :math:`\delta_{nN}`, indicates that the drag is only applied in the
-bottom layer. (Note that in QG :math:`h_b/H_{\mathrm{N}}<< 1`.)
+bottom layer. (Note that in QG :math:`h_b/H_{\mathrm{N}} \ll 1`.)
 
 Equations in spectral space
 ---------------------------
@@ -60,7 +60,7 @@ The evolution equation in spectral space is
 .. math::
 
    \begin{aligned}
-       \widehat{q}_{nt} + (\mathrm{i} k U + \mathrm{i} l V) \left(\widehat{q}_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}\widehat{h}_b\right) + (\mathrm{i} k\, {Q_y} - \mathrm{i} l\,{Q_x}){\widehat{\psi}_n} + \mathsf{\widehat{J}}(\psi_n, q_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_b )   \nonumber \\ =  {\text{ssd}} - \delta_{n {\mathrm{N}}} r_{ek} \kappa^2 \widehat{\psi}_n \,, \qquad i = 1,\textsf{N}{\, ,}\end{aligned}
+       \widehat{q}_{nt} + (\mathrm{i} k U + \mathrm{i} l V) \left(\widehat{q}_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}\widehat{h}_b\right) + (\mathrm{i} k\, {Q_y} - \mathrm{i} l\,{Q_x}){\widehat{\psi}_n} + \mathsf{\widehat{J}}(\psi_n, q_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_b )   \nonumber \\ =  {\text{ssd}} + \delta_{n {\mathrm{N}}} r_{ek} \kappa^2 \widehat{\psi}_n \,, \qquad i = 1,\dots,\mathrm{N}{\, ,}\end{aligned}
 
 where :math:`\kappa^2 = k^2 + l^2`. Also, in the pseudo-spectral spirit
 we write the transform of the nonlinear terms and the non-constant
@@ -178,7 +178,7 @@ with the deformation wavenumber
 
 .. math:: k_d^2 \equiv \, \frac{f_0^2}{g} \frac{H_1+H_2}{H_1 H_2} {\, .}
 
-With this notation, the “stretching matrix” is simply
+With this notation, the stretching matrix is simply
 
 .. math::
 

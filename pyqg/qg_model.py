@@ -196,9 +196,9 @@ class QGModel(model.Model):
         ----------
 
         U1 : number
-            Upper layer flow. Units: m/s
+            Upper layer flow. Units: meters seconds :sup:`-1`
         U2 : number
-            Lower layer flow. Units: m/s
+            Lower layer flow. Units: meters seconds :sup:`-1`
         """
         self.U1 = U1
         self.U2 = U2

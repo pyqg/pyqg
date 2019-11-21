@@ -469,7 +469,7 @@ class Model(PseudoSpectralKernel):
     # *** don't remove! needed for diagnostics (but not forward model) ***
     def _advect(self, q, u, v):
         """Given real inputs q, u, v, returns the advective tendency for
-        q in spectal space."""
+        q in spectral space."""
         uq = u*q
         vq = v*q
         # this is a hack, since fft now requires input to have shape (nz,ny,nx)

@@ -4,13 +4,11 @@ import warnings
 import numpy as np
 import os
 import tempfile, subprocess, shutil
+import versioneer
 
-VERSION='0.2.0'
 
 DISTNAME='pyqg'
 URL='http://github.com/pyqg/pyqg'
-# how can we make download_url automatically get the right version?
-DOWNLOAD_URL='https://github.com/pyqg/pyqg/tarball/v%s' % VERSION
 AUTHOR='pyqg team'
 AUTHOR_EMAIL='pyqg-dev@googlegroups.com'
 LICENSE='MIT'
@@ -142,12 +140,12 @@ ext_module = Extension(
 )
 
 setup(name=DISTNAME,
-      version=VERSION,
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
       description=DESCRIPTION,
       classifiers=CLASSIFIERS,
       long_description=LONG_DESCRIPTION,
       url=URL,
-      download_url=DOWNLOAD_URL,
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       license=LICENSE,

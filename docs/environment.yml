@@ -6,6 +6,6 @@ dependencies:
   - cython
   - pytest
   - future
-  - sphinx=1.6.7
+  - sphinx<2
   - ipython
   - numpydoc

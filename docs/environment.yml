@@ -1,11 +1,11 @@
 name: pyqg_test_env
 dependencies:
-  - python=2.7
+  - python=3.6
   - numpy
   - scipy
   - cython
   - pytest
   - future
-  - pip:
-    - codecov
-    - pytest-cov
+  - sphinx==1.6.7
+  - ipython
+  - numpydoc

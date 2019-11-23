@@ -1,4 +1,4 @@
-name: test_env
+name: pyqg_test_env
 channels:
   - conda-forge
 dependencies:

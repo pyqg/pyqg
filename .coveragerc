@@ -10,5 +10,5 @@ exclude_lines =
 ignore_errors = True
 omit = pyqg/tests/*
        pyqg/__init__.py
-       pyqg_version.py
-       versioneer.py 
+       pyqg/_version.py
+       versioneer.py

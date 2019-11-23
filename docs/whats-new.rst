@@ -1,8 +1,16 @@
 What's New
 ==========
 
+v0.3.0 (23 Nov. 2019)
+---------------------
+- Revived development after long hiatus
+- Reverted some experimental changes
+- Several small bug fixes and documentation corrections
+- Updated CI and doc build environments
+- Adopted to versioneer for package versioning 
+
 v0.2.0 (27 April 2016)
-------------
+----------------------
 
 Added compatibility with python 3.
 

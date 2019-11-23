@@ -9,14 +9,8 @@ import cython
 cimport numpy as np
 from cython.parallel import prange, threadid
 
-# see if we got a compile time flag
-include '.compile_time_use_pyfftw.pxi'
-IF PYQG_USE_PYFFTW:
-    import pyfftw
-    pyfftw.interfaces.cache.enable()
-ELSE:
-    import numpy.fft as npfft
-    warnings.warn('No pyfftw detected. Using numpy.fft')
+import pyfftw
+pyfftw.interfaces.cache.enable()
 
 # We now need to fix a datatype for our arrays. I've used the variable
 # DTYPE for this, which is assigned to the usual NumPy runtime
@@ -175,71 +169,46 @@ cdef class PseudoSpectralKernel:
         self.num_threads = fftw_num_threads
         self.chunksize = self.nl/self.num_threads
 
-        IF PYQG_USE_PYFFTW:
-            # set up FFT plans
-            # Note that the Backwards Real transform for the case
-            # in which the dimensionality of the transform is greater than 1
-            # will destroy the input array. This is inherent to FFTW and the only
-            # general work-around for this is to copy the array prior to
-            # performing the transform.
-            self.fft_q_to_qh = pyfftw.FFTW(q, qh, threads=fftw_num_threads,
-                             direction='FFTW_FORWARD', axes=(-2,-1))
-            self.ifft_qh_to_q = pyfftw.FFTW(qh, q, threads=fftw_num_threads,
-                             direction='FFTW_BACKWARD', axes=(-2,-1))
-            self.ifft_uh_to_u = pyfftw.FFTW(uh, u, threads=fftw_num_threads,
-                             direction='FFTW_BACKWARD', axes=(-2,-1))
-            self.ifft_vh_to_v = pyfftw.FFTW(vh, v, threads=fftw_num_threads,
-                             direction='FFTW_BACKWARD', axes=(-2,-1))
-            self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, threads=fftw_num_threads,
-                             direction='FFTW_FORWARD', axes=(-2,-1))
-            self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, threads=fftw_num_threads,
-                             direction='FFTW_FORWARD', axes=(-2,-1))
-            # dummy ffts for diagnostics
-            self._dummy_fft = pyfftw.FFTW(dfftin, dfftout, threads=fftw_num_threads,
-                             direction='FFTW_FORWARD', axes=(-2,-1))
-            self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads,
-                             direction='FFTW_BACKWARD', axes=(-2,-1))
+        # set up FFT plans
+        # Note that the Backwards Real transform for the case
+        # in which the dimensionality of the transform is greater than 1
+        # will destroy the input array. This is inherent to FFTW and the only
+        # general work-around for this is to copy the array prior to
+        # performing the transform.
+        self.fft_q_to_qh = pyfftw.FFTW(q, qh, threads=fftw_num_threads,
+                         direction='FFTW_FORWARD', axes=(-2,-1))
+        self.ifft_qh_to_q = pyfftw.FFTW(qh, q, threads=fftw_num_threads,
+                         direction='FFTW_BACKWARD', axes=(-2,-1))
+        self.ifft_uh_to_u = pyfftw.FFTW(uh, u, threads=fftw_num_threads,
+                         direction='FFTW_BACKWARD', axes=(-2,-1))
+        self.ifft_vh_to_v = pyfftw.FFTW(vh, v, threads=fftw_num_threads,
+                         direction='FFTW_BACKWARD', axes=(-2,-1))
+        self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, threads=fftw_num_threads,
+                         direction='FFTW_FORWARD', axes=(-2,-1))
+        self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, threads=fftw_num_threads,
+                         direction='FFTW_FORWARD', axes=(-2,-1))
+        # dummy ffts for diagnostics
+        self._dummy_fft = pyfftw.FFTW(dfftin, dfftout, threads=fftw_num_threads,
+                         direction='FFTW_FORWARD', axes=(-2,-1))
+        self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads,
+                         direction='FFTW_BACKWARD', axes=(-2,-1))
 
-    # otherwise define those functions using numpy
-    IF PYQG_USE_PYFFTW==0:
-        def fft_q_to_qh(self):
-            self.qh = npfft.rfftn(self.q, axes=(-2,-1))
-        def ifft_qh_to_q(self):
-            self.q = npfft.irfftn(self.qh, axes=(-2,-1))
-        def ifft_uh_to_u(self):
-            self.u = npfft.irfftn(self.uh, axes=(-2,-1))
-        def ifft_vh_to_v(self):
-            self.v = npfft.irfftn(self.vh, axes=(-2,-1))
-        def fft_uq_to_uqh(self):
-            self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
-        def fft_vq_to_vqh(self):
-            self.vqh = npfft.rfftn(self.vq, axes=(-2,-1))
-        def _dummy_fft(self):
-            self._dummy_fft_out = npfft.rfftn(self._dummy_fft_in, axes=(-2,-1))
-        def _dummy_ifft(self):
-            self._dummy_ifft_out = npfft.irfftn(self._dummy_ifft_in, axes=(-2,-1))
 
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.ny, self.ny)
-        IF PYQG_USE_PYFFTW:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_real)
-            out.flat[:] = 0.
-            return out
-        ELSE:
-            return np.zeros(shape, dtype=DTYPE_real)
+        out = pyfftw.n_byte_align_empty(shape,
+                             pyfftw.simd_alignment, dtype=DTYPE_real)
+        out.flat[:] = 0.
+        return out
 
     def _empty_com(self):
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.nl, self.nk)
-        IF PYQG_USE_PYFFTW:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_com)
-            out.flat[:] = 0.+0.j
-            return out
-        ELSE:
-            return np.zeros(shape, dtype=DTYPE_com)
+        out = pyfftw.n_byte_align_empty(shape,
+                             pyfftw.simd_alignment, dtype=DTYPE_com)
+        out.flat[:] = 0.+0.j
+        return out
 
     def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):
         """"Generic FFT function for real grid-sized variables.

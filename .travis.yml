@@ -55,8 +55,8 @@ install:
 
 script:
   - if [ -z ${DOCTEST+x} ];
-    then cd docs; make html;
-    else py.test pyqg -v --cov=pyqg  --cov-config .coveragerc --cov-report term-missing;
+    then py.test pyqg -v --cov=pyqg  --cov-config .coveragerc --cov-report term-missing;
+    else cd docs; make html;
     fi
 
 after_success:

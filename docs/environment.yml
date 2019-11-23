@@ -8,4 +8,12 @@ dependencies:
   - future
   - sphinx<2
   - ipython
+  - matplotlib
   - numpydoc
+  - jupyter_client
+  - ipykernel
+  - pandoc
+  - pip
+  - pip:
+    - nbsphinx
+    - sphinx_rtd_theme

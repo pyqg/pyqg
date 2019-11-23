@@ -8,23 +8,23 @@ matrix:
   fast_finish: true
   include:
   - python: 2.7
-    env: "CONDA_ENV=ci/environment-py27.yml"
+    env: CONDA_ENV="ci/environment-py27.yml"
   - python: 2.7
-    env: "CONDA_ENV=ci/environment-py27-pyfftw.yml"
+    env: CONDA_ENV="ci/environment-py27-pyfftw.yml"
   - python: 3.6
-    env: "CONDA_ENV=ci/environment-py36.yml"
+    env: CONDA_ENV="ci/environment-py36.yml"
   - python: 3.6
-    env: "CONDA_ENV=ci/environment-py36-pyfftw.yml"
+    env: CONDA_ENV="ci/environment-py36-pyfftw.yml"
   - python: 3.7
-    env: "CONDA_ENV=ci/environment-py37.yml"
+    env: CONDA_ENV="ci/environment-py37.yml"
   - python: 3.7
-    env: "CONDA_ENV=ci/environment-py37-pyfftw.yml"
+    env: CONDA_ENV="ci/environment-py37-pyfftw.yml"
   - python: 3.8
-    env: "CONDA_ENV=ci/environment-py38.yml"
+    env: CONDA_ENV="ci/environment-py38.yml"
   - python: 3.8
-    env: "CONDA_ENV=ci/environment-py38-pyfftw.yml"
+    env: CONDA_ENV="ci/environment-py38-pyfftw.yml"
   - python: 3.6
-    env: "CONDA_ENV=docs/environment.yml" DOCTEST="true"
+    env: CONDA_ENV="docs/environment.yml" DOCTEST="true"
 
 before_install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then

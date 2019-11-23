@@ -1,0 +1,19 @@
+name: pyqg_test_env
+dependencies:
+  - python=3.6
+  - numpy
+  - scipy
+  - cython
+  - pytest
+  - future
+  - sphinx<2
+  - ipython
+  - matplotlib
+  - numpydoc
+  - jupyter_client
+  - ipykernel
+  - pandoc
+  - pip
+  - pip:
+    - nbsphinx
+    - sphinx_rtd_theme

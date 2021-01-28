@@ -101,8 +101,11 @@ def check_for_openmp():
     with open(filename, 'wb', 0) as file:
         file.write(omp_test)
     with open(os.devnull, 'wb') as fnull:
-        result = subprocess.call([cc, '-fopenmp', filename],
-                                 stdout=fnull, stderr=fnull)
+        try:
+            result = subprocess.call([cc, '-fopenmp', filename],
+                                     stdout=fnull, stderr=fnull)
+        except FileNotFoundError:
+            result = 1
     print('check_for_openmp() result: ', result)
     os.chdir(curdir)
     #clean up

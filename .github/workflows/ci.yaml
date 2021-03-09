@@ -1,14 +1,5 @@
 name: CI
-on:
-  push:
-    branches:
-      - "master"
-  pull_request:
-    branches:
-      - "*"
-  schedule:
-    - cron: "0 13 * * 1"
-
+on: [push, pull_request]
 jobs:
   build:
     name: Build (${{ matrix.python-version }} | ${{ matrix.os }})

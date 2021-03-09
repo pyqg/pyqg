@@ -32,6 +32,19 @@ routines.
 Instructions
 ============
 
+The easiest and quickest way: installing pyqg with conda
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We suggest that you install pyqg using conda. This will automatically install pyfftw_ as well, so then you will be done and can ignore the remaining instructions on this page. To install pyqg with conda, 
+
+.. code-block:: bash
+
+    $ conda install -c conda-forge pyqg
+
+
+Alternatives
+^^^^^^^^^^^^
+    
 In our opinion, the best way to get python and numpy is to use a distribution
 such as Anaconda_ (recommended) or Canopy_. These provide robust package
 management and come with many other useful packages for scientific computing.

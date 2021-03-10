@@ -1,6 +1,6 @@
-name: pyqg_test_env
+name: test_env_pyqg
 dependencies:
-  - python=2.7
+  - python=3.8
   - numpy
   - scipy
   - cython

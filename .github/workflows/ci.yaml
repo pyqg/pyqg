@@ -1,5 +1,6 @@
 name: CI
 on: [push, pull_request, workflow_dispatch]
+
 jobs:
   build:
     name: Build (${{ matrix.python-version }} | ${{ matrix.os }})
@@ -8,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         os: ["ubuntu-latest"]
-        python-version: ["3.6", "3.7", "3.8"]
+        python-version: ["3.7", "3.8"]
     steps:
       - uses: actions/checkout@v2
       - name: Cache conda
@@ -21,7 +22,7 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('ci/environment-py${{ matrix.python-version }}.yml') }}
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: test_env_xgcm # Defined in ci/environment*.yml
+          activate-environment: test_env_pyqg # Defined in ci/environment*.yml
           auto-update-conda: false
           python-version: ${{ matrix.python-version }}
           environment-file: ci/environment-py${{ matrix.python-version }}.yml
@@ -29,6 +30,7 @@ jobs:
       - name: Set up conda environment
         shell: bash -l {0}
         run: |
+          python setup.py build_ext --inplace
           python -m pip install -e . --no-deps
           conda list
       - name: Run Tests

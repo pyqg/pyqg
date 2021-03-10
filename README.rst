@@ -37,8 +37,8 @@ Links
 
 .. |DOI| image:: https://zenodo.org/badge/14957/pyqg/pyqg.svg
    :target: https://zenodo.org/badge/latestdoi/14957/pyqg/pyqg
-.. |Build Status| image:: https://travis-ci.org/pyqg/pyqg.svg?branch=master
-   :target: https://travis-ci.org/pyqg/pyqg
+.. |Build Status| image:: https://github.com/pyqg/pyqg/actions/workflows/ci.yaml/badge.svg
+   :target: https://github.com/pyqg/pyqg/actions/workflows/ci.yaml
 .. |codecov| image:: https://codecov.io/github/pyqg/pyqg/coverage.svg?branch=master
    :target: https://codecov.io/github/pyqg/pyqg?branch=master
 .. |pypi| image:: https://badge.fury.io/py/pyqg.svg

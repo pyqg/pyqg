@@ -128,7 +128,9 @@ def model_to_dataset(m):
             coordinates[cname] = coords_1D[index]
         else:
             try:
-                data = getattr(m,cname)
+                data = getattr(m, cname, None)
+                if data:
+                    # do something
                 coordinates[cname] = (coord_database[cname],data )
             except:
                 pass

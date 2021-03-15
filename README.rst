@@ -46,8 +46,8 @@ Links
 .. |landscape| image:: https://landscape.io/github/pyqg/pyqg/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pyqg/pyqg/master
    :alt: Code Health
-.. |binder| image:: http://mybinder.org/badge.svg
-   :target: http://mybinder.org/repo/crocha700/pyqg
+.. |binder| image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/pyqg/pyqg/HEAD
 .. |docs| image:: http://readthedocs.org/projects/pyqg/badge/?version=stable
    :target: http://pyqg.readthedocs.org/en/stable/?badge=stable
    :alt: Documentation Status

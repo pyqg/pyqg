@@ -675,6 +675,11 @@ class Model(PseudoSpectralKernel):
         self.q = q
 
     def to_dataset(self):
-        '''Convert outputs from model to an xarray dataset'''
+        """Convert outputs from model to an xarray dataset
+        
+        Returns
+        -------
+        ds : xarray.Dataset
+        """
         from .xarray_output import model_to_dataset
         return model_to_dataset(self)

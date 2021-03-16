@@ -6,4 +6,3 @@ ipython==3.1.0
 numpydoc==0.5
 cython>=0.20
 numpy>=1.8
-pyqg

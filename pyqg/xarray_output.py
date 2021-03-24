@@ -95,9 +95,8 @@ coord_attr_database = {
 }
 
 # dict for dataset attributes
-ds_attr_database = {
+global_attrs = {
     'title': 'pyqg: Python Quasigeostrophic Model',
-    'source': ('version: {}'.format(pyqg.__version__)),
     'references': 'https://pyqg.readthedocs.io/en/latest/index.html',
 }
 
@@ -114,36 +113,26 @@ transformations = {
 def model_to_dataset(m):
     '''Convert outputs from model to an xarray dataset'''
 
-    ds = xr.Dataset()
-    
-    # Create list of variables
+    # Create a dictionary of variables
     variables = {}
     for vname in dim_database:
         if hasattr(m,vname):
             data = getattr(m,vname, None)
             if 'time' in dim_database[vname]:
-                variables[vname] = (dim_database[vname],data[np.newaxis,...])
-                ds = xr.merge([ds, ds.assign(variables)])
-                ds.data_vars[vname].attrs = var_attr_database[vname]
+                variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
             else:
-                variables[vname] = (dim_database[vname],data)
-                ds = xr.merge([ds, ds.assign(variables)])
-                ds.data_vars[vname].attrs = var_attr_database[vname]
+                variables[vname] = (dim_database[vname], data, var_attr_database[vname])
 
-    # Create list of coordinates
+    # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
         if cname in transformations:
-            coordinates[cname] = transformations[cname](m)
-            ds = xr.merge([ds, ds.assign_coords(coordinates)])
-            ds.coords[cname].attrs = coord_attr_database[cname]
+            coordinates[cname] = (coord_database[cname], transformations[cname](m), coord_attr_database[cname])
         else:
             if hasattr(m,cname):
                 data = getattr(m, cname)
-                coordinates[cname] = (coord_database[cname],data)
-                ds = xr.merge([ds, ds.assign_coords(coordinates)])
-                ds.coords[cname].attrs = coord_attr_database[cname]
+                coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
     
-    ds.attrs = ds_attr_database 
+    ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
 
     return ds

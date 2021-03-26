@@ -126,13 +126,13 @@ def model_to_dataset(m):
     # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
-        if cname in transformations:
-            coordinates[cname] = (coord_database[cname], transformations[cname](m), coord_attr_database[cname])
-        else:
-            if hasattr(m,cname):
+        if hasattr(m, cname):
+            if cname in transformations:
+                data = transformations[cname](m)
+            else:
                 data = getattr(m, cname)
-                coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
-    
+            coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
+        
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
 
     return ds

@@ -8,6 +8,9 @@ def test_xarray():
     ds = m.to_dataset()
     
     assert type(ds) == xr.Dataset
-
-if __name__ == "__main__":
-    test_xarray()
+    
+    expected_vars = ['q', 'u', 'v', 'ph', 'Qy']  
+    for v in expected_vars:
+        assert v in ds
+    
+    

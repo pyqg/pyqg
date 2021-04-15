@@ -34,6 +34,28 @@ var_attr_database = {
  
 }
 
+# Define dict for diagnostic dimensions
+diagnostic_database = {
+    'APEflux': ('time','l','k'),
+    'APEgenspec': ('time','l','k'),
+    'EKE': ('time','lev'),
+    'Ensspec': spectral_dims,
+    'KEflux': ('time','l','k'),
+    'KEspec': spectral_dims,
+    'entspec': ('time','l','k'), 
+}
+
+# dict for diagnostics attributes
+diagnostic_attr_database = {
+    'APEflux': {'long_name': 'spectral flux of available potential energy', 'units': '',},
+    'APEgenspec': {'long_name': 'spectrum of APE generation', 'units': '',},
+    'EKE': {'long_name': 'mean eddy kinetic energy', 'units': '',},
+    'Ensspec': {'long_name': 'enstrophy spectrum', 'units': '',},
+    'KEflux': {'long_name': 'spectral flux of kinetic energy', 'units': '',},
+    'KEspec': {'long_name': 'kinetic energy spectrum', 'units': '',},
+    'entspec': {'long_name': 'barotropic enstrophy spectrum', 'units': '',},
+}    
+
 # dict for coordinate dimensions
 coord_database = {
     'time': ('time'),
@@ -123,6 +145,15 @@ def model_to_dataset(m):
             else:
                 variables[vname] = (dim_database[vname], data, var_attr_database[vname])
 
+    diagnostics = {}
+    for dname in diagnostic_database:
+        if m.get_diagnostic(dname).any():
+            data = m.get_diagnostic(dname)
+            if 'time' in diagnostic_database[dname]:
+                diagnostics[dname] = (diagnostic_database[dname], data[np.newaxis,...], diagnostic_attr_database[dname])
+            else:
+                diagnostics[dname] = (diagnostic_database[dname], data, diagnostic_attr_database[dname])
+                
     # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
@@ -132,7 +163,8 @@ def model_to_dataset(m):
             else:
                 data = getattr(m, cname)
             coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
-        
+     
+    variables.update(diagnostics)
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
 
     return ds

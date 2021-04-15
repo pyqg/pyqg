@@ -9,7 +9,7 @@ def test_xarray():
     
     assert type(ds) == xr.Dataset
     
-    expected_vars = ['q', 'u', 'v', 'ph', 'Qy']  
+    expected_vars = ['q', 'u', 'v', 'ph', 'Qy', 'APEflux', 'EKE']  
     for v in expected_vars:
         assert v in ds
     

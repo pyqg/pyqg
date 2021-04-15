@@ -37,8 +37,10 @@ var_attr_database = {
 # Define dict for diagnostic dimensions
 diagnostic_database = {
     'APEflux': ('time','l','k'),
+    'APEgen': ('time'),
     'APEgenspec': ('time','l','k'),
     'EKE': ('time','lev'),
+    'EKEdiss': ('time'),
     'Ensspec': spectral_dims,
     'KEflux': ('time','l','k'),
     'KEspec': spectral_dims,
@@ -55,6 +57,7 @@ diagnostic_attr_database = {
     'KEspec': {'long_name': 'kinetic energy spectrum', 'units': '',},
     'entspec': {'long_name': 'barotropic enstrophy spectrum', 'units': '',},
 }    
+
 
 # dict for coordinate dimensions
 coord_database = {
@@ -156,6 +159,7 @@ def model_to_dataset(m):
         except:
             pass
                 
+
     # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
@@ -167,6 +171,7 @@ def model_to_dataset(m):
             coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
      
     variables.update(diagnostics)
+        
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
 
     return ds

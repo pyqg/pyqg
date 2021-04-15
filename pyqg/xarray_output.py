@@ -127,7 +127,7 @@ global_attrs = {
 
 # Transform certain key coordinates
 transformations = {
-    'time': lambda x: np.array([x.t]),
+    'time': lambda x: [x.t],
     'lev': lambda x: np.arange(1,x.nz+1),
     'x': lambda x: x.x[0,:],
     'y': lambda x: x.y[:,0],
@@ -163,12 +163,12 @@ def model_to_dataset(m):
     # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
-        if hasattr(m, cname):
-            if cname in transformations:
-                data = transformations[cname](m)
-            else:
+        if cname in transformations:
+            data = transformations[cname](m)
+        else:
+            if hasattr(m, cname):
                 data = getattr(m, cname)
-            coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
+        coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
      
     variables.update(diagnostics)
         

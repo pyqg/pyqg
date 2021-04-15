@@ -5,7 +5,7 @@ import xarray as xr
 
 def test_xarray():
     m = pyqg.QGModel(1)
-    ds = m.model_to_dataset()
+    ds = m.to_dataset()
     
     assert type(ds) == xr.Dataset
     

@@ -157,7 +157,7 @@ def model_to_dataset(m):
             else:
                 diagnostics[dname] = (diagnostic_database[dname], data, diagnostic_attr_database[dname])   
         except:
-            pass
+            diagnostics[dname] = np.nan
                 
 
     # Create a dictionary of coordinates

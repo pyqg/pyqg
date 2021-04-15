@@ -147,12 +147,14 @@ def model_to_dataset(m):
 
     diagnostics = {}
     for dname in diagnostic_database:
-        if m.get_diagnostic(dname).any():
+        try: 
             data = m.get_diagnostic(dname)
             if 'time' in diagnostic_database[dname]:
                 diagnostics[dname] = (diagnostic_database[dname], data[np.newaxis,...], diagnostic_attr_database[dname])
             else:
-                diagnostics[dname] = (diagnostic_database[dname], data, diagnostic_attr_database[dname])
+                diagnostics[dname] = (diagnostic_database[dname], data, diagnostic_attr_database[dname])   
+        except:
+            pass
                 
     # Create a dictionary of coordinates
     coordinates = {}

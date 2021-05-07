@@ -12,5 +12,12 @@ def test_xarray():
     expected_vars = ['q', 'u', 'v', 'ph', 'Qy']  
     for v in expected_vars:
         assert v in ds
-    
-    
+        
+    expected_attrs = ['L', 'W', 'dt', 'title', 'references']  
+    for a in expected_attrs:
+        assert a in ds.attrs
+        
+    expected_coords = ['x', 'y', 'l', 'k']  
+    for c in expected_coords:
+        assert c in ds.coords
+        

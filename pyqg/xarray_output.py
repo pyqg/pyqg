@@ -115,7 +115,7 @@ transformations = {
 }
 
 def model_to_dataset(m):
-    '''Convert diagnostics from model to an xarray dataset'''
+    '''Convert output from model to an xarray dataset'''
 
     diagnostics = {}
     for dname in diagnostic_database:

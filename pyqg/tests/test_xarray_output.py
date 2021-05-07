@@ -13,7 +13,7 @@ def test_xarray():
     for v in expected_vars:
         assert v in ds
         
-    expected_attrs = ['L', 'W', 'dt', 'title', 'references']  
+    expected_attrs = ['L', 'W', 'dt', 'title', 'reference']  
     for a in expected_attrs:
         assert a in ds.attrs
         

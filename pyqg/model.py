@@ -570,30 +570,41 @@ class Model(PseudoSpectralKernel):
 
     def _initialize_core_diagnostics(self):
         """Diagnostics common to all models."""
+       
         self.add_diagnostic('Ensspec',
             description='enstrophy spectrum',
-            function= (lambda self: np.abs(self.qh)**2/self.M**2)
+            function= (lambda self: np.abs(self.qh)**2/self.M**2),
+            units='',
+            dims=('lev','l','k')         
         )
 
         self.add_diagnostic('KEspec',
             description=' kinetic energy spectrum',
-            function=(lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
+            function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
+            units='',
+            dims=('l','k')  
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
 
         self.add_diagnostic('q',
-            description='QGPV',
-            function= (lambda self: self.q)
+            description='potential vorticity in real space',
+            function= (lambda self: self.q),
+            units='meters squared Kelvin per second per kilogram',
+            dims=('lev','y','x')
         )
 
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
-            function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean())
+            function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
+            units='',
+            dims=('')
         )
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
-            function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1))
+            function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
+            units='',
+            dims=('lev')
         )
 
     def _calc_derived_fields(self):
@@ -608,7 +619,7 @@ class Model(PseudoSpectralKernel):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 
-    def add_diagnostic(self, diag_name, description=None, units=None, function=None):
+    def add_diagnostic(self, diag_name, description=None, units=None, dims=None, function=None):
         # create a new diagnostic dict and add it to the object array
 
         # make sure the function is callable
@@ -621,6 +632,7 @@ class Model(PseudoSpectralKernel):
         self.diagnostics[diag_name] = {
            'description': description,
            'units': units,
+           'dims': dims,
            'active': True,
            'count': 0,
            'function': function, }
@@ -662,12 +674,10 @@ class Model(PseudoSpectralKernel):
         var_dens[...,-1] = var_dens[...,-1]/2.
         return var_dens.sum()
 
-
     def set_qh(self, qh):
         warnings.warn("Method deprecated. Set model.qh directly instead. ",
             DeprecationWarning)
         self.qh = qh
-
 
     def set_q(self, q):
         warnings.warn("Method deprecated. Set model.q directly instead. ",

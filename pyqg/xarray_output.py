@@ -117,7 +117,7 @@ def model_to_dataset(m):
     variables = {}
     for vname in dim_database:
         if hasattr(m,vname):
-            data = getattr(m,vname, None)
+            data = getattr(m,vname, None).copy()
             if 'time' in dim_database[vname]:
                 variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
             else:
@@ -128,9 +128,9 @@ def model_to_dataset(m):
     for cname in coord_database:
         if hasattr(m, cname):
             if cname in transformations:
-                data = transformations[cname](m)
+                data = transformations[cname](m).copy()
             else:
-                data = getattr(m, cname)
+                data = getattr(m, cname).copy()
             coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
         
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)

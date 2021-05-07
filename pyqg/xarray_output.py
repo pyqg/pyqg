@@ -31,7 +31,6 @@ var_attr_database = {
     'ph': {'long_name': 'streamfunction in spectral space', 'units': 'meters squared per second',},
     'Ubg': {'long_name': 'background zonal velocity', 'units': 'meters per second',},
     'Qy': {'long_name': 'background potential vorticity gradient', 'units': 'meters squared Kelvin per second per kilogram',} ,
- 
 }
 
 # Define dict for diagnostic dimensions
@@ -50,14 +49,15 @@ diagnostic_database = {
 # dict for diagnostics attributes
 diagnostic_attr_database = {
     'APEflux': {'long_name': 'spectral flux of available potential energy', 'units': '',},
+    'APEgen': {'long_name': 'total APE generation', 'units': '',},
     'APEgenspec': {'long_name': 'spectrum of APE generation', 'units': '',},
     'EKE': {'long_name': 'mean eddy kinetic energy', 'units': '',},
+    'EKEdiss': {'long_name': 'total energy dissipation by bottom drag', 'units': '',},
     'Ensspec': {'long_name': 'enstrophy spectrum', 'units': '',},
     'KEflux': {'long_name': 'spectral flux of kinetic energy', 'units': '',},
     'KEspec': {'long_name': 'kinetic energy spectrum', 'units': '',},
     'entspec': {'long_name': 'barotropic enstrophy spectrum', 'units': '',},
 }    
-
 
 # dict for coordinate dimensions
 coord_database = {
@@ -67,26 +67,6 @@ coord_database = {
     'y': ('y'),
     'l': ('l'),
     'k': ('k'),
-    'nx': (),
-    'ny': (),
-    'nz': (),
-    'nl': (),
-    'nk': (),
-    'rek': (),
-    'tc': (),
-    'dt': (),
-    'L': (),
-    'W': (),
-    'filterfac': (),
-    'twrite': (),
-    'tmax': (),
-    'tavestart': (),
-    'tsnapstart': (),
-    'taveint': (),
-    'tsnapint': (),
-    'ntd': (),
-    'pmodes': (),
-    'radii': (),
 }
 
 # dict for coordinate attributes 
@@ -97,32 +77,31 @@ coord_attr_database = {
     'y': {'long_name': 'real space grid points in the y direction', 'units': 'grid point',},
     'l': {'long_name': 'spectal space grid points in the l direction', 'units': 'meridional wavenumber',},
     'k': {'long_name': 'spectal space grid points in the k direction', 'units': 'zonal wavenumber',},
-    'nx': {'long_name': 'number of real space grid points in x direction',},
-    'ny': {'long_name': 'number of real space grid points in y direction (default: nx)'},
-    'nz': {'long_name': 'number of vertical levels',},
-    'nl': {'long_name': 'number of spectral space grid points in l direction', 'units': 'grid point',},
-    'nk': {'long_name': 'number of spectral space grid points in k direction', 'units': 'grid point',},
-    'rek': {'long_name': 'linear drag in lower layer', 'units': 'per second',},
-    'tc': {'long_name': 'model timestep', 'units': 'seconds',},
-    'dt': {'long_name': 'numerical timestep', 'units': 'seconds',},
-    'L': {'long_name': 'domain length in x direction', 'units': 'meters',},
-    'W': {'long_name': 'domain length in y direction', 'units': 'meters',},
-    'filterfac': {'long_name': 'amplitude of spectral spherical filter', 'units': '',},
-    'twrite': {'long_name': 'interval for cfl writeout', 'units': 'number of timesteps',},
-    'tmax': {'long_name': 'total time of integration', 'units': 'seconds',},
-    'tavestart': {'long_name': 'start time for averaging', 'units': 'seconds',},
-    'tsnapstart': {'long_name': 'start time for snapshot writeout', 'units': 'seconds'},
-    'taveint': {'long_name': 'time interval for accumulation of diagnostic averages', 'units': 'seconds'},
-    'tsnapint': {'long_name': 'time interval for snapshots', 'units': 'seconds',},
-    'ntd': {'long_name': 'number of threads used',},
-    'pmodes': {'long_name': 'vertical pressure modes',},
-    'radii': {'long_name': 'deformation radii', 'units': 'meters',},
 }
 
-# dict for dataset attributes
-global_attrs = {
-    'title': 'pyqg: Python Quasigeostrophic Model',
-    'references': 'https://pyqg.readthedocs.io/en/latest/index.html',
+# dict for global attributes
+attribute_database = {
+    'L': (),
+    'W': (),
+    'dt': (),
+    'filterfac': (),
+    'nk': (),
+    'nl': (),
+    'ntd': (),
+    'nx': (),
+    'ny': (),
+    'nz': (),
+    'pmodes': (),
+    'radii': (),
+    'rek': (),
+    'taveint': (),
+    'tavestart': (),
+    'tc': (),
+    'time': (),
+    'tmax': (),
+    'tsnapint': (),
+    'tsnapstart': (),
+    'twrite': (),
 }
 
 # Transform certain key coordinates
@@ -136,17 +115,7 @@ transformations = {
 }
 
 def model_to_dataset(m):
-    '''Convert outputs from model to an xarray dataset'''
-
-    # Create a dictionary of variables
-    variables = {}
-    for vname in dim_database:
-        if hasattr(m,vname):
-            data = getattr(m,vname, None)
-            if 'time' in dim_database[vname]:
-                variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
-            else:
-                variables[vname] = (dim_database[vname], data, var_attr_database[vname])
+    '''Convert diagnostics from model to an xarray dataset'''
 
     diagnostics = {}
     for dname in diagnostic_database:
@@ -158,7 +127,16 @@ def model_to_dataset(m):
                 diagnostics[dname] = (diagnostic_database[dname], data, diagnostic_attr_database[dname])   
         except:
             diagnostics[dname] = np.nan
-                
+            
+    # Create a dictionary of variables
+    variables = {}
+    for vname in dim_database:
+        if hasattr(m,vname):
+            data = getattr(m,vname, None)
+            if 'time' in dim_database[vname]:
+                variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
+            else:
+                variables[vname] = (dim_database[vname], data, var_attr_database[vname])
 
     # Create a dictionary of coordinates
     coordinates = {}
@@ -169,9 +147,17 @@ def model_to_dataset(m):
             if hasattr(m, cname):
                 data = getattr(m, cname)
         coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
-     
-    variables.update(diagnostics)
+    
+    # Create a dictionary of global attributes
+    global_attrs = {}
+    for aname in attribute_database:
+        if hasattr(m, aname):
+            data = getattr(m, aname)
+            global_attrs[aname] = (data)
         
+    variables.update(diagnostics)
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
-
-    return ds
+    ds.attrs['title'] = 'pyqg: Python Quasigeostrophic Model'
+    ds.attrs['references'] = 'https://pyqg.readthedocs.io/en/latest/index.html'
+   
+    return ds 

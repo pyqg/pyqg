@@ -580,7 +580,7 @@ class Model(PseudoSpectralKernel):
 
         self.add_diagnostic('KEspec',
             description='kinetic energy spectrum',
-            function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
+            function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2),
             units='Joules',
             dims=('l','k')  
         )      # factor of 2 to account for the fact that we have only half of
@@ -619,7 +619,7 @@ class Model(PseudoSpectralKernel):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 
-    def add_diagnostic(self, diag_name, description=None, units=None, dims=None, function=None):
+    def add_diagnostic(self, diag_name, description=None, , function=None, units=None, dims=None):
         # create a new diagnostic dict and add it to the object array
 
         # make sure the function is callable

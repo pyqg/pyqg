@@ -574,14 +574,14 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('Ensspec',
             description='enstrophy spectrum',
             function= (lambda self: np.abs(self.qh)**2/self.M**2),
-            units='',
+            units='meters squared per second squared',
             dims=('lev','l','k')         
         )
 
         self.add_diagnostic('KEspec',
-            description=' kinetic energy spectrum',
+            description='kinetic energy spectrum',
             function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2)
-            units='',
+            units='Joules',
             dims=('l','k')  
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
@@ -596,14 +596,14 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
-            units='',
+            units='meters squared per seconds cubed',
             dims=('')
         )
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
-            units='',
+            units='meters squared per seconds squared',
             dims=('lev')
         )
 

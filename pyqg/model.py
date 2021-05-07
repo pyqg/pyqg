@@ -619,7 +619,7 @@ class Model(PseudoSpectralKernel):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 
-    def add_diagnostic(self, diag_name, description=None, , function=None, units=None, dims=None):
+    def add_diagnostic(self, diag_name, description=None, function=None, units=None, dims=None):
         # create a new diagnostic dict and add it to the object array
 
         # make sure the function is callable

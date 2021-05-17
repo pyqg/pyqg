@@ -244,32 +244,40 @@ class QGModel(model.Model):
         self.add_diagnostic('entspec',
             description='barotropic enstrophy spectrum',
             function= (lambda self:
-                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.)
+                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.),
+            units='meters squared per seconds squared',
+            dims=('l','k')
         )
 
         self.add_diagnostic('APEflux',
             description='spectral flux of available potential energy',
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
-              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) )
-        )
+              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) ),
+            units='Joules per meters squared per second',
+            dims=('l','k')
+       )
 
         self.add_diagnostic('KEflux',
             description='spectral flux of kinetic energy',
             function= (lambda self:
               np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
-              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) )
-        )
+              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) ),
+            units='Joules per meters squared per second',
+            dims=('l','k')
+       )
 
         self.add_diagnostic('APEgenspec',
-            description='spectrum of APE generation',
+            description='spectrum of available potential energy generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
-                                  np.conj(self.ph[0] - self.ph[1])) )
-        )
+                                  np.conj(self.ph[0] - self.ph[1])) ),
+            units='Joules',
+            dims=('l','k')
+       )
 
         self.add_diagnostic('APEgen',
-            description='total APE generation',
+            description='total available potential energy generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real((1j*self.k*
                             (self.del1*self.ph[0] + self.del2*self.ph[1]) *
@@ -277,9 +285,10 @@ class QGModel(model.Model):
                               +(1j*self.k[:,1:-2]*
                             (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
-                            (self.M**2) )
-        )
-
+                            (self.M**2) ),
+            units='Joules',
+            dims=('x','y')
+       )
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',
         #     description='upper layer kinetic energy spectrum',

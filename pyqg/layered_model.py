@@ -275,48 +275,75 @@ class LayeredModel(model.Model):
         self.add_diagnostic('entspec',
                 description='barotropic enstrophy spectrum',
                 function= (lambda self:
-                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H) )
+                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H),
+                units='meters squared per seconds squared',
+                dims=('l','k')
+        )
 
         self.add_diagnostic('KEspec_modal',
-                description='modal KE spectra',
+                description='modal kinetic energy spectra',
                 function= (lambda self:
-                    self.wv2*(np.abs(self.phn)**2)/self.M**2 ))
+                    self.wv2*(np.abs(self.phn)**2)/self.M**2 ),
+                units='Joules',
+                dims=('lev','l','k')
+        )
 
         self.add_diagnostic('PEspec_modal',
-                description='modal PE spectra',
+                description='modal potential energy spectra',
                 function= (lambda self:
-                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2 ))
-
+                    self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
+                units='Joules',
+                dims=('lev','l','k')
+        )
+        
         self.add_diagnostic('APEspec',
                 description='available potential energy spectrum',
                 function= (lambda self:
                            (self.f2gpi*
-                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H))
-
-        self.add_diagnostic('KEflux',
+                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H),
+                units='Joules',
+                dims=('l','k')
+        )
+        
+        self.add_diagnostic('KEflux_div',
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H))
-
-        self.add_diagnostic('APEflux',
+                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H),
+                units='Joules per meters cubed per second',
+                dims=('l','k')
+        )
+        
+        self.add_diagnostic('APEflux_div',
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H))
-
+                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H),
+                units='Joules per meters cubed per second',
+                dims=('l','k')
+        )
+        
         self.add_diagnostic('APEgenspec',
                     description='the spectrum of the rate of generation of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                 (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
                                  self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
-                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H))
+                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H),
+                units='Joules',
+                dims=('l','k')
+        )
 
         self.add_diagnostic('ENSflux',
                  description='barotropic enstrophy flux',
                  function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
-                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H))
+                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
+                units='meters squared per seconds squared',
+                dims=('x','y')
+        )
 
         self.add_diagnostic('ENSgenspec',
                     description='the spectrum of the rate of generation of barotropic enstrophy',
                     function = (lambda self:
                             -(self.Hi[:,np.newaxis,np.newaxis]*((self.ikQy -
-                            self.ilQx)*(self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H))
+                            self.ilQx)*(self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H),
+                units='meters squared per seconds squared',
+                dims=('l','k')
+        )

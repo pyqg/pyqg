@@ -586,18 +586,11 @@ class Model(PseudoSpectralKernel):
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
 
-        self.add_diagnostic('q',
-            description='potential vorticity in real space',
-            function= (lambda self: self.q),
-            units='meters squared Kelvin per second per kilogram',
-            dims=('lev','y','x')
-        )
-
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
             units='meters squared per seconds cubed',
-            dims=('')
+            dims=('time')
         )
 
         self.add_diagnostic('EKE',

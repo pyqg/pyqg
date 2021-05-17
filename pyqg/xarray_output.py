@@ -54,6 +54,26 @@ coord_attr_database = {
     'k': {'long_name': 'spectal space grid points in the k direction', 'units': 'zonal wavenumber',},
 }
 
+# dict of diagnostics 
+diagnostic_database = {
+    'KEspec_modal': (),
+    'PEspec_modal': (),
+    'KEspec': (),
+    'APEspec': (),
+    'KEflux': (),
+    'KEflux_div': (),
+    'APEflux': (),
+    'APEflux_div': (),
+    'APEgenspec': (),
+    'APEgen': (),
+    'ENSgenspec': (),
+    'ENSflux': (),
+    'Ensspec': (),
+    'entspec': (),
+    'EKEdiss': (),
+    'EKE': (),
+}
+
 # dict for dataset attributes
 attribute_database = {
     'L': (),
@@ -101,16 +121,11 @@ def model_to_dataset(m):
                 variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
             else:
                 variables[vname] = (dim_database[vname], data, var_attr_database[vname])
-
-    # Create a dictionary of coordinates
+   
     coordinates = {}
     for cname in coord_database:
-        if hasattr(m, cname):
-            if cname in transformations:
-                data = transformations[cname](m).copy()
-            else:
-                data = getattr(m, cname).copy()
-            coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
+        data = transformations[cname](m).copy()
+        coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
     
     # Create a dictionary of global attributes
     global_attrs = {}

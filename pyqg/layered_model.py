@@ -276,7 +276,7 @@ class LayeredModel(model.Model):
                 description='barotropic enstrophy spectrum',
                 function= (lambda self:
                     np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H),
-                units='meters squared per seconds squared',
+                units='m^2/s^2',
                 dims=('l','k')
         )
 
@@ -284,7 +284,7 @@ class LayeredModel(model.Model):
                 description='modal kinetic energy spectra',
                 function= (lambda self:
                     self.wv2*(np.abs(self.phn)**2)/self.M**2 ),
-                units='Joules',
+                units='J',
                 dims=('lev','l','k')
         )
 
@@ -292,7 +292,7 @@ class LayeredModel(model.Model):
                 description='modal potential energy spectra',
                 function= (lambda self:
                     self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
-                units='Joules',
+                units='J',
                 dims=('lev','l','k')
         )
         
@@ -301,7 +301,7 @@ class LayeredModel(model.Model):
                 function= (lambda self:
                            (self.f2gpi*
                             np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H),
-                units='Joules',
+                units='J',
                 dims=('l','k')
         )
         
@@ -309,7 +309,7 @@ class LayeredModel(model.Model):
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H),
-                units='Joules per meters cubed per second',
+                units='J/m^3/s',
                 dims=('l','k')
         )
         
@@ -317,7 +317,7 @@ class LayeredModel(model.Model):
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H),
-                units='Joules per meters cubed per second',
+                units='J/m^3/s',
                 dims=('l','k')
         )
         
@@ -327,7 +327,7 @@ class LayeredModel(model.Model):
                                 (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
                                  self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
                                 (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H),
-                units='Joules',
+                units='J',
                 dims=('l','k')
         )
 
@@ -335,7 +335,7 @@ class LayeredModel(model.Model):
                  description='barotropic enstrophy flux',
                  function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
                               (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
-                units='meters squared per seconds squared',
+                units='m^2/s^2',
                 dims=('x','y')
         )
 
@@ -344,6 +344,6 @@ class LayeredModel(model.Model):
                     function = (lambda self:
                             -(self.Hi[:,np.newaxis,np.newaxis]*((self.ikQy -
                             self.ilQx)*(self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H),
-                units='meters squared per seconds squared',
+                units='m^2/s^2',
                 dims=('l','k')
         )

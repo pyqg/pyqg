@@ -245,7 +245,7 @@ class QGModel(model.Model):
             description='barotropic enstrophy spectrum',
             function= (lambda self:
                       np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.),
-            units='meters squared per seconds squared',
+            units='m^2/s^2',
             dims=('l','k')
         )
 
@@ -254,7 +254,7 @@ class QGModel(model.Model):
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) ),
-            units='Joules per meters squared per second',
+            units='J/m^2/s',
             dims=('l','k')
        )
 
@@ -263,7 +263,7 @@ class QGModel(model.Model):
             function= (lambda self:
               np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
               np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) ),
-            units='Joules per meters squared per second',
+            units='J/m^2/s',
             dims=('l','k')
        )
 
@@ -272,7 +272,7 @@ class QGModel(model.Model):
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
                                   np.conj(self.ph[0] - self.ph[1])) ),
-            units='Joules',
+            units='J',
             dims=('l','k')
        )
 
@@ -286,8 +286,8 @@ class QGModel(model.Model):
                             (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
                             (self.M**2) ),
-            units='Joules',
-            dims=('x','y')
+            units='J',
+            dims=('time')
        )
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',

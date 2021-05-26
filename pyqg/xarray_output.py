@@ -42,26 +42,6 @@ coord_database = {
     'y': ('y'),
     'l': ('l'),
     'k': ('k'),
-    'nx': (),
-    'ny': (),
-    'nz': (),
-    'nl': (),
-    'nk': (),
-    'rek': (),
-    'tc': (),
-    'dt': (),
-    'L': (),
-    'W': (),
-    'filterfac': (),
-    'twrite': (),
-    'tmax': (),
-    'tavestart': (),
-    'tsnapstart': (),
-    'taveint': (),
-    'tsnapint': (),
-    'ntd': (),
-    'pmodes': (),
-    'radii': (),
 }
 
 # dict for coordinate attributes 
@@ -72,32 +52,30 @@ coord_attr_database = {
     'y': {'long_name': 'real space grid points in the y direction', 'units': 'grid point',},
     'l': {'long_name': 'spectal space grid points in the l direction', 'units': 'meridional wavenumber',},
     'k': {'long_name': 'spectal space grid points in the k direction', 'units': 'zonal wavenumber',},
-    'nx': {'long_name': 'number of real space grid points in x direction',},
-    'ny': {'long_name': 'number of real space grid points in y direction (default: nx)'},
-    'nz': {'long_name': 'number of vertical levels',},
-    'nl': {'long_name': 'number of spectral space grid points in l direction', 'units': 'grid point',},
-    'nk': {'long_name': 'number of spectral space grid points in k direction', 'units': 'grid point',},
-    'rek': {'long_name': 'linear drag in lower layer', 'units': 'per second',},
-    'tc': {'long_name': 'model timestep', 'units': 'seconds',},
-    'dt': {'long_name': 'numerical timestep', 'units': 'seconds',},
-    'L': {'long_name': 'domain length in x direction', 'units': 'meters',},
-    'W': {'long_name': 'domain length in y direction', 'units': 'meters',},
-    'filterfac': {'long_name': 'amplitude of spectral spherical filter', 'units': '',},
-    'twrite': {'long_name': 'interval for cfl writeout', 'units': 'number of timesteps',},
-    'tmax': {'long_name': 'total time of integration', 'units': 'seconds',},
-    'tavestart': {'long_name': 'start time for averaging', 'units': 'seconds',},
-    'tsnapstart': {'long_name': 'start time for snapshot writeout', 'units': 'seconds'},
-    'taveint': {'long_name': 'time interval for accumulation of diagnostic averages', 'units': 'seconds'},
-    'tsnapint': {'long_name': 'time interval for snapshots', 'units': 'seconds',},
-    'ntd': {'long_name': 'number of threads used',},
-    'pmodes': {'long_name': 'vertical pressure modes',},
-    'radii': {'long_name': 'deformation radii', 'units': 'meters',},
 }
 
 # dict for dataset attributes
-global_attrs = {
-    'title': 'pyqg: Python Quasigeostrophic Model',
-    'references': 'https://pyqg.readthedocs.io/en/latest/index.html',
+attribute_database = {
+    'L': 'domain length in x direction',
+    'W': 'domain length in y direction',
+    'dt': 'numerical timestep',
+    'filterfac': 'amplitude of spectral spherical filter',
+    'nk': 'number of spectral space grid points in k direction',
+    'nl': 'number of spectral space grid points in l direction',
+    'ntd': 'number of threads used',
+    'nx': 'number of real space grid points in x direction',
+    'ny': 'number of real space grid points in y direction',
+    'nz': 'number of vertical levels',
+    'pmodes': 'vertical pressure modes',
+    'radii': 'deformation radii',
+    'rek': 'linear drag in lower layer',
+    'taveint': 'time interval for accumulation of diagnostic averages',
+    'tavestart': 'start time for averaging',
+    'tc': 'model timestep',
+    'tmax': 'total time of integration',
+    'tsnapint': 'time interval for snapshots',
+    'tsnapstart': 'start time for snapshot writeout',
+    'twrite': 'time interval for cfl writeout',
 }
 
 # Transform certain key coordinates
@@ -126,13 +104,30 @@ def model_to_dataset(m):
     # Create a dictionary of coordinates
     coordinates = {}
     for cname in coord_database:
-        if hasattr(m, cname):
-            if cname in transformations:
-                data = transformations[cname](m)
-            else:
-                data = getattr(m, cname)
-            coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
-        
-    ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
+        data = transformations[cname](m).copy()
+        coordinates[cname] = (coord_database[cname], data, coord_attr_database[cname])
 
+    # Create a dictionary of global attributes
+    global_attrs = {}
+    for aname in attribute_database:
+        if hasattr(m, aname):
+            data = getattr(m, aname)
+            long_name = attribute_database[aname]
+            global_attrs[long_name] = (data)
+        
+    diagnostics = {}
+    for diag_name in m.diagnostics:
+        dims = m.diagnostics[diag_name]['dims']
+        data = m.get_diagnostic(diag_name)
+        if isinstance(data, np.float64):
+            data = np.array([m.get_diagnostic(diag_name)])
+        attrs = {'long_name': m.diagnostics[diag_name]['description'], 'units': m.diagnostics[diag_name]['units'],}
+        diagnostics[diag_name] = (dims, data, attrs)
+    
+    variables.update(diagnostics)
+    
+    ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
+    ds.attrs['title'] = 'pyqg: Python Quasigeostrophic Model'
+    ds.attrs['reference'] = 'https://pyqg.readthedocs.io/en/latest/index.html'
+    
     return ds

@@ -4,7 +4,15 @@ import pyqg
 import xarray as xr
 
 def test_xarray():
-    m = pyqg.QGModel(1)
+    # Set parameters & initialize model
+    year = 24*60*60*360.
+    twrite = 1000
+    tavestart = 2*year
+
+    # Initialize QG Model
+    m = pyqg.QGModel(tmax=5*year, twrite=twrite, tavestart=tavestart)
+    m.run()
+
     ds = m.to_dataset()
     
     assert type(ds) == xr.Dataset

@@ -116,12 +116,15 @@ def model_to_dataset(m):
         
     diagnostics = {}
     for diag_name in m.diagnostics:
-        dims = m.diagnostics[diag_name]['dims']
-        data = m.get_diagnostic(diag_name)
-        if isinstance(data, np.float64):
-            data = np.array([m.get_diagnostic(diag_name)])
-        attrs = {'long_name': m.diagnostics[diag_name]['description'], 'units': m.diagnostics[diag_name]['units'],}
-        diagnostics[diag_name] = (dims, data, attrs)
+        try:
+            dims = m.diagnostics[diag_name]['dims']
+            data = m.get_diagnostic(diag_name)
+            if isinstance(data, np.float64):
+                data = np.array([m.get_diagnostic(diag_name)])
+            attrs = {'long_name': m.diagnostics[diag_name]['description'], 'units': m.diagnostics[diag_name]['units'],}
+            diagnostics[diag_name] = (dims, data, attrs)
+        except:
+            pass
     
     variables.update(diagnostics)
     

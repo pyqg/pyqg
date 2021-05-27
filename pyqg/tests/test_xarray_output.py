@@ -21,7 +21,7 @@ def test_xarray():
     for v in expected_vars:
         assert v in ds
     
-    expected_attrs = ['domain length in x direction', 'domain length in y direction', 'numerical timestep', 'title', 'reference'] 
+    expected_attrs = ['L', 'W', 'dt', 'filterfac', 'reference'] 
     for a in expected_attrs:
         assert a in ds.attrs
 

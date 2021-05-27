@@ -54,29 +54,29 @@ coord_attr_database = {
     'k': {'long_name': 'spectal space grid points in the k direction', 'units': 'zonal wavenumber',},
 }
 
-# dict for dataset attributes
-attribute_database = {
-    'L': 'domain length in x direction',
-    'W': 'domain length in y direction',
-    'dt': 'numerical timestep',
-    'filterfac': 'amplitude of spectral spherical filter',
-    'nk': 'number of spectral space grid points in k direction',
-    'nl': 'number of spectral space grid points in l direction',
-    'ntd': 'number of threads used',
-    'nx': 'number of real space grid points in x direction',
-    'ny': 'number of real space grid points in y direction',
-    'nz': 'number of vertical levels',
-    'pmodes': 'vertical pressure modes',
-    'radii': 'deformation radii',
-    'rek': 'linear drag in lower layer',
-    'taveint': 'time interval for accumulation of diagnostic averages',
-    'tavestart': 'start time for averaging',
-    'tc': 'model timestep',
-    'tmax': 'total time of integration',
-    'tsnapint': 'time interval for snapshots',
-    'tsnapstart': 'start time for snapshot writeout',
-    'twrite': 'time interval for cfl writeout',
-}
+# list for dataset attributes
+attribute_database = [
+    'L',
+    'W',
+    'dt',
+    'filterfac',
+    'nk',
+    'nl',
+    'ntd',
+    'nx',
+    'ny',
+    'nz',
+    'pmodes',
+    'radii',
+    'rek',
+    'taveint',
+    'tavestart',
+    'tc',
+    'tmax',
+    'tsnapint',
+    'tsnapstart',
+    'twrite',
+]
 
 # Transform certain key coordinates
 transformations = {
@@ -112,8 +112,7 @@ def model_to_dataset(m):
     for aname in attribute_database:
         if hasattr(m, aname):
             data = getattr(m, aname)
-            long_name = attribute_database[aname]
-            global_attrs[long_name] = (data)
+            global_attrs[aname] = (data)
         
     diagnostics = {}
     for diag_name in m.diagnostics:

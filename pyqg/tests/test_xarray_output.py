@@ -21,7 +21,7 @@ def test_xarray():
     for v in expected_vars:
         assert v in ds
     
-    expected_attrs = ['L', 'W', 'dt', 'filterfac', 'reference'] 
+    expected_attrs = ['L', 'W', 'dt', 'filterfac'] 
     for a in expected_attrs:
         assert f"pyqg:{a}" in ds.attrs
 

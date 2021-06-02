@@ -1,5 +1,6 @@
 import numpy as np
 import xarray as xr
+from pyqg.errors import DiagnosticNotFilledError
 
 # Define dict for variable dimensions
 spatial_dims = ('time','lev','y','x')
@@ -112,7 +113,7 @@ def model_to_dataset(m):
     for aname in attribute_database:
         if hasattr(m, aname):
             data = getattr(m, aname)
-            global_attrs[aname] = (data)
+            global_attrs[f"pyqg:{aname}"] = (data)
         
     diagnostics = {}
     for diag_name in m.diagnostics:
@@ -123,7 +124,7 @@ def model_to_dataset(m):
                 data = np.array([m.get_diagnostic(diag_name)])
             attrs = {'long_name': m.diagnostics[diag_name]['description'], 'units': m.diagnostics[diag_name]['units'],}
             diagnostics[diag_name] = (dims, data, attrs)
-        except:
+        except DiagnosticNotFilledError:
             pass
     
     variables.update(diagnostics)

@@ -23,7 +23,7 @@ def test_xarray():
     
     expected_attrs = ['L', 'W', 'dt', 'filterfac', 'reference'] 
     for a in expected_attrs:
-        assert a in ds.attrs
+        assert f"pyqg:{a}" in ds.attrs
 
     expected_coords = ['x', 'y', 'l', 'k']  
     for c in expected_coords:

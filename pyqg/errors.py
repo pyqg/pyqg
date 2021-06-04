@@ -7,5 +7,4 @@ class DiagnosticNotFilledError(PYQGError):
     def __init__(self, dname):
         self.dname = dname
         super().__init__(self.dname)
-    
-        pass
+    pass

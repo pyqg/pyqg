@@ -5,6 +5,7 @@ from numpy import pi
 import logging
 import warnings
 
+from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 try:
     import mkl

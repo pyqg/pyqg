@@ -658,7 +658,7 @@ class Model(PseudoSpectralKernel):
 
     def get_diagnostic(self, dname):
         if 'value' not in self.diagnostics[dname]:
-            raise DiagnosticNotFilledError(f"Diagnostic {dname} has not been filled. Please adjust tavestart and taveint.")
+            raise DiagnosticNotFilledError(dname)
         return (self.diagnostics[dname]['value'] /
                 self.diagnostics[dname]['count'])
 

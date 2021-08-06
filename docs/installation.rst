@@ -8,7 +8,7 @@ Requirements
 
 The only requirements are
 
-- Python 2.7. (Python 3 support is in the works)
+- Python (2.7 or later)
 - numpy_ (1.6 or later)
 - Cython (0.2 or later)
 

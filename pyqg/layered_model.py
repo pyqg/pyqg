@@ -293,7 +293,7 @@ class LayeredModel(model.Model):
                 function= (lambda self:
                     self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
                 units='',
-                dims=('lev','l','k')
+                dims=('lev_mid','l','k')
         )
         
         self.add_diagnostic('APEspec',
@@ -336,7 +336,7 @@ class LayeredModel(model.Model):
                  function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
                               (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
                 units='',
-                dims=('x','y')
+                dims=('l','k')
         )
 
         self.add_diagnostic('ENSgenspec',

@@ -39,6 +39,7 @@ var_attr_database = {
 coord_database = {
     'time': ('time'),
     'lev': ('lev'),
+    'lev_mid': ('lev_mid'),
     'x': ('x'),
     'y': ('y'),
     'l': ('l'),
@@ -49,6 +50,7 @@ coord_database = {
 coord_attr_database = {
     'time': {'long_name': 'model time', 'units': 'seconds',},
     'lev': {'long_name': 'vertical levels',},
+    'lev_mid': {'long_name': 'vertical level interface',},
     'x': {'long_name': 'real space grid points in the x direction', 'units': 'grid point',},
     'y': {'long_name': 'real space grid points in the y direction', 'units': 'grid point',},
     'l': {'long_name': 'spectal space grid points in the l direction', 'units': 'meridional wavenumber',},
@@ -57,10 +59,13 @@ coord_attr_database = {
 
 # list for dataset attributes
 attribute_database = [
-    'L',
-    'W',
+    'beta',
+    'delta',
+    'del2',
     'dt',
     'filterfac',
+    'L',
+    'M',
     'nk',
     'nl',
     'ntd',
@@ -69,6 +74,8 @@ attribute_database = [
     'nz',
     'pmodes',
     'radii',
+    'rd',
+    'rho',
     'rek',
     'taveint',
     'tavestart',
@@ -77,12 +84,14 @@ attribute_database = [
     'tsnapint',
     'tsnapstart',
     'twrite',
+    'W',
 ]
 
 # Transform certain key coordinates
 transformations = {
     'time': lambda x: np.array([x.t]),
     'lev': lambda x: np.arange(1,x.nz+1),
+    'lev_mid': lambda x: np.arange(1.5,x.nz+.5),
     'x': lambda x: x.x[0,:],
     'y': lambda x: x.y[:,0],
     'l': lambda x: x.ll,

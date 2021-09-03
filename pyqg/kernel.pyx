@@ -55,6 +55,15 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :, :] dqhdt_p
     cdef DTYPE_com_t [:, :, :] dqhdt_pp
 
+    # uv param
+    cdef DTYPE_real_t [:, :, :] du
+    cdef DTYPE_real_t [:, :, :] dv
+    cdef DTYPE_com_t [:, :, :] duh
+    cdef DTYPE_com_t [:, :, :] dvh
+    # q param
+    cdef DTYPE_real_t [:, :, :] dq
+    cdef DTYPE_com_t [:, :, :] dqh
+
     # dummy variables for diagnostic ffts
     cdef DTYPE_real_t [:, :, :] _dummy_fft_in
     cdef DTYPE_com_t [:, :, :] _dummy_fft_out
@@ -99,6 +108,9 @@ cdef class PseudoSpectralKernel:
     cdef object fft_q_to_qh
     cdef object ifft_qh_to_q
     cdef object ifft_uh_to_u
+    cdef object fft_du_to_duh
+    cdef object fft_dv_to_dvh
+    cdef object fft_dq_to_dqh
     cdef object ifft_vh_to_v
     cdef object fft_uq_to_uqh
     cdef object fft_vq_to_vqh
@@ -147,6 +159,20 @@ cdef class PseudoSpectralKernel:
         vqh = self._empty_com()
         self.vqh = vqh
 
+        # adv param
+        du = self._empty_real()
+        dv = self._empty_real()
+        dq = self._empty_real()
+        duh = self._empty_com()
+        dvh = self._empty_com()
+        dqh = self._empty_com()
+        self.du = du
+        self.dv = dv
+        self.dq = dq
+        self.duh = duh
+        self.dvh = dvh
+        self.dqh = dqh
+
         # dummy variables for diagnostic ffts
         dfftin = self._empty_real()
         self._dummy_fft_in = dfftin
@@ -190,6 +216,15 @@ cdef class PseudoSpectralKernel:
                              direction='FFTW_BACKWARD', axes=(-2,-1))
             self.ifft_vh_to_v = pyfftw.FFTW(vh, v, threads=fftw_num_threads,
                              direction='FFTW_BACKWARD', axes=(-2,-1))
+            self.fft_du_to_duh = pyfftw.FFTW(du, duh, threads=fftw_num_threads,
+                                             direction='FFTW_FORWARD',
+                                             axes=(-2, -1))
+            self.fft_dv_to_dvh = pyfftw.FFTW(dv, dvh, threads=fftw_num_threads,
+                                             direction='FFTW_FORWARD',
+                                             axes=(-2, -1))
+            self.fft_dq_to_dqh = pyfftw.FFTW(dq, dqh, threads=fftw_num_threads,
+                                             direction='FFTW_FORWARD',
+                                             axes=(-2, -1))
             self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, threads=fftw_num_threads,
                              direction='FFTW_FORWARD', axes=(-2,-1))
             self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, threads=fftw_num_threads,
@@ -210,6 +245,12 @@ cdef class PseudoSpectralKernel:
             self.u = npfft.irfftn(self.uh, axes=(-2,-1))
         def ifft_vh_to_v(self):
             self.v = npfft.irfftn(self.vh, axes=(-2,-1))
+        def fft_du_to_duh(self):
+            self.duh = npfft.rfftn(self.du, axes=(-2,-1))
+        def fft_dv_to_dvh(self):
+            self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
+        def fft_dq_to_dqh(self):
+            self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
         def fft_uq_to_uqh(self):
             self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
         def fft_vq_to_vqh(self):
@@ -345,6 +386,53 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
                                     self._il[j] * self.vqh[k,j,i] +
                                     self._ikQy[k,i] * self.ph[k,j,i] )
+        return
+
+    def _do_uv_subgrid_parameterization(self):
+        self.__do_uv_subgrid_parameterization()
+
+    cdef __do_uv_subgrid_parameterization(self):
+        """Add the uv subgrid parameterization"""
+        cdef Py_ssize_t k, j, i
+        du, dv = self.uv_parameterization(self)
+        cdef DTYPE_real_t [:, :, :] du_view = du
+        cdef DTYPE_real_t [:, :, :] dv_view = dv
+        # convert to cython memory view
+        self.du[:, :, :] = du_view
+        self.dv[:, :, :] = dv_view
+        # convert to spectral space
+        self.fft_du_to_duh()
+        self.fft_dv_to_dvh()
+        for k in range(self.nz):
+            for j in prange(self.nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,
+                      num_threads=self.num_threads):
+                for i in range(self.nk):
+                    self.dqhdt[k,j,i] = (
+                                        self.dqhdt[k,j,i] +
+                                        (-self._il[j] * self.duh[k, j, i] +
+                                        +self._ik[i] * self.dvh[k, j, i] )
+                                        )
+        return
+
+    def _do_q_subgrid_parameterization(self):
+        self.__do_q_subgrid_parameterization()
+
+    cdef __q_subgrid_parameterization(self):
+        """Add the q subgrid parameterization"""
+        cdef Py_ssize_t k, j, i
+        dq = self.q_parameterization(self)
+        cdef DTYPE_real_t [:, :, :] dq_view = dq
+        # convert to cython memory view
+        self.dq[:, :, :] = dq_view
+        # convert to spectral space
+        self.fft_dq_to_dqh()
+        for k in range(self.nz):
+            for j in prange(self.nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,
+                      num_threads=self.num_threads):
+                for i in range(self.nk):
+                    self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
         return
 
     def _do_friction(self):

@@ -355,6 +355,11 @@ class Model(PseudoSpectralKernel):
         self._do_external_forcing()
         # apply external forcing
 
+        if hasattr(self, 'uv_parameterization'):
+            self._do_uv_subgrid_parameterization()
+        if hasattr(self, 'q_parameterization'):
+            self._do_q_subgrid_parameterization()
+
         self._calc_diagnostics()
         # do what has to be done with diagnostics
 

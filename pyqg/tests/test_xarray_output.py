@@ -84,10 +84,10 @@ def SQGModel():
                            taveint=1, twrite=400, ntd=4)
     return m
     
-@pytest.mark.parametrize("m", [QGModel(), LayeredModel(), BTModel(), SQGModel()])
-def test_xarray(m):
+@pytest.mark.parametrize("model", [QGModel(), LayeredModel(), BTModel(), SQGModel()])
+def test_xarray(model):
     '''Run with snapshots and test contents of xarray.dataset'''
-    
+    m = model()
     for snapshot in m.run_with_snapshots(tsnapstart=m.t, tsnapint=year/4):
         ds = m.to_dataset()
         assert type(ds) == xr.Dataset

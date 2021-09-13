@@ -23,10 +23,20 @@ expected_vars = [
 expected_diags = [
     'EKE', 
     'entspec', 
-#     'APEflux', 
-#     'KEflux', 
-    'APEgenspec', 
-#     'APEgen'
+    'APEflux', 
+    'APEflux_div', 
+    'KEflux', 
+    'KEflux_div', 
+    'APEgen',
+    'APEgenspec',
+    'Ensspec',
+    'KEspec',
+    'EKEdiss',
+    'KEspec_modal',
+    'PEspec_modal',
+    'APEspec',
+    'ENSflux',
+    'ENSgenspec',
 ]
 
 expected_attrs = [
@@ -129,8 +139,8 @@ def test_xarray(all_models):
 
         if snapshot > tsnapint:
 
-            for v in expected_vars + expected_diags:
-                assert v in ds
+            for v in list(ds.keys()): 
+                assert v in expected_vars + expected_diags
 
             for a in expected_attrs:
                 assert f"pyqg:{a}" in ds.attrs

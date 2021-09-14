@@ -142,6 +142,10 @@ def test_xarray(all_models):
             for v in list(ds.keys()): 
                 assert v in expected_vars + expected_diags
 
+            for v in expected_diags:
+                if v in ds:
+                    assert 'time' in ds[v].coords
+
             for a in expected_attrs:
                 assert f"pyqg:{a}" in ds.attrs
 

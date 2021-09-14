@@ -122,9 +122,15 @@ def test_xarray(all_models):
     '''Run with snapshots and test contents of xarray.dataset'''
     m=all_models
     tsnapint=year/4
+    datasets = []
+    timevals = []
+
     for snapshot in m.run_with_snapshots(tsnapstart=m.t, tsnapint=tsnapint):
         ds = m.to_dataset()
         assert type(ds) == xr.Dataset
+
+        datasets.append(ds)
+        timevals.append(m.t)
 
         if snapshot < tsnapint:
 
@@ -151,3 +157,7 @@ def test_xarray(all_models):
 
             for c in expected_coords:
                 assert c in ds.coords
+
+    concatenated = xr.concat(datasets, dim='time')
+
+    assert np.allclose(concatenated.coords['time'], timevals)

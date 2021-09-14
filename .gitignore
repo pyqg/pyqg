@@ -65,5 +65,6 @@ target/
 # notebooks
 */.ipynb_checkpoints/*
 
-# .swp files from text editors
+# .swp/.swo files from text editors
 *.swp
+*.swo

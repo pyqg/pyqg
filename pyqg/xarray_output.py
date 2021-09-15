@@ -145,7 +145,6 @@ def model_to_dataset(m):
     variables.update(diagnostics)
     
     ds = xr.Dataset(variables, coords=coordinates, attrs=global_attrs)
-    ds.assign_coords(time=np.array([m.t]))
     ds.attrs['title'] = 'pyqg: Python Quasigeostrophic Model'
     ds.attrs['reference'] = 'https://pyqg.readthedocs.io/en/latest/index.html'
     

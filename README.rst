@@ -5,7 +5,7 @@
 pyqg: Python Quasigeostrophic Model
 ===================================
 
-|DOI| |pypi| |Build Status| |codecov| |docs| |binder|
+|DOI| |conda| |pypi| |Build Status| |codecov| |docs| |binder|
 
 pyqg is a python solver for quasigeostrophic systems. Quasigeostophic
 equations are an approximation to the full fluid equations of motion in
@@ -43,6 +43,8 @@ Links
    :target: https://codecov.io/github/pyqg/pyqg?branch=master
 .. |pypi| image:: https://badge.fury.io/py/pyqg.svg
    :target: https://badge.fury.io/py/pyqg
+.. |conda| image:: https://img.shields.io/conda/vn/conda-forge/pyqg.svg
+   :target: https://anaconda.org/conda-forge/pyqg
 .. |landscape| image:: https://landscape.io/github/pyqg/pyqg/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pyqg/pyqg/master
    :alt: Code Health

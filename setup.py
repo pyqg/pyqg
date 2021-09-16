@@ -36,9 +36,9 @@ Optimal performance will be achieved on a single system with many cores.
 Links
 -----
 
-- HTML documentation: http://pyqg.readthedocs.org
-- Issue tracker: http://github.com/pyqg/pyqg/issues
-- Source code: http://github.com/pyqg/pyqg
+- HTML documentation: https://pyqg.readthedocs.io
+- Issue tracker: https://github.com/pyqg/pyqg/issues
+- Source code: https://github.com/pyqg/pyqg
 """
 
 CLASSIFIERS = [
@@ -47,11 +47,12 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Intended Audience :: Science/Research',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Topic :: Scientific/Engineering',
     'Topic :: Scientific/Engineering :: Physics',
     'Topic :: Scientific/Engineering :: Atmospheric Science'

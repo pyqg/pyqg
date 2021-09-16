@@ -124,7 +124,7 @@ install it, check the version, and tear down the virtual environment.
 
 .. code-block:: bash
 
-    $ conda create --yes -n test_env python=2.7 pip nose numpy cython scipy nose
+    $ conda create --yes -n test_env python=3.9 pip nose numpy cython scipy nose
     $ conda install --yes -n test_env -c nanshe pyfftw
     $ source activate test_env
     $ pip install pyqg

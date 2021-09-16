@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 from numpy import pi
 from . import model
@@ -41,7 +40,7 @@ class SQGModel(model.Model):
 
         self.nz = 1
 
-        super(SQGModel, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))

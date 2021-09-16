@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 from numpy import pi
 from . import model
@@ -99,7 +98,7 @@ class QGModel(model.Model):
         #self.filterfac = filterfac
 
 
-        super(QGModel, self).__init__(nz=2, **kwargs)
+        super().__init__(nz=2, **kwargs)
 
         # initial conditions: (PV anomalies)
         self.set_q1q2(

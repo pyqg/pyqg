@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 from numpy import pi
 import time
@@ -29,7 +28,7 @@ def test_fftw_rfft2(Nx = 64, Ny = None, n = 7200):
     tend = time.time()
 
     # error after nmax fft cycles
-    abs_err = np.abs((A-Ai)).max()
+    abs_err = np.abs(A-Ai).max()
     rel_err = np.abs((A-Ai)/A).max()
 
     print("RFFT2 test with Nx = %i, Ny = %i" %(Nx,Ny))
@@ -53,7 +52,7 @@ def test_fftw_rfft(Nx = 64, n = 100000):
     tend = time.time()
 
     # error after nmax fft cycles
-    abs_err = np.abs((A-Ai)).max()
+    abs_err = np.abs(A-Ai).max()
     rel_err = np.abs((A-Ai)/A).max()
 
     print("RFFT test with Nx = %i" %Nx)

@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 from numpy import pi
 from . import model
@@ -119,7 +118,7 @@ class LayeredModel(model.Model):
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
-        super(LayeredModel, self).__init__(nz=nz, **kwargs)
+        super().__init__(nz=nz, **kwargs)
 
         self.vertical_modes()
 

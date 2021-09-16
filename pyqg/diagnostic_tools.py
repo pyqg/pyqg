@@ -1,4 +1,3 @@
-from __future__ import print_function
 """Utility functions for pyqg model data."""
 
 import numpy as np

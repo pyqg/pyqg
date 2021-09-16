@@ -418,7 +418,7 @@ cdef class PseudoSpectralKernel:
     def _do_q_subgrid_parameterization(self):
         self.__do_q_subgrid_parameterization()
 
-    cdef __q_subgrid_parameterization(self):
+    cdef __do_q_subgrid_parameterization(self):
         """Add the q subgrid parameterization"""
         cdef Py_ssize_t k, j, i
         dq = self.q_parameterization(self)

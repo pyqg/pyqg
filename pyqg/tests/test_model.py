@@ -1,4 +1,3 @@
-from __future__ import print_function
 import unittest
 import numpy as np
 import pyqg
@@ -139,11 +138,11 @@ class PyqgModelTester(unittest.TestCase):
 
                 # these tests pass, but what about the factor of two?
                 np.testing.assert_allclose(tabs[0,0,2*kwave], k**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency k (%g,%g)' % (lwave,kwave))
+                    err_msg=f'Incorrect advection tendency k ({lwave:g},{kwave:g})')
                 np.testing.assert_allclose(tabs[1,2*lwave,0], l**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency +l (%g,%g)' % (lwave,kwave))
+                    err_msg=f'Incorrect advection tendency +l ({lwave:g},{kwave:g})')
                 np.testing.assert_allclose(tabs[1,-2*lwave,0], l**2 * amp, rtol,
-                    err_msg='Incorrect advection tendency -l (%g,%g)' % (lwave,kwave))
+                    err_msg=f'Incorrect advection tendency -l ({lwave:g},{kwave:g})')
 
                 # now mask those components
                 tabs_mask = np.ma.masked_array(tabs, np.zeros_like(tabs))
@@ -155,7 +154,7 @@ class PyqgModelTester(unittest.TestCase):
                     print("Found NaNs")
                 np.testing.assert_allclose(tabs_mask.filled(0.), 0.,
                     rtol=0., atol=rtol,
-                    err_msg='Incorrect advection tendency (%g,%g)' % (lwave,kwave))
+                    err_msg=f'Incorrect advection tendency ({lwave:g},{kwave:g})')
 
     def test_friction(self, rtol=1e-15):
         """Check whether calculating advection tendency gives the expected result."""

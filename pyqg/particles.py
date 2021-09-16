@@ -12,7 +12,7 @@ except ImportError:
            'Gridded interpolation will not work',
 	   ImportWarning)
 
-class LagrangianParticleArray2D(object):
+class LagrangianParticleArray2D:
     """A class for keeping track of a set of lagrangian particles
     in two-dimensional space. Tries to be fast.
     """
@@ -153,7 +153,7 @@ class GriddedLagrangianParticleArray2D(LagrangianParticleArray2D):
             Arakawa grid type specifying velocity positions.
         """
         
-        super(GriddedLagrangianParticleArray2D, self).__init__(x0, y0, **kwargs)
+        super().__init__(x0, y0, **kwargs)
         self.Nx = Nx
         self.Ny = Ny
         

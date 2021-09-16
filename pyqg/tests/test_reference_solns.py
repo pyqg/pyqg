@@ -1,4 +1,3 @@
-from __future__ import print_function
 from future.utils import iteritems
 import unittest
 import numpy as np

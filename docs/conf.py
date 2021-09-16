@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # pyqg documentation build configuration file, created by
 # sphinx-quickstart on Sun May 10 14:44:32 2015.
@@ -17,7 +16,7 @@ import os
 
 # need to mock out pyfftw
 # http://stackoverflow.com/questions/13238736/how-to-document-cython-function-on-readthedocs
-class Mock(object):
+class Mock:
     def __init__(self, *args, **kwargs):
         pass
 
@@ -83,8 +82,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pyqg'
-copyright = u'2015, PyQG team'
+project = 'pyqg'
+copyright = '2015-2021, PyQG team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -243,8 +242,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'pyqg.tex', u'pyqg Documentation',
-   u'PyQG team', 'manual'),
+  ('index', 'pyqg.tex', 'pyqg Documentation',
+   'PyQG team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -273,8 +272,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyqg', u'pyqg Documentation',
-     [u'PyQG team'], 1)
+    ('index', 'pyqg', 'pyqg Documentation',
+     ['PyQG team'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -287,8 +286,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pyqg', u'pyqg Documentation',
-   u'PyQG team', 'pyqg', 'One line description of project.',
+  ('index', 'pyqg', 'pyqg Documentation',
+   'PyQG team', 'pyqg', 'One line description of project.',
    'Miscellaneous'),
 ]
 

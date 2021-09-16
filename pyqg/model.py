@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 import numpy as np
 from numpy import pi
 import logging
@@ -264,7 +262,7 @@ class Model(PseudoSpectralKernel):
         return pt
 
     def stability_analysis(self,bottom_friction=False):
-        """ Performs the baroclinic linear instability analysis given
+        r""" Performs the baroclinic linear instability analysis given
                 given the base state velocity :math: `(U, V)` and
                 the stretching matrix  :math: `S`:
 

@@ -83,7 +83,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pyqg'
-copyright = '2015, PyQG team'
+copyright = '2015-2021, PyQG team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

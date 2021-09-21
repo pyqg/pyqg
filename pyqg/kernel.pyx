@@ -620,6 +620,9 @@ cdef class PseudoSpectralKernel:
     property vq:
         def __get__(self):
             return np.asarray(self.vq)
+    property dqh:
+        def __get__(self):
+            return np.asarray(self.dqh)
 
 
 # general purpose timestepping routines

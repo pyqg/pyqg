@@ -293,6 +293,55 @@ class QGModel(model.Model):
             units='',
             dims=('time',)
        )
+
+        def q_parameterization_spectrum(m, sq_1, sq_2):
+            # Based on https://github.com/Zanna-ResearchTeam/ag7531-pyqg/blob/adv_param/pyqg/qg_model.py#L307-L334
+            d1 = m.del1
+            d2 = m.del2
+            F1 = m.F1
+            F2 = m.F2
+            ksq = m.wv2
+            return np.real(
+                d1 / (ksq + F1 + F2) * (
+                    -(ksq + F2) * sq_1
+                    - F1 * sq_2
+                ) * np.conj(m.ph[0])
+                +
+                d2 / (ksq + F1 + F2) * (
+                        - F2 * sq_1
+                        - (ksq + F1) * sq_2
+                ) * np.conj(m.ph[1])
+                +
+                d1 * F1 / (ksq + F1 + F2) * (
+                    sq_2 - sq_1
+                ) * np.conj(m.ph[0] - m.ph[1])
+            )
+
+        if hasattr(self, 'uv_parameterization'):
+            def parameterization_spectrum(m):
+                ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
+                il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
+                sx_1 = m.duh[0]
+                sx_2 = m.duh[1]
+                sy_1 = m.dvh[0]
+                sy_2 = m.dvh[1]
+                sq_1 = (-il * sx_1 + ik * sy_1)
+                sq_2 = (-il * sx_2 + ik * sy_2)
+                return q_parameterization_spectrum(m, sq_1, sq_2)
+        elif hasattr(self, 'q_parameterization'):
+            def parameterization_spectrum(m):
+                return q_parameterization_spectrum(m, m.dqh[0], m.dqh[1])
+        else:
+            def parameterization_spectrum(m):
+                return np.zeros_like(m.wv2)
+
+        self.add_diagnostic('paramspec',
+            description='Spectral contribution of subgrid parameterization (if present)',
+            function=parameterization_spectrum,
+            units='',
+            dims=('l','k')
+        )
+
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',
         #     description='upper layer kinetic energy spectrum',

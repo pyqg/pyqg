@@ -154,7 +154,6 @@ def test_xarray(all_models):
             for c in expected_coords:
                 assert c in ds.coords
 
-    if len(datasets):
-        concatenated = xr.concat(datasets, dim='time')
+    concatenated = xr.concat(datasets, dim='time')
 
-        assert np.allclose(concatenated.coords['time'], timevals)
+    assert np.allclose(concatenated.coords['time'], timevals)

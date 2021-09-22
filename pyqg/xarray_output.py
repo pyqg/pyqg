@@ -132,7 +132,13 @@ def model_to_dataset(m):
             if isinstance(data, np.float64):
                 data = np.array([m.get_diagnostic(diag_name)])
             attrs = {'long_name': m.diagnostics[diag_name]['description'], 'units': m.diagnostics[diag_name]['units'],}
-            diagnostics[diag_name] = (dims, data, attrs)
+            # Ensure time is added to diagnostic data so simulation timesteps
+            # can be stacked
+            if 'time' not in dims:
+                aug_dims = tuple(['time'] + list(dims))
+                diagnostics[diag_name] = (aug_dims, data[np.newaxis,...], attrs)
+            else:
+                diagnostics[diag_name] = (dims, data, attrs)
         except DiagnosticNotFilledError:
             pass
     

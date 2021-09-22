@@ -286,7 +286,7 @@ class QGModel(model.Model):
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
                             (self.M**2) ),
             units='',
-            dims=('time')
+            dims=('time',)
        )
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',

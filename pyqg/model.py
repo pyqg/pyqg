@@ -589,14 +589,14 @@ class Model(PseudoSpectralKernel):
             description='total energy dissipation by bottom drag',
             function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
             units='',
-            dims=('time')
+            dims=('time',)
         )
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
             units='',
-            dims=('lev')
+            dims=('lev',)
         )
 
     def _calc_derived_fields(self):

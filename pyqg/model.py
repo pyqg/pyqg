@@ -104,6 +104,8 @@ class Model(PseudoSpectralKernel):
         f = None,                   # coriolis parameter (not necessary for two-layer model
                                     #  if deformation radius is provided)
         g= 9.81,                    # acceleration due to gravity
+        q_parameterization=None,    # subgrid parameterization in terms of q
+        uv_parameterization=None,   # subgrid parameterization in terms of u,v
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -154,6 +156,13 @@ class Model(PseudoSpectralKernel):
         ntd : int
             Number of threads to use. Should not exceed the number of cores on
             your machine.
+        q_parameterization : function
+            Optional function which takes a model as input and returns a
+            correction term to be applied to dq/dt at each timestep
+        uv_parameterization : function
+            Optional function which takes a model as input and returns a tuple
+            of correction terms to be applied to the zonal and meridional
+            velocity derivatives (respectively) at each timestep
         """
 
         if ny is None:
@@ -188,6 +197,10 @@ class Model(PseudoSpectralKernel):
         if f:
             self.f = f
             self.f2 = f**2
+
+        # optional subgrid parameterizations
+        self.q_parameterization = q_parameterization
+        self.uv_parameterization = uv_parameterization
 
         # TODO: make this less complicated!
         # Really we just need to initialize the grid here. It's not necessary
@@ -355,10 +368,13 @@ class Model(PseudoSpectralKernel):
         self._do_external_forcing()
         # apply external forcing
 
-        if hasattr(self, 'uv_parameterization'):
+        if self.uv_parameterization is not None:
             self._do_uv_subgrid_parameterization()
-        if hasattr(self, 'q_parameterization'):
+            # apply velocity subgrid forcing term, if present
+
+        if self.q_parameterization is not None:
             self._do_q_subgrid_parameterization()
+            # apply potential vorticity subgrid forcing term, if present
 
         self._calc_diagnostics()
         # do what has to be done with diagnostics
@@ -604,6 +620,27 @@ class Model(PseudoSpectralKernel):
             dims=('lev',)
         )
 
+        if self.uv_parameterization is not None:
+            def parameterization_spectrum(m):
+                ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
+                il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
+                dqh1 = (-il * self.duh[0] + ik * self.dvh[0])
+                dqh2 = (-il * self.duh[1] + ik * self.dvh[1])
+                return m._calc_parameterization_spectrum(dqh1, dqh2)
+        elif self.q_parameterization is not None:
+            def parameterization_spectrum(m):
+                return m._calc_parameterization_spectrum()
+        else:
+            def parameterization_spectrum(m):
+                return np.zeros_like(m.wv2)
+
+        self.add_diagnostic('paramspec',
+            description='Spectral contribution of subgrid parameterization (if present)',
+            function=parameterization_spectrum,
+            units='',
+            dims=('l','k')
+        )
+
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""
         pass
@@ -611,6 +648,21 @@ class Model(PseudoSpectralKernel):
     def _initialize_model_diagnostics(self):
         """Should be implemented by subclass."""
         pass
+
+    def _calc_parameterization_spectrum(self, dqh1=None, dqh2=None):
+        if dqh1 is None: dqh1 = self.dqh[0]
+        if dqh2 is None: dqh2 = self.dqh[1]
+        del1 = self.del1
+        del2 = self.del2
+        F1 = self.F1
+        F2 = self.F2
+        wv2 = self.wv2
+        ph = self.ph
+        return np.real(
+            (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
+            (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
+            (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
+        )
 
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:

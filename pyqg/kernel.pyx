@@ -55,12 +55,12 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_com_t [:, :, :] dqhdt_p
     cdef DTYPE_com_t [:, :, :] dqhdt_pp
 
-    # uv param
+    # subgrid velocity parameterizations
     cdef DTYPE_real_t [:, :, :] du
     cdef DTYPE_real_t [:, :, :] dv
     cdef DTYPE_com_t [:, :, :] duh
     cdef DTYPE_com_t [:, :, :] dvh
-    # q param
+    # subgrid potential vorticity parameterizations
     cdef DTYPE_real_t [:, :, :] dq
     cdef DTYPE_com_t [:, :, :] dqh
 
@@ -159,7 +159,7 @@ cdef class PseudoSpectralKernel:
         vqh = self._empty_com()
         self.vqh = vqh
 
-        # adv param
+        # variables for subgrid parameterizations
         du = self._empty_real()
         dv = self._empty_real()
         dq = self._empty_real()

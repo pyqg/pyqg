@@ -97,6 +97,7 @@ class QGModel(model.Model):
         self.U2 = U2
         #self.filterfac = filterfac
 
+
         super().__init__(nz=2, **kwargs)
 
         # initial conditions: (PV anomalies)
@@ -287,8 +288,6 @@ class QGModel(model.Model):
             units='',
             dims=('time',)
        )
-
-
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',
         #     description='upper layer kinetic energy spectrum',

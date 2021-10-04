@@ -25,9 +25,13 @@ simulations.
 If pyqg can't import pyfftw at compile time, it will fall back on numpy_'s fft
 routines.
 
+PyQG can also conveniently store model output data as an xarray dataset. The feature (which is used in some of the examples in this documentation) requires xarray_.
+
 .. _numpy:  http://www.numpy.org/
 .. _fftw: http://www.fftw.org/
 .. _pyfftw: http://github.com/hgomersall/pyFFTW
+.. _xarray: http://xarray.pydata.org/en/stable/
+
 
 Instructions
 ============

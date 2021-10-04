@@ -1,5 +1,13 @@
 import numpy as np
-import xarray as xr
+try:
+    import xarray as xr
+except ImportError:
+    raise ImportError(
+        "Xarray output in Pyqg requires the Xarray package, which is not installed on your system. " 
+        "Please install Xarray in order to activate this feature. "
+        "Instructions at http://xarray.pydata.org/en/stable/getting-started-guide/installing.html#instructions"
+    )
+    
 from pyqg.errors import DiagnosticNotFilledError
 
 # Define dict for variable dimensions

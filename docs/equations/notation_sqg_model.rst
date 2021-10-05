@@ -40,7 +40,7 @@ and
 
    \psi = 0,  \qquad \text{at} \qquad z \rightarrow -\infty\,.
 
-The solutions to the elliptic problem above, in horizontal Fourier
+The solutions to the elliptic problem above*, in horizontal Fourier
 space, gives the inversion relationship between surface buoyancy and
 surface streamfunction
 
@@ -51,3 +51,27 @@ surface streamfunction
 
 The SQG evolution equation is marched forward similarly to the two-layer
 model.
+
+
+* Since understanding this step is key to making your own modifications to the model, in more detail:
+
+.. math::
+
+
+    \frac{\partial }{\partial t}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,
+    
+Taking the Fourier transform with kappa equal to k^2 + l^2 we get
+.. math::
+
+
+    \frac{f_0^2}{N^2}\frac{\partial }{\partial t}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \nabla^2\psi\,,
+    
+which has solution
+
+.. math::
+
+
+   \hat \psi = Ae^{\frac{\kappa N}{f_0}z} + Be^{-\frac{\kappa N}{f_0}z},.
+   
+Our decay at negative infinity immediately tells us that B = 0. Differentiating with respect to z and evaluating at the surface tells us $A = f_0 \hat b / \kappa N$ so that we have the result. 
+ 

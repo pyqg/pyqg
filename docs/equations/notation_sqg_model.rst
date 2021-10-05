@@ -53,7 +53,7 @@ The SQG evolution equation is marched forward similarly to the two-layer
 model.
 
 
-* Since understanding this step is key to making your own modifications to the model, in more detail:
+\* Since understanding this step is key to making your own modifications to the model, in more detail:
 
 .. math::
 

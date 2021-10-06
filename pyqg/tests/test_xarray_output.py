@@ -106,7 +106,7 @@ def BT():
 def SQG():
     '''Initialize Surface Quasi-Geostrophic Model'''
     return pyqg.SQGModel(L=2.*np.pi, nx=512, tmax=year/2, beta=0.,
-                         Nb=1., H=1., rek=0., rd=None, dt=year/8,
+                         Nb=1., H=1., f_0 = 1., dt=year/8,
                          taveint=1, twrite=1000, ntd=4, tavestart=year/3)
     
 @pytest.fixture(params=[QG, Layered, BT, SQG])

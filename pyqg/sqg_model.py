@@ -63,7 +63,7 @@ class SQGModel(model.Model):
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
-        # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph
+        # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph. 
         self.a = np.asarray(self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):

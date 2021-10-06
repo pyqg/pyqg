@@ -6,7 +6,7 @@ from pyqg import sqg_model
 # the model object
 year = 1.
 m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 40.005,
-        beta = 0., Nb = 1., H = 1., rek = 0., rd = None, dt = 0.005,
+        beta = 0., Nb = 1., H = 1., f_0 = 1, dt = 0.005,
                      taveint=1, ntd=4)
 
 # run the model and plot some figs

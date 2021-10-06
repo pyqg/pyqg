@@ -63,7 +63,7 @@ model.
     \frac{\partial }{\partial t}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,
 
 
-Taking the Fourier transform in the x and y directions with :math:`\kappa = k^2 + l^2`  we get
+Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^2 + l^2`  we get
 
 .. math::
 

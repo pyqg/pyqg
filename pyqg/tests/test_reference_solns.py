@@ -149,7 +149,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qi = m.ifft(qih)
         m.set_q(qi)
 
-        rtol = 1.e-5
+        rtol = 1.e-4
         atol = 1.e-14
 
         np.testing.assert_allclose(m.q, qi, atol)

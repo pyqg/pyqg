@@ -68,7 +68,7 @@ Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^
 .. math::
 
 
-    \frac{f_0^2}{N^2}\frac{\partial }{\partial z}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \psi\,,
+    \frac{f_0^2}{N^2}\frac{\partial }{\partial z}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \hat\psi\,,
     
 which has solution
 

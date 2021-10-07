@@ -60,7 +60,7 @@ model.
 .. math::
 
 
-    \frac{\partial }{\partial t}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,
+    \frac{\partial }{\partial z}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,
 
 
 Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^2 + l^2`  we get
@@ -68,7 +68,7 @@ Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^
 .. math::
 
 
-    \frac{f_0^2}{N^2}\frac{\partial }{\partial t}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \nabla^2\psi\,,
+    \frac{f_0^2}{N^2}\frac{\partial }{\partial z}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \nabla^2\psi\,,
     
 which has solution
 

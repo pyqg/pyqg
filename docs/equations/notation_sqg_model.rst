@@ -68,7 +68,7 @@ Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^
 .. math::
 
 
-    \frac{f_0^2}{N^2}\frac{\partial }{\partial z}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \nabla^2\psi\,,
+    \frac{f_0^2}{N^2}\frac{\partial }{\partial z}\left(\frac{\partial \hat \psi}{\partial z}\right) = \kappa^2 \psi\,,
     
 which has solution
 
@@ -78,5 +78,11 @@ which has solution
    \hat \psi = Ae^{\frac{\kappa N}{f_0}z} + Be^{-\frac{\kappa N}{f_0}z},.
    
 
-Our decay at negative infinity immediately tells us that :math:`B = 0`. Differentiating with respect to :math:`z` and evaluating at the surface tells us :math:`A = f_0 \hat b / \kappa N` so that we have the result. 
+Our decay at negative infinity immediately tells us that :math:`B = 0`. Differentiating with respect to :math:`z` and evaluating at the surface tells us :math:`A = f_0 \hat b / \kappa N` so that we have:
 
+.. math::
+
+
+   \hat \psi = \frac{f_0 \hat b}{\kappa N }e^{\frac{\kappa N}{f_0}z},.
+
+Evaluating at :math:`z = 0` gives the inversion relation given above. 

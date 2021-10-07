@@ -57,7 +57,7 @@ the inversion in Fourier space is,
 .. math::
 
 
-   \hat b = K \hat \psi.
+   \hat b = \frac{\kappa N}{f_0} \hat \psi.
 
 Held et al. studied several different cases, the first of which was the
 nonlinear evolution of an elliptical vortex. There are several other

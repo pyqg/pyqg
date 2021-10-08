@@ -368,13 +368,13 @@ class Model(PseudoSpectralKernel):
         self._do_external_forcing()
         # apply external forcing
 
-        if self.uv_parameterization is not None:
-            self._do_uv_subgrid_parameterization()
-            # apply velocity subgrid forcing term, if present
-
         if self.q_parameterization is not None:
             self._do_q_subgrid_parameterization()
             # apply potential vorticity subgrid forcing term, if present
+
+        elif self.uv_parameterization is not None:
+            self._do_uv_subgrid_parameterization()
+            # apply velocity subgrid forcing term, if present
 
         self._calc_diagnostics()
         # do what has to be done with diagnostics

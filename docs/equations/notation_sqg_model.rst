@@ -60,7 +60,7 @@ model.
 .. math::
 
 
-    \frac{\partial }{\partial z}\left(\frac{f_0^2}{N^2}\frac{\partial \psi}{\partial z}\right) + \nabla^2\psi = 0\,
+    \frac{\partial }{\partial z}\left(\frac{f_0^2}{N^2}\frac{\partial \psi(x,y,z)}{\partial z}\right) + \nabla^2\psi(x,y,z) = 0\,
 
 
 Taking the Fourier transform in the x and y directions with :math:`\kappa^2 = k^2 + l^2`  we get
@@ -83,6 +83,6 @@ Our decay at negative infinity immediately tells us that :math:`B = 0`. Differen
 .. math::
 
 
-   \hat \psi = \frac{f_0 \hat b}{\kappa N }e^{\frac{\kappa N}{f_0}z},.
+   \hat \psi(k,l,z) = \frac{f_0}{N}\frac{1}{\kappa} \hat b(k,l,z) e^{\frac{\kappa N}{f_0}z},.
 
 Evaluating at :math:`z = 0` gives the inversion relation given above. 

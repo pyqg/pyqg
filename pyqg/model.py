@@ -5,6 +5,7 @@ import warnings
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
+from .particles import GriddedLagrangianParticleArray2D
 try:
     import mkl
     np.use_fastnumpy = True
@@ -221,6 +222,9 @@ class Model(PseudoSpectralKernel):
         self.q_parameterization = q_parameterization
         self.uv_parameterization = uv_parameterization
 
+        # placeholder for adding particles
+        self.particles = None
+
         # TODO: make this less complicated!
         # Really we just need to initialize the grid here. It's not necessary
         # to have all these silly methods. Maybe we need "hooks" instead.
@@ -233,6 +237,35 @@ class Model(PseudoSpectralKernel):
         self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
 
+    def add_particles(self, initial_coords=None, order=1):
+        """Add particles to the simulation whose positions will be updated at
+        each timestep.
+
+        Parameters
+        ----------
+
+        initial_coords : tuple
+            An optional tuple of x,y coordinates for the initial positions of
+            particles at each fluid layer.
+        order : int
+            Order of interpolation.
+        """
+
+        if initial_coords is None:
+            n = self.nx // 8
+            x = self.x[:,::n][::n]
+            y = self.y[::n][:,::n]
+        else:
+            x, y = initial_coords
+
+        self.particles = [
+            GriddedLagrangianParticleArray2D(x, y, self.nx, self.ny,
+                periodic_in_x=True, periodic_in_y=True, xmin=0, xmax=self.L,
+                ymin=0, ymax=self.L)
+            for _ in range(len(self.ufull))
+        ]
+
+        self.particle_order = order
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
@@ -374,6 +407,8 @@ class Model(PseudoSpectralKernel):
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
+        if self.particles is not None:
+            u1, v1 = self.ufull, self.vfull
 
         self._invert()
         # find streamfunction from pv
@@ -404,6 +439,12 @@ class Model(PseudoSpectralKernel):
 
         # the basic steps are
         self._print_status()
+
+        if self.particles is not None:
+            u2, v2 = self.ufull, self.vfull
+            for i, p in enumerate(self.particles):
+                p.step_forward_with_gridded_uv(u1[i], v1[i], u2[i], v2[i],
+                        self.dt, order=self.particle_order)
 
     def _initialize_time(self):
         """Set up timestep stuff"""

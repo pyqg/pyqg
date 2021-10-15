@@ -29,17 +29,17 @@ dim_database = {
 
 # dict for variable dimensions
 var_attr_database = {
-    'q': {'long_name': 'potential vorticity in real space', 'units': 'per second',},
-    'u': {'long_name': 'zonal velocity anomaly', 'units': 'meters per second',},
-    'v': {'long_name': 'meridional velocity anomaly', 'units': 'meters per second',},
-    'ufull': {'long_name': 'zonal full velocities in real space', 'units': 'meters per second',},
-    'vfull': {'long_name': 'meridional full velocities in real space', 'units': 'meters per second',},
-    'qh': {'long_name': 'potential vorticity in spectral space', 'units': 'per second',},
-    'uh': {'long_name': 'zonal velocity anomaly in spectral space', 'units': 'meters per second',},
-    'vh': {'long_name': 'meridional velocity anomaly in spectral space', 'units': 'meters per second',},
-    'ph': {'long_name': 'streamfunction in spectral space', 'units': 'meters squared per second',},
-    'Ubg': {'long_name': 'background zonal velocity', 'units': 'meters per second',},
-    'Qy': {'long_name': 'background potential vorticity gradient', 'units': 'per second per meter',} , 
+    'q': {'long_name': 'potential vorticity in real space', 'units': 'second -1',},
+    'u': {'long_name': 'zonal velocity anomaly', 'units': 'meters second ^-1',},
+    'v': {'long_name': 'meridional velocity anomaly', 'units': 'meters second ^-1',},
+    'ufull': {'long_name': 'zonal full velocities in real space', 'units': 'meters second ^-1',},
+    'vfull': {'long_name': 'meridional full velocities in real space', 'units': 'meters second ^-1',},
+    'qh': {'long_name': 'potential vorticity in spectral space', 'units': 'second ^-1',},
+    'uh': {'long_name': 'zonal velocity anomaly in spectral space', 'units': 'meters second ^-1',},
+    'vh': {'long_name': 'meridional velocity anomaly in spectral space', 'units': 'meters second ^-1',},
+    'ph': {'long_name': 'streamfunction in spectral space', 'units': 'meters squared second ^-1',},
+    'Ubg': {'long_name': 'background zonal velocity', 'units': 'meters second ^-1',},
+    'Qy': {'long_name': 'background potential vorticity gradient', 'units': 'second ^-1 meter ^-1',} , 
 }
 
 # dict for coordinate dimensions

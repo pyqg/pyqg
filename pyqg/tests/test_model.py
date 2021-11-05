@@ -262,6 +262,30 @@ class PyqgModelTester(unittest.TestCase):
             )
 
 
+    def test_parameterization_variables(self):
+        # Initialize models with all combinations of parameterizations
+        m1 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
+        m2 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                q_parameterization=lambda m: None)
+        m3 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                uv_parameterization=lambda m: None)
+        m4 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                q_parameterization=lambda m: None,
+                uv_parameterization=lambda m: None)
+
+        # Models should only have attributes corresponding to their parameterizations
+        for m in [m2,m4]:
+            m.dqh
+        for m in [m3,m4]:
+            m.duh
+            m.dvh
+        for m in [m1,m3]:
+            with pytest.raises(AttributeError): m.dqh
+        for m in [m1,m2]:
+            with pytest.raises(AttributeError): m.duh
+            with pytest.raises(AttributeError): m.dvh
+
+
     def test_timestepping(self, rtol=1e-15):
         """Make sure timstepping works properly."""
 

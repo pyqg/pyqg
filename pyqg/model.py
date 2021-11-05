@@ -172,7 +172,9 @@ class Model(PseudoSpectralKernel):
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
-        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd)
+        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
+                has_q_param=int(q_parameterization is not None),
+                has_uv_param=int(uv_parameterization is not None))
 
         self.L = L
         self.W = W
@@ -372,7 +374,7 @@ class Model(PseudoSpectralKernel):
             self._do_uv_subgrid_parameterization()
             # apply velocity subgrid forcing term, if present
 
-        elif self.q_parameterization is not None:
+        if self.q_parameterization is not None:
             self._do_q_subgrid_parameterization()
             # apply potential vorticity subgrid forcing term, if present
 
@@ -620,19 +622,20 @@ class Model(PseudoSpectralKernel):
             dims=('lev',)
         )
 
-        if self.uv_parameterization is not None:
-            def parameterization_spectrum(m):
+        def parameterization_spectrum(m):
+            spectrum = np.zeros_like(m.wv2)
+
+            if m.uv_parameterization is not None:
                 ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
                 il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
-                dqh1 = (-il * self.duh[0] + ik * self.dvh[0])
-                dqh2 = (-il * self.duh[1] + ik * self.dvh[1])
-                return m._calc_parameterization_spectrum(dqh1, dqh2)
-        elif self.q_parameterization is not None:
-            def parameterization_spectrum(m):
-                return m._calc_parameterization_spectrum()
-        else:
-            def parameterization_spectrum(m):
-                return np.zeros_like(m.wv2)
+                dqh1 = (-il * m.duh[0] + ik * m.dvh[0])
+                dqh2 = (-il * m.duh[1] + ik * m.dvh[1])
+                spectrum += m._calc_parameterization_spectrum(dqh1, dqh2)
+
+            if m.q_parameterization is not None:
+                spectrum += m._calc_parameterization_spectrum(*m.dqh)
+
+            return spectrum
 
         self.add_diagnostic('paramspec',
             description='Spectral contribution of subgrid parameterization (if present)',

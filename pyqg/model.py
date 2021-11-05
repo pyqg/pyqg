@@ -630,9 +630,12 @@ class Model(PseudoSpectralKernel):
                 il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
                 dqh1 = (-il * m.duh[0] + ik * m.dvh[0])
                 dqh2 = (-il * m.duh[1] + ik * m.dvh[1])
+                if m.q_parameterization is not None:
+                    dqh1 += m.dqh[0]
+                    dqh2 += m.dqh[1]
                 spectrum += m._calc_parameterization_spectrum(dqh1, dqh2)
 
-            if m.q_parameterization is not None:
+            elif m.q_parameterization is not None:
                 spectrum += m._calc_parameterization_spectrum(*m.dqh)
 
             return spectrum

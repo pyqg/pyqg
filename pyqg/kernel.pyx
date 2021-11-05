@@ -251,14 +251,12 @@ cdef class PseudoSpectralKernel:
             self.u = npfft.irfftn(self.uh, axes=(-2,-1))
         def ifft_vh_to_v(self):
             self.v = npfft.irfftn(self.vh, axes=(-2,-1))
-        if has_uv_param:
-            def fft_du_to_duh(self):
-                self.duh = npfft.rfftn(self.du, axes=(-2,-1))
-            def fft_dv_to_dvh(self):
-                self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
-        if has_q_param:
-            def fft_dq_to_dqh(self):
-                self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
+        def fft_du_to_duh(self):
+            self.duh = npfft.rfftn(self.du, axes=(-2,-1))
+        def fft_dv_to_dvh(self):
+            self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
+        def fft_dq_to_dqh(self):
+            self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
         def fft_uq_to_uqh(self):
             self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
         def fft_vq_to_vqh(self):

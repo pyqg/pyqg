@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import pyqg
+import pytest
 
 class PyqgModelTester(unittest.TestCase):
 
@@ -180,6 +181,85 @@ class PyqgModelTester(unittest.TestCase):
                         err_msg='Ekman friction was wrong.')
                 np.testing.assert_allclose(self.m.dqhdt[:-1], 0., rtol,
                         err_msg='Nonzero friction found in upper layers.')
+
+
+    def test_q_parameterization(self, rtol=1e-15):
+        # Initialize two models, one unparameterized, one parameterized to add 1 to dqdt
+        m1 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
+        m2 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                q_parameterization=lambda m: np.ones_like(m1.q))
+
+        # Give them the same initial conditions
+        m2.q = m1.q
+
+        # Step forward in time
+        m1._step_forward()
+        m2._step_forward()
+
+        # Their resulting dqdts should differ by exactly one
+        dqdt1 = m1.ifft(m1.dqhdt)
+        dqdt2 = m2.ifft(m2.dqhdt)
+        np.testing.assert_allclose(dqdt2 - dqdt1, 1., rtol,
+                err_msg='q parameterization incorrectly applied')
+
+
+    def test_uv_parameterization_zero_curl(self, rtol=1e-15):
+        # Initialize two models, one unparameterized, one parameterized to
+        # change velocity linearly
+        m1 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
+
+        def uv_parameterization(m):
+            return (
+                np.ones_like(m.u) * np.random.normal() + np.random.normal(),
+                np.ones_like(m.v) * np.random.normal() + np.random.normal(),
+            )
+
+        m2 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                uv_parameterization=uv_parameterization)
+
+        # Give them the same initial conditions
+        m2.q = m1.q
+
+        # Step forward in time
+        m1._step_forward()
+        m2._step_forward()
+
+        # Their resulting dqdts should not differ
+        dqdt1 = m1.ifft(m1.dqhdt)
+        dqdt2 = m2.ifft(m2.dqhdt)
+        np.testing.assert_allclose(dqdt2 - dqdt1, 0., rtol,
+                err_msg='zero-curl uv param incorrectly changed dqdt')
+
+
+    def test_uv_parameterization_nonzero_curl(self, rtol=1e-15):
+        # Initialize two models, one unparameterized, one parameterized to add
+        # random noise in terms of velocities
+        m1 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.)
+
+        def uv_parameterization(m):
+            return (
+                np.random.normal(size=m.u.shape).astype(m.u.dtype),
+                np.random.normal(size=m.v.shape).astype(m.v.dtype),
+            )
+
+        m2 = pyqg.QGModel(beta=0., U1=0., U2=0., filterfac=0.,
+                uv_parameterization=uv_parameterization)
+
+        # Give them the same initial conditions
+        m2.q = m1.q
+
+        # Step forward in time
+        m1._step_forward()
+        m2._step_forward()
+
+        # Their resulting dqdts should differ
+        dqdt1 = m1.ifft(m1.dqhdt)
+        dqdt2 = m2.ifft(m2.dqhdt)
+        with pytest.raises(AssertionError):
+            np.testing.assert_allclose(
+                dqdt2 - dqdt1, 0., rtol,
+                err_msg="nonzero-curl uv param incorrectly didn't change dqdt"
+            )
 
 
     def test_timestepping(self, rtol=1e-15):

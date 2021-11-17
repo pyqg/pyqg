@@ -80,6 +80,18 @@ class Model(PseudoSpectralKernel):
         Vertical pressure modes (unitless)
     radii :  real array
         Deformation radii  (units: model length)
+    q_parameterization : function
+        Optional function which takes the model as input and returns a `numpy`
+        array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
+        forward. This can be used to implement subgrid forcing
+        parameterizations.
+    uv_parameterization : function
+        Optional function which takes the model as input and returns a tuple of
+        two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
+        the zonal and meridional velocity derivatives (respectively) at each
+        timestep. This can also be used to implemented subgrid forcing
+        parameterizations, but expressed in terms of velocity rather than
+        potential vorticity.
     """
 
     def __init__(
@@ -157,12 +169,17 @@ class Model(PseudoSpectralKernel):
             Number of threads to use. Should not exceed the number of cores on
             your machine.
         q_parameterization : function
-            Optional function which takes a model as input and returns a
-            correction term to be applied to dq/dt at each timestep
+            Optional function which takes the model as input and returns a `numpy`
+            array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
+            forward. This can be used to implement subgrid forcing
+            parameterizations.
         uv_parameterization : function
-            Optional function which takes a model as input and returns a tuple
-            of correction terms to be applied to the zonal and meridional
-            velocity derivatives (respectively) at each timestep
+            Optional function which takes the model as input and returns a tuple of
+            two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
+            the zonal and meridional velocity derivatives (respectively) at each
+            timestep. This can also be used to implemented subgrid forcing
+            parameterizations, but expressed in terms of velocity rather than
+            potential vorticity.
         """
 
         if ny is None:

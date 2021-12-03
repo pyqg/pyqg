@@ -23,6 +23,7 @@ dim_database = {
     'uh': spectral_dims,
     'vh': spectral_dims,
     'ph': spectral_dims, 
+    'dqhdt': spectral_dims, 
     'Ubg': ('lev'),
     'Qy': ('lev'),
 }
@@ -38,8 +39,17 @@ var_attr_database = {
     'uh': {'long_name': 'zonal velocity anomaly in spectral space', 'units': 'meters second ^-1',},
     'vh': {'long_name': 'meridional velocity anomaly in spectral space', 'units': 'meters second ^-1',},
     'ph': {'long_name': 'streamfunction in spectral space', 'units': 'meters squared second ^-1',},
+    'p': {'long_name': 'streamfunction in real space', 'units': 'meters squared second ^-1',},
     'Ubg': {'long_name': 'background zonal velocity', 'units': 'meters second ^-1',},
     'Qy': {'long_name': 'background potential vorticity gradient', 'units': 'second ^-1 meter ^-1',} , 
+    'dqhdt': {'long_name': 'previous partial derivative of potential vorticity wrt. time in spectral space', 'units': 'second ^-2',} , 
+    'dqdt': {'long_name': 'previous partial derivative of potential vorticity wrt. time in real space', 'units': 'second ^-2',} , 
+}
+
+# dict for variables to convert back from spectral to spatial
+vars_to_invert = {
+    'dqhdt': 'dqdt',
+    'ph': 'p'
 }
 
 # dict for coordinate dimensions
@@ -117,6 +127,12 @@ def model_to_dataset(m):
                 variables[vname] = (dim_database[vname], data[np.newaxis,...], var_attr_database[vname])
             else:
                 variables[vname] = (dim_database[vname], data, var_attr_database[vname])
+
+    # Convert a subset of spectral variables to spatial
+    for spectral_var, spatial_var in vars_to_invert.items():
+        if hasattr(m, spectral_var):
+            data = m.ifft(getattr(m, spectral_var, None))
+            variables[spatial_var] = (spatial_dims, data[np.newaxis,...], var_attr_database[spatial_var])
 
     # Create a dictionary of coordinates
     coordinates = {}

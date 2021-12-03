@@ -11,12 +11,15 @@ expected_vars = [
     'v', 
     'ufull', 
     'vfull', 
+    'p',
+    'dqdt',
     'qh', 
     'uh', 
     'vh', 
     'ph', 
     'Ubg', 
     'Qy',
+    'dqhdt',
 ]
 
 expected_diags = [

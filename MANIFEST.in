@@ -1,3 +1,3 @@
 recursive-include pyqg *.pyx
-recursive-exclude pyqg *.cinclude versioneer.py
+recursive-exclude pyqg *.cinclude
 include pyqg/_version.py

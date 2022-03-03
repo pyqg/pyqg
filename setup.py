@@ -4,6 +4,10 @@ import warnings
 import numpy as np
 import os
 import tempfile, subprocess, shutil
+
+import sys
+# This appears to be necessary so that versioneer works:
+sys.path.insert(0, ".")
 import versioneer
 
 
@@ -62,8 +66,7 @@ CLASSIFIERS = [
 ### Dependency section ###
 install_requires = [
     'cython',
-    'numpy',
-    'versioneer'
+    'numpy'
 ]
 
 # This hack tells cython whether pyfftw is present

@@ -4,8 +4,6 @@ import warnings
 import numpy as np
 import os
 import tempfile, subprocess, shutil
-import versioneer
-
 
 DISTNAME='pyqg'
 URL='http://github.com/pyqg/pyqg'
@@ -144,8 +142,6 @@ ext_module = Extension(
 )
 
 setup(name=DISTNAME,
-      version=versioneer.get_version(),
-      cmdclass=versioneer.get_cmdclass(),
       description=DESCRIPTION,
       classifiers=CLASSIFIERS,
       long_description=LONG_DESCRIPTION,
@@ -155,6 +151,7 @@ setup(name=DISTNAME,
       license=LICENSE,
       packages=['pyqg'],
       install_requires=install_requires,
+      use_scm_version=True,
       python_requires='>=3.6',
       ext_modules = cythonize(ext_module),
       include_dirs = [np.get_include()],

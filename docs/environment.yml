@@ -12,6 +12,7 @@ dependencies:
   - numpydoc
   - jupyter_client
   - ipykernel
+  - importlib_metadata
   - pandoc
   - pip
   - pip:

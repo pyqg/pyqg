@@ -1,9 +1,22 @@
 What's New
 ==========
 
-v0.3.1 (unreleased)
+v0.5.1 (unreleased)
 -------------------
 
+v0.5.0 (23 Mar. 2022)
+---------------------
+- Added support for online parameterizations
+- Dropped support for Python 2.7
+- Improvements to the development and release process
+- Miscellaneous bug fixes
+
+v0.4.0 (15 Sep. 2021)
+---------------------
+- Refactored diagnostics
+- Added xarray support
+- Improvements to documentation and build process
+- Miscellaneous bug fixes
 
 v0.3.0 (23 Nov. 2019)
 ---------------------

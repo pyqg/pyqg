@@ -25,7 +25,7 @@ jobs:
           activate-environment: test_env_pyqg # Defined in ci/environment*.yml
           auto-update-conda: false
           python-version: ${{ matrix.python-version }}
-          environment-file: ci/environment-py${{ matrix.python-version }}.yml
+          environment-file: ci/environment-py${{ matrix.python-version }}-pyfftw.yml
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
       - name: Set up conda environment
         shell: bash -l {0}

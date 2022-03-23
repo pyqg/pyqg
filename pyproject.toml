@@ -1,0 +1,10 @@
+[build-system]
+requires = [
+    "importlib_metadata",
+    "setuptools>=45",
+    "setuptools_scm[toml]>=6.2",
+    "wheel",
+    "cython",
+    "pyfftw",
+    "oldest-supported-numpy"
+]

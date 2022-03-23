@@ -22,8 +22,9 @@ simulations.
 - fftw_ (3.3 or later)
 - pyfftw_ (0.9.2 or later)
 
-If pyqg can't import pyfftw at compile time, it will fall back on numpy_'s fft
-routines.
+If pyqg can't import pyfftw at compile time, it can fall back on numpy_'s fft
+routines. **Note that the numpy_ fallback requires a local install (see
+[below](#installing-pyqg)).**
 
 PyQG can also conveniently store model output data as an xarray dataset. The feature (which is used in some of the examples in this documentation) requires xarray_.
 
@@ -86,12 +87,9 @@ the pyfftw conda package was created. There are currently 13
 `pyfftw user packages <https://anaconda.org/search?q=pyfftw>`__
 hosted on anaconda.org. Each has different dependencies and platform support
 (e.g. linux, windows, mac.)
-The `nanshe <https://anaconda.org/nanshe/pyfftw>`__ channel version is the most
-popular and appears to have the broadest cross-platform support. We don't know
-who nanshe is, but we are greatful to him/her.
-
-To install pyfftw from the `conda-forge <https://conda-forge.github.io/>`_
-channel, open a terminal and run the command
+The `conda-forge <https://anaconda.org/conda-forge/pyfftw>`__ version is the
+most popular and appears to have the broadest cross-platform support. To
+install it, open a terminal and run the command
 
 .. code-block:: bash
 
@@ -226,31 +224,26 @@ use the latest development version.
 
     $ git clone https://github.com/pyqg/pyqg.git
 
-Then install pyqg on your system:
+Then install pyqg locally on your system:
 
 .. code-block:: bash
 
-    $ python setup.py install [--user]
+    $ cd pyqg && pip install --editable .
 
-(The ``--user`` flag is optional--use it if you don't have root privileges.)
-
-If you want to make changes in the code, set up the development mode:
-
-.. code-block:: bash
-
-    $ python setup.py develop
-
-pyqg is a work in progress, and we really encourage users to contribute to its
+This will also allow you to make and test changes to the library.  pyqg is a
+work in progress, and we really encourage users to contribute to its
 :doc:`/development`
 
+**Note that due to Cython build considerations, this local install method is
+required if you do not wish to use pyfftw.**
 
 .. _advanced-install:
 
 Installing with OpenMP support on OSX
 -------------------------------------
 
-There are two options for installing on OSX with OpenMP support.  Both methods require using the Anaconda distribution of
-Python.
+There are two options for installing on OSX with OpenMP support.  Both methods
+require using the Anaconda distribution of Python.
 
 1. Using Homebrew
 

@@ -268,7 +268,7 @@ cdef class PseudoSpectralKernel:
 
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
-        shape = (self.nz, self.ny, self.ny)
+        shape = (self.nz, self.ny, self.nx)
         IF PYQG_USE_PYFFTW:
             out = pyfftw.n_byte_align_empty(shape,
                                  pyfftw.simd_alignment, dtype=DTYPE_real)

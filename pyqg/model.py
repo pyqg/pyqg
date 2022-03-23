@@ -233,7 +233,6 @@ class Model(PseudoSpectralKernel):
         self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
 
-
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
 
@@ -795,3 +794,39 @@ class Model(PseudoSpectralKernel):
         """
         from .xarray_output import model_to_dataset
         return model_to_dataset(self)
+
+    def run_to_dataset(self, tsnapstart=0., tsnapint=4320000., drop_complex=True):
+        """Run a simulation to completion and save intermediate steps as an
+        xarray dataset.
+
+        Parameters
+        ----------
+        tsnapstart : int
+            The timestep at which to begin saving snapshots.
+        tstapint : int
+            The interval at which to save snapshots.
+        drop_complex : bool
+            Whether to drop complex variables (which cannot be saved in netcdf
+            files). Defaults to true.
+
+        Returns
+        -------
+        ds: xarray.Dataset
+        """
+        snapshots = [
+            self.to_dataset().copy(deep=True)
+            for _ in self.run_with_snapshots(tsnapstart, tsnapint)
+        ]
+
+        dataset = xr.concat(snapshots, dim='time')
+
+        # Ensure diagnostics, which are already time-averaged, get saved
+        for k,v in snapshots[-1].variables.items():
+            if k not in dataset:
+                dataset[k] = v.isel(time=-1)
+
+        if drop_complex:
+            complex_vars = [k for k,v in dataset.variables.items() if np.iscomplexobj(v)]
+            dataset = dataset.drop_vars(complex_vars)
+
+        return dataset

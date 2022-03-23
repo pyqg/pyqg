@@ -60,7 +60,8 @@ CLASSIFIERS = [
 ### Dependency section ###
 install_requires = [
     'cython',
-    'numpy'
+    'numpy',
+    'pyfftw'
 ]
 
 # This hack tells cython whether pyfftw is present

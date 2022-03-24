@@ -57,7 +57,7 @@ the inversion in Fourier space is,
 .. math::
 
 
-   \hat b = K \hat \psi.
+   \hat b = \frac{\kappa N}{f_0} \hat \psi.
 
 Held et al. studied several different cases, the first of which was the
 nonlinear evolution of an elliptical vortex. There are several other
@@ -70,7 +70,7 @@ pedagogical reasons.
     # create the model object
     year = 1.
     m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 26.005,
-            beta = 0., Nb = 1., H = 1., rek = 0., rd = None, dt = 0.005,
+            beta = 0., Nb = 1., H = 1., f_0 = 0., dt = 0.005,
                          taveint=1, twrite=400, ntd=4)
     # in this example we used ntd=4, four threads
     # if your machine has more (or fewer) cores available, you could try changing it

@@ -136,7 +136,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         """ Tests against some statistics of a reference sqg solution """
 
         m = pyqg.SQGModel(L=2.*np.pi,nx=64, tmax = 5.,
-                beta = 0., H = 1., rek = 0., dt = 0.0025,
+                beta = 0., H = 1., dt = 0.0025,
                 twrite=1000)
 
         p = np.exp(-(2.*(m.x-1.75*np.pi/2))**2.-(2.*(m.y-np.pi))**2) +\
@@ -149,7 +149,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qi = m.ifft(qih)
         m.set_q(qi)
 
-        rtol = 1.e-5
+        rtol = 1.e-4
         atol = 1.e-14
 
         np.testing.assert_allclose(m.q, qi, atol)

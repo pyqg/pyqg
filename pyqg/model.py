@@ -25,7 +25,7 @@ class Model(PseudoSpectralKernel):
     nx, ny : int
         Number of real space grid points in the `x`, `y` directions (cython)
     nk, nl : int
-        Number of spectal space grid points in the `k`, `l` directions (cython)
+        Number of spectral space grid points in the `k`, `l` directions (cython)
     nz : int
         Number of vertical levels (cython)
     kk, ll : real array

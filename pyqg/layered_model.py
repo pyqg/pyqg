@@ -98,9 +98,9 @@ class LayeredModel(model.Model):
             Layer thickness ratio (H1/H2). Only necessary for the
             two-layer (nz=2) case. Unitless.
         U : list of size nz
-            Base state zonal velocity. Units: meters s :sup:`-1`
+            Base state zonal velocity. Units: meters seconds :sup:`-1`
         V : array of size nz
-            Base state meridional velocity. Units: meters s :sup:`-1`
+            Base state meridional velocity. Units: meters seconds :sup:`-1`
         H : array of size nz
             Layer thickness. Units: meters
         rho: array of size nz.

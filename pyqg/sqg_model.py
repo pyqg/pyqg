@@ -25,7 +25,7 @@ class SQGModel(model.Model):
         Nb : number
             Buoyancy frequency. Units: seconds :sup:`-1`.
         U : number
-            Background zonal flow. Units: meters.
+            Background zonal flow. Units: meters seconds :sup:`-1`.
         """
 
         # physical

@@ -288,6 +288,38 @@ class QGModel(model.Model):
             units='',
             dims=('time',)
        )
+
+        def dissipation_spectrum(m):
+            spectrum = np.zeros_like(m.qh)
+            ones = np.ones_like(m.filtr)
+            if m.ablevel==0:
+                # forward euler
+                dt1 = m.dt
+                dt2 = 0.0
+                dt3 = 0.0
+            elif m.ablevel==1:
+                # AB2 at step 2
+                dt1 = 1.5*m.dt
+                dt2 = -0.5*m.dt
+                dt3 = 0.0
+            else:
+                # AB3 from step 3 on
+                dt1 = 23./12.*m.dt
+                dt2 = -16./12.*m.dt
+                dt3 = 5./12.*m.dt
+            for k in range(m.nz):
+                spectrum[k] += (m.filtr - ones) * (
+                    m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k])
+            return -np.real(m.del1*np.conj(m.ph[0])*spectrum[0] + m.del2*np.conj(m.ph[1])*spectrum[1]) / m.dt
+
+        self.add_diagnostic('Dissspec',
+            description='Spectral contribution of filter dissipation',
+            function=dissipation_spectrum,
+            units='',
+            dims=('l','k')
+        )
+
+
         ### These generic diagnostics are now calculated in model.py ###
         # self.add_diagnostic('KE1spec',
         #     description='upper layer kinetic energy spectrum',

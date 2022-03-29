@@ -690,7 +690,7 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('Dissspec',
             description='Spectral contribution of filter dissipation',
             function=dissipation_spectrum,
-            units='',
+            units='meters squared second ^-3',
             dims=('l','k')
         )
 

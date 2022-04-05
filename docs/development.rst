@@ -136,29 +136,24 @@ Release Procedure
 =================
 
 Once we are ready for a new release, someone needs to make a pull request which
-updates `docs/whats-new.rst` in preparation for updating to the new version.
-Then, tag the pull request's merge commit with an updated version tag:
+updates `docs/whats-new.rst` in preparation for the new version.  Then, you can
+simply create a new `release`_ in Github, adding a new tag for the new version
+(following `semver`_) and clicking "Auto-generate release notes" to summarize
+changes since the last release (with further elaboration if necessary).
 
-.. code-block:: bash
+After the release is created, a new version should be published to `pypi`_
+automatically.
 
-    $ git remote update
-    $ git checkout master
-    $ git rebase origin/master
-    $ git tag vX.Y.Z # replace X.Y.Z real version, e.g. 0.5.0
-    $ git push origin --tags
+However, before creating the release, it's worth checking `testpypi`_ to ensure
+the new version works. You can do that by:
 
-Before creating a release or publishing to `pypi`_, however, we'll want to do a
-test release to `testpypi`_ (see instructions there) to ensure the new version
-works:
+1. Verifying the `most recent test publish`_ succeeded (and is for the most
+   recent commit)
 
-.. code-block:: bash
+1. Finding the corresponding pre-release version in pyqg's `TestPyPI history`_
+   (should look like `X.Y.Z.devN`)
 
-    # Build the new version and upload it to the test version of pypi
-    $ python -m build # could also run `python setup.py sdist`
-    $ twine upload --repository testpypi dist/pyqg-X.Y.Z.tar.gz
-
-As an additional validation, it's worth setting up a test environment and
-ensuring pyqg can be installed:
+1. Installing that version locally as follows:
 
 .. code-block:: bash
 
@@ -169,33 +164,22 @@ ensuring pyqg can be installed:
     $ source activate test_env
     $ pip install pyfftw # or install with conda-forge
     
-    # Install the new version of pyqg that we deployed to testpypi
-    $ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ --no-cache-dir pyqg==X.Y.Z
+    # Install the latest pre-release version of pyqg
+    $ pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ --no-cache-dir pyqg==X.Y.Z.devN
 
-    # Ensure this prints out the test version (X.Y.Z)
+    # Ensure this imports successfully and prints out the pre-release version (X.Y.Z.devN)
     $ python -c 'import pyqg; print(pyqg.__version__);'
 
     # Clean up and remove the test environment
     $ conda deactivate
     $ conda env remove --yes -n test_env
 
-If this all works, then we're ready to publish to `pypi`_:
-
-.. code-block:: bash
-
-    $ twine upload dist/pyqg-X.Y.Z.tar.gz
-
-Note that pypi will not let you publish the same release twice, so make sure
-you get it right!
-
-In the event that pypi deployment fails (and requires code changes to debug),
-delete the tag, and instead iterate locally using temporary alpha tags (e.g.
-`vX.Y.Z.alpha1`). Push these to testpypi and continue iterating until you can
-successfully install the new version.
-
-Finally, after publishing, you should create a new `release`_ in Github.
+If this all works, then you should be ready to create the Github `release`_.
 
 .. _testpypi: https://packaging.python.org/en/latest/guides/using-testpypi
 .. _pypi: https://pypi.python.org/pypi/pyqg
 .. _release: https://help.github.com/articles/creating-releases/
 .. _instructions: http://peterdowns.com/posts/first-time-with-pypi.html
+.. _semver: https://semver.org/
+.. _most recent test publish: https://github.com/pyqg/pyqg/actions/workflows/publish-to-test-pypi.yml
+.. _TestPyPI history: https://test.pypi.org/project/pyqg/#history

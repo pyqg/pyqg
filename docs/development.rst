@@ -150,10 +150,10 @@ the new version works. You can do that by:
 1. Verifying the `most recent test publish`_ succeeded (and is for the most
    recent commit)
 
-1. Finding the corresponding pre-release version on `pyqg's TestPyPI page`_
+1. Finding the corresponding pre-release version in pyqg's `TestPyPI history`_
    (should look like `X.Y.Z.devN`)
 
-1. Installing that pre-release version locally as follows:
+1. Installing that version locally as follows:
 
 .. code-block:: bash
 
@@ -182,4 +182,4 @@ If this all works, then you should be ready to create the Github `release`_.
 .. _instructions: http://peterdowns.com/posts/first-time-with-pypi.html
 .. _semver: https://semver.org/
 .. _most recent test publish: https://github.com/pyqg/pyqg/actions/workflows/publish-to-test-pypi.yml
-.. _pyqg's TestPyPI page: https://test.pypi.org/project/pyqg/#history
+.. _TestPyPI history: https://test.pypi.org/project/pyqg/#history

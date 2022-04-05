@@ -25,7 +25,7 @@ jobs:
         python -m build --sdist --outdir dist/
     - name: Publish
       run: |
-        python -m twine upload dist/*
+        python -m twine upload dist/* --verbose
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: $${ secrets.TEST_PYPI_API_SECRET }}

@@ -639,31 +639,6 @@ class Model(PseudoSpectralKernel):
             dims=('lev',)
         )
 
-        def parameterization_spectrum(m):
-            spectrum = np.zeros_like(m.wv2)
-
-            if m.uv_parameterization is not None:
-                ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
-                il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
-                dqh1 = (-il * m.duh[0] + ik * m.dvh[0])
-                dqh2 = (-il * m.duh[1] + ik * m.dvh[1])
-                if m.q_parameterization is not None:
-                    dqh1 += m.dqh[0]
-                    dqh2 += m.dqh[1]
-                spectrum += m._calc_parameterization_spectrum(dqh1, dqh2)
-
-            elif m.q_parameterization is not None:
-                spectrum += m._calc_parameterization_spectrum(*m.dqh)
-
-            return spectrum
-
-        self.add_diagnostic('paramspec',
-            description='Spectral contribution of subgrid parameterization (if present)',
-            function=parameterization_spectrum,
-            units='',
-            dims=('l','k')
-        )
-
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""
         pass
@@ -671,21 +646,6 @@ class Model(PseudoSpectralKernel):
     def _initialize_model_diagnostics(self):
         """Should be implemented by subclass."""
         pass
-
-    def _calc_parameterization_spectrum(self, dqh1=None, dqh2=None):
-        if dqh1 is None: dqh1 = self.dqh[0]
-        if dqh2 is None: dqh2 = self.dqh[1]
-        del1 = self.del1
-        del2 = self.del2
-        F1 = self.F1
-        F2 = self.F2
-        wv2 = self.wv2
-        ph = self.ph
-        return np.real(
-            (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
-            (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
-            (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
-        )
 
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:

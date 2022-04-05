@@ -24,9 +24,10 @@ jobs:
       run: |
         python -m build --sdist --outdir dist/
     - name: Publish
-      run: |
-        python -m twine upload dist/* --verbose
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: $${ secrets.TEST_PYPI_API_SECRET }}
-        TWINE_REPOSITORY: testpypi
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_API_SECRET }}
+        repository_url: https://test.pypi.org/legacy/
+        verbose: true
+        print_hash: true

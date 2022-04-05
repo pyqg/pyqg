@@ -11,7 +11,7 @@ def test_describe_diagnostics():
     m = pyqg.QGModel(1)
     m.describe_diagnostics()
 
-def test_paramspec_diagnostics(rtol=1e-11):
+def test_paramspec_diagnostics(rtol=1e-10):
     # Initialize four models with different (deterministic) parameterizations
     m1 = pyqg.QGModel()
 

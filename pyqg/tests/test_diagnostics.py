@@ -11,7 +11,58 @@ def test_describe_diagnostics():
     m = pyqg.QGModel(1)
     m.describe_diagnostics()
 
-def test_paramspec_diagnostics(rtol=1e-10):
+def old_qgmodel_calc_paramspec(self, dqh1, dqh2):
+    del1 = self.del1
+    del2 = self.del2
+    F1 = self.F1
+    F2 = self.F2
+    wv2 = self.wv2
+    ph = self.ph
+    return np.real(
+        (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
+        (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
+        (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
+    )
+
+def test_paramspec_decomposition(rtol=1e-10):
+    # Initialize a model with a parameterization, step it forward and compute paramspec
+    dq = np.random.normal(size=(2,64,64))
+    m = pyqg.QGModel(q_parameterization = lambda m: dq)
+    m._step_forward()
+    m._increment_diagnostics()
+
+    # Compute the parameterization spectrum at least two ways
+    height_ratios = (m.Hi / m.H)[:,np.newaxis,np.newaxis]
+    dqh = m.fft(dq)
+    ps1 = -np.real((height_ratios * np.conj(m.ph) * dqh).sum(axis=0))
+    ps2 = old_qgmodel_calc_paramspec(m, dqh[0], dqh[1])
+    ps3 = m.get_diagnostic('paramspec') 
+
+    # Ensure they're identical
+    np.testing.assert_allclose(ps1, ps2, rtol=rtol)
+    np.testing.assert_allclose(ps1, ps3, rtol=rtol)
+
+    # Now test it can be decomposed into separate KE and APE components
+    ph_diff = np.subtract(*np.conj(m.ph))
+    apeflux_term = m.del1 * m.del2 / m.rd**2 * np.array([ph_diff, -ph_diff])
+    keflux_term  = m.wv2 * height_ratios * np.conj(m.ph)
+
+    def matvec(m, v):
+        # matrix-vector multiplication over the first two dimensions
+        return np.einsum("ij..., i... -> j...", m, v) 
+
+    paramspec_apeflux = np.real((matvec(m.a, apeflux_term) * dqh).sum(axis=0))
+    paramspec_keflux  = np.real((matvec(m.a,  keflux_term) * dqh).sum(axis=0))
+    ps4 = paramspec_apeflux + paramspec_keflux
+    np.testing.assert_allclose(ps1, ps4, rtol=rtol)
+
+    # Test these terms match the subterms from QGModel
+    np.testing.assert_allclose(paramspec_apeflux,
+            m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
+    np.testing.assert_allclose(paramspec_keflux,
+            m.get_diagnostic('paramspec_keflux'), rtol=rtol)
+
+def test_paramspec_additivity(rtol=1e-10):
     # Initialize four models with different (deterministic) parameterizations
     m1 = pyqg.QGModel()
 

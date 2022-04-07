@@ -63,40 +63,42 @@ def test_paramspec_decomposition(rtol=1e-10):
             m.get_diagnostic('paramspec_keflux'), rtol=rtol)
 
 def test_paramspec_additivity(rtol=1e-10):
-    # Initialize four models with different (deterministic) parameterizations
-    m1 = pyqg.QGModel()
+    # Test over multiple model classes
+    for model_class in [pyqg.QGModel, pyqg.LayeredModel]:
+        # Initialize four models with different (deterministic) parameterizations
+        m1 = model_class()
 
-    dq = np.random.normal(size=m1.q.shape)
-    du = np.random.normal(size=m1.u.shape)
-    dv = np.random.normal(size=m1.v.shape)
+        dq = np.random.normal(size=m1.q.shape)
+        du = np.random.normal(size=m1.u.shape)
+        dv = np.random.normal(size=m1.v.shape)
 
-    m2 = pyqg.QGModel(q_parameterization=lambda m: dq)
-    m3 = pyqg.QGModel(uv_parameterization=lambda m: (du,dv))
-    m4 = pyqg.QGModel(q_parameterization=lambda m: dq,
-                      uv_parameterization=lambda m: (du,dv))
+        m2 = model_class(q_parameterization=lambda m: dq)
+        m3 = model_class(uv_parameterization=lambda m: (du,dv))
+        m4 = model_class(q_parameterization=lambda m: dq,
+                         uv_parameterization=lambda m: (du,dv))
 
-    # Give them the same initial conditions
-    for m in [m1,m2,m3,m4]:
-        m.q = m1.q
+        # Give them the same initial conditions
+        for m in [m1,m2,m3,m4]:
+            m.q = m1.q
 
-    # Step them forward and manually increment diagnostics
-    for m in [m1,m2,m3,m4]:
-        m._step_forward()
-        m._increment_diagnostics()
+        # Step them forward and manually increment diagnostics
+        for m in [m1,m2,m3,m4]:
+            m._step_forward()
+            m._increment_diagnostics()
 
-    # Unparameterized model should have 0 for its parameterization spectrum
-    np.testing.assert_allclose(m1.get_diagnostic('paramspec'), 0., rtol=rtol)
+        # Unparameterized model should have 0 for its parameterization spectrum
+        np.testing.assert_allclose(m1.get_diagnostic('paramspec'), 0., rtol=rtol)
 
-    # Parameterized models should have nonzero values
-    for m in [m2,m3,m4]:
-        with pytest.raises(AssertionError):
-            np.testing.assert_allclose(m.get_diagnostic('paramspec'), 0., rtol=rtol)
+        # Parameterized models should have nonzero values
+        for m in [m2,m3,m4]:
+            with pytest.raises(AssertionError):
+                np.testing.assert_allclose(m.get_diagnostic('paramspec'), 0., rtol=rtol)
 
-    # Model with both parameterizations should have the sum
-    np.testing.assert_allclose(
-            (m2.get_diagnostic('paramspec') + m3.get_diagnostic('paramspec')),
-            m4.get_diagnostic('paramspec'),
-            rtol=rtol)
+        # Model with both parameterizations should have the sum
+        np.testing.assert_allclose(
+                (m2.get_diagnostic('paramspec') + m3.get_diagnostic('paramspec')),
+                m4.get_diagnostic('paramspec'),
+                rtol=rtol)
 
 def test_Dissspec_diagnostics(atol=1e-20):
 
@@ -152,4 +154,3 @@ def test_Dissspec_diagnostics(atol=1e-20):
     np.testing.assert_allclose(diss_contribution_model, 
                                rhs_contribution_filtered - rhs_contribution_unfiltered, 
                                atol=atol)
-

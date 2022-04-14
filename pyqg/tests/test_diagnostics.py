@@ -50,6 +50,7 @@ def test_paramspec_diagnostics(rtol=1e-10):
 def test_Dissspec_diagnostics(atol=1e-20):
 
     # Run model for some timesteps
+    dt = 3600
     tmax = dt * 1000
     m = pyqg.QGModel(tavestart=tmax, taveint=1, tmax=tmax, dt=dt)
     m.run()

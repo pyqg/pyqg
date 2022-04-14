@@ -702,21 +702,6 @@ class Model(PseudoSpectralKernel):
         """Should be implemented by subclass."""
         pass
 
-    def _calc_parameterization_spectrum(self, dqh1=None, dqh2=None):
-        if dqh1 is None: dqh1 = self.dqh[0]
-        if dqh2 is None: dqh2 = self.dqh[1]
-        del1 = self.del1
-        del2 = self.del2
-        F1 = self.F1
-        F2 = self.F2
-        wv2 = self.wv2
-        ph = self.ph
-        return np.real(
-            (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
-            (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
-            (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
-        )
-
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)

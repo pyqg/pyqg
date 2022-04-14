@@ -1,4 +1,3 @@
-__version__='0.1.3'
 from .model import Model
 from .qg_model import QGModel
 from .bt_model import BTModel

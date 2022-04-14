@@ -72,8 +72,9 @@ class LayeredModel(model.Model):
     def __init__(
         self,
         beta = 1.5e-11,             # gradient of coriolis parameter
-        nz = 4,                     # number of layers
+        nz = 3,                     # number of layers
         rd = 15000.0,               # deformation radius
+        f = 0.0001236812857687059,  # coriolis parameter [s^-1]
         H = None,                   # layer thickness
         U = None,                   # zonal base state flow
         V = None,                   # meridional base state flow
@@ -111,15 +112,24 @@ class LayeredModel(model.Model):
         self.beta = beta
         self.rd = rd
         self.delta = delta
+
+        if U is None: U = (np.arange(nz) * 0.025)[::-1]
+        if V is None: V = np.zeros(nz)
+        if H is None: H = [500] + [1750 for _ in range(nz-1)]
+        if rho is None: rho = np.arange(nz) * 0.3 + 1025
+
         self.Ubg = np.array(U)
         self.Vbg = np.array(V)
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
-        super().__init__(nz=nz, **kwargs)
+        super().__init__(nz=nz, f=f, **kwargs)
 
         self.vertical_modes()
 
+        self.set_q(1e-7*np.vstack([
+            np.random.randn(self.nx,self.ny)[np.newaxis,]
+            for _ in range(nz)]))
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

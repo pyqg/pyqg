@@ -683,7 +683,7 @@ class Model(PseudoSpectralKernel):
                 dt2 = -16./12.*m.dt
                 dt3 = 5./12.*m.dt
             for k in range(m.nz):
-                spectrum[k] += (m.filtr - ones) * (
+                spectrum[k] = (m.filtr - ones) * (
                     m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k])
             return -np.real(np.tensordot(m.Hi, np.conj(m.ph) * spectrum, axes = (0, 0))) / m.H / m.dt
 

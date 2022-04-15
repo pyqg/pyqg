@@ -639,6 +639,61 @@ class Model(PseudoSpectralKernel):
             dims=('lev',)
         )
 
+        def parameterization_spectrum(m):
+            spectrum = np.zeros_like(m.wv2)
+
+            if m.uv_parameterization is not None:
+                ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
+                il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
+                dqh1 = (-il * m.duh[0] + ik * m.dvh[0])
+                dqh2 = (-il * m.duh[1] + ik * m.dvh[1])
+                if m.q_parameterization is not None:
+                    dqh1 += m.dqh[0]
+                    dqh2 += m.dqh[1]
+                spectrum += m._calc_parameterization_spectrum(dqh1, dqh2)
+
+            elif m.q_parameterization is not None:
+                spectrum += m._calc_parameterization_spectrum(*m.dqh)
+
+            return spectrum
+
+        self.add_diagnostic('paramspec',
+            description='Spectral contribution of subgrid parameterization (if present)',
+            function=parameterization_spectrum,
+            units='',
+            dims=('l','k')
+        )
+
+        def dissipation_spectrum(m):
+            spectrum = np.zeros_like(m.qh)
+            ones = np.ones_like(m.filtr)
+            if m.ablevel==0:
+                # forward euler
+                dt1 = m.dt
+                dt2 = 0.0
+                dt3 = 0.0
+            elif m.ablevel==1:
+                # AB2 at step 2
+                dt1 = 1.5*m.dt
+                dt2 = -0.5*m.dt
+                dt3 = 0.0
+            else:
+                # AB3 from step 3 on
+                dt1 = 23./12.*m.dt
+                dt2 = -16./12.*m.dt
+                dt3 = 5./12.*m.dt
+            for k in range(m.nz):
+                spectrum[k] = (m.filtr - ones) * (
+                    m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k])
+            return -np.real(np.tensordot(m.Hi, np.conj(m.ph) * spectrum, axes = (0, 0))) / m.H / m.dt
+
+        self.add_diagnostic('Dissspec',
+            description='Spectral contribution of filter dissipation',
+            function=dissipation_spectrum,
+            units='meters squared second ^-3',
+            dims=('l','k')
+        )
+
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""
         pass

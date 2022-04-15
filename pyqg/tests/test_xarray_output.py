@@ -40,6 +40,7 @@ expected_diags = [
     'ENSflux',
     'ENSgenspec',
     'paramspec',
+    'Dissspec',
 ]
 
 expected_attrs = [

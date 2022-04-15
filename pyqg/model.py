@@ -17,6 +17,17 @@ try:
 except ImportError:
     pass
 
+def ifft_if_real(method):
+    def method_wrapper(self, arg, *args, **kwargs):
+        if arg.shape == self.q.shape:
+            return self.ifft(method(self.fft(arg, *args, **kwargs)))
+        elif arg.shape == self.qh.shape:
+            return method(arg, *args, **kwargs)
+        else:
+            raise ValueError(f"{method}'s argument must have shape " \
+                    "{self.q.shape} or {self.qh.shape}, not {arg.shape}")
+    return method_wrapper
+
 class Model(PseudoSpectralKernel):
     """A generic pseudo-spectral inversion model.
 
@@ -794,6 +805,18 @@ class Model(PseudoSpectralKernel):
         """
         from .xarray_output import model_to_dataset
         return model_to_dataset(self)
+
+    @ifft_if_real
+    def ddx(self, field):
+        return self.ik * field
+
+    @ifft_if_real
+    def ddy(self, field):
+        return self.il * field
+
+    @ifft_if_real
+    def laplacian(self, field):
+        return (self.ik**2 + self.il**2) * field
 
     def run_to_dataset(self, tsnapstart=0., tsnapint=4320000., drop_complex=True):
         """Run a simulation to completion and save intermediate steps as an

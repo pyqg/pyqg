@@ -45,3 +45,10 @@ Diagnostic Tools
 
 .. automodule:: pyqg.diagnostic_tools
     :members:  
+
+Parameterizations
+=================
+
+.. automodule:: pyqg.parameterizations
+    :members:
+    :exclude-members: Parameterization, CompositeParameterization, ReweightedParameterization

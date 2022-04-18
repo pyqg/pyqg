@@ -79,18 +79,18 @@ class ReweightedParameterization(Parameterization):
         return f"{self.weight} * {self.param}"
 
 class Smagorinsky(Parameterization):
-    r"""Subfilter stress parameterization from [Smagorinsky
-    1963](https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2)
+    r"""Velocity parameterization from `Smagorinsky 1963`_.
 
     This parameterization assumes that due to subgrid stress, there is an
     effective eddy viscosity
 
-    .. math:: (C_S \Delta)^2 \sqrt{2(S_{x,x}^2 + S_{y,y}^2 + 2S_{x,y}^2)}
+    .. math:: \nu = (C_S \Delta)^2 \sqrt{2(S_{x,x}^2 + S_{y,y}^2 + 2S_{x,y}^2)}
 
-    which leads to updated velocity tendencies :math:`\mathbf{u}_i, i \in
-    \{1,2\}`
+    which leads to updated velocity tendencies :math:`\Pi_{i}, i \in \{1,2\}`
+    corresponding to :math:`x` and :math:`y` respectively (equation is the same
+    in each layer):
 
-    .. math:: d\mathbf{u}_i = 2 \partial_i(\nu S_{i,i}) + \partial_{2-i}(\nu S_{i,2-i})
+    .. math:: \Pi_{i} = 2 \partial_i(\nu S_{i,i}) + \partial_{2-i}(\nu S_{i,2-i})
 
     where :math:`C_S` is a tunable Smagorinsky constant, :math:`\Delta` is the
     grid spacing, and
@@ -98,6 +98,8 @@ class Smagorinsky(Parameterization):
     .. math:: S_{i,j} = \frac{1}{2}(\partial_i \mathbf{u}_j
                                   + \partial_j \mathbf{u}_i)
 
+
+    .. _Smagorinsky 1963: https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2
     """
 
     def __init__(self, constant=0.1):
@@ -135,11 +137,13 @@ class Smagorinsky(Parameterization):
         return du, dv
 
 class BackscatterBiharmonic(Parameterization):
-    r"""Backscatter parameterization based on [Jansen and Held
-    2014](https://doi.org/10.1016/j.ocemod.2014.06.002) and [Jansen et al.
-    2015](https://doi.org/10.1016/j.ocemod.2015.05.007), and adapted by Pavel
-    Perezhogin. Assumes that a configurable fraction of Smagorinsky dissipation
-    is scattered back to larger scales in an energetically consistent way.
+    r"""PV parameterization based on `Jansen and Held 2014`_ and
+    `Jansen et al.  2015`_ (adapted by Pavel Perezhogin). Assumes that a
+    configurable fraction of Smagorinsky dissipation is scattered back to
+    larger scales in an energetically consistent way.
+
+    .. _Jansen and Held 2014: https://doi.org/10.1016/j.ocemod.2014.06.002
+    .. _Jansen et al. 2015: https://doi.org/10.1016/j.ocemod.2015.05.007
     """
 
     def __init__(self, smag_constant=0.1, back_constant=0.9, eps=1e-32):
@@ -175,8 +179,10 @@ class BackscatterBiharmonic(Parameterization):
         return dq
 
 class ZannaBolton2020(Parameterization):
-    r"""Parameterization derived from equation discovery by [Zanna and Bolton
-    2020](https://doi.org/10.1029/2020GL088376) (Eq. 6).
+    r"""Velocity parameterization derived from equation discovery by `Zanna and
+    Bolton 2020`_ (Eq. 6).
+
+    .. _Zanna and Bolton 2020: https://doi.org/10.1029/2020GL088376
     """
 
     def __init__(self, constant=-46761284):
@@ -185,11 +191,13 @@ class ZannaBolton2020(Parameterization):
         ----------
         constant : number
             Scaling constant :math:`\kappa_{BC}`. Units: meters :sup:`-2`.
-            Defaults to :math:`approx -4.68 \times 10^7`, a value obtained by
+            Defaults to :math:`\approx -4.68 \times 10^7`, a value obtained by
             empirically minimizing squared error with respect to the subgrid
-            forcing that results from applying the filtering method of [Guan et
-            al. 2022](https://doi.org/10.1016/j.jcp.2022.111090) to a
+            forcing that results from applying the filtering method of `Guan et
+            al. 2022`_ to a
             two-layer QGModel with default parameters.
+
+            .. _Guan et al. 2022: https://doi.org/10.1016/j.jcp.2022.111090
         """
 
         self.constant = constant

@@ -1,10 +1,197 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
-class Parameterization:
-    pass
+class Parameterization(ABC):
+    """A generic class representing a subgrid parameterization."""
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def __call__(self):
+        r"""
+        Parameters
+        ----------
+        m : Model
+            The model for which we are evaluating the parameterization.
+        """
+        pass
+
+    def __add__(self, other):
+        """Define a new parameterization as the sum of existing
+        parameterizations.
+
+        Parameters
+        ----------
+        other : Parameterization
+            The parameterization to add to this one.
+
+        Returns
+        -------
+        param : Parameterization
+            The sum of the two parameterizations.
+        """
+        return CompositeParameterization(self, other)
+
+    def __mul__(self, weight):
+        """Define a new parameterization by reweighting an existing
+        parameterization.
+
+        Parameters
+        ----------
+        weight : number
+            Multiplicative factor for scaling the parameterization.
+
+        Returns
+        -------
+        param : Parameterization
+            The rescaled parameterization.
+        """
+        return ReweightedParameterization(self, weight)
+
+    __rmul__ = __mul__
+
+class CompositeParameterization(Parameterization):
+    """A sum of multiple parameterizations. Used in
+    Parameterization#__add__."""
+
+    def __init__(self, *params):
+        self.params = params
+
+    def __call__(self, m):
+        return np.sum([f(m) for f in self.params], axis=0)
+
+    def __repr__(self):
+        return f"CompositeParameterization{self.params}"
+
+class ReweightedParameterization(Parameterization):
+    """A weighted parameterization. Used in Parameterization#__mul__."""
+
+    def __init__(self, param, weight):
+        self.param = param
+        self.weight = weight
+
+    def __call__(self, m):
+        return np.array(self.param(m)) * self.weight
+
+    def __repr__(self):
+        return f"{self.weight} * {self.param}"
+
+class Smagorinsky(Parameterization):
+    r"""Subfilter stress parameterization from [Smagorinsky
+    1963](https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2)
+
+    This parameterization assumes that due to subgrid stress, there is an
+    effective eddy viscosity
+
+    .. math:: (C_S \Delta)^2 \sqrt{2(S_{x,x}^2 + S_{y,y}^2 + 2S_{x,y}^2)}
+
+    which leads to updated velocity tendencies :math:`\mathbf{u}_i, i \in
+    \{1,2\}`
+
+    .. math:: d\mathbf{u}_i = 2 \partial_i(\nu S_{i,i}) + \partial_{2-i}(\nu S_{i,2-i})
+
+    where :math:`C_S` is a tunable Smagorinsky constant, :math:`\Delta` is the
+    grid spacing, and
+
+    .. math:: S_{i,j} = \frac{1}{2}(\partial_i \mathbf{u}_j
+                                  + \partial_j \mathbf{u}_i)
+
+    """
+
+    def __init__(self, constant=0.1):
+        r"""
+        Parameters
+        ----------
+        constant : number
+            Smagorinsky constant :math:`C_S`. Defaults to 0.1.
+        """
+
+        self.constant = constant
+
+    def __call__(self, m, just_viscosity=False):
+        r"""
+        Parameters
+        ----------
+        m : Model
+            The model for which we are evaluating the parameterization.
+        just_viscosity : bool
+            Whether to just return the eddy viscosity (e.g. for use in a
+            different parameterization which assumes a Smagorinsky dissipation
+            model). Defaults to false.
+        """
+        Sxx = m.ifft(m.uh * m.ik)
+        Syy = m.ifft(m.vh * m.il)
+        Sxy = 0.5 * m.ifft(m.uh * m.il + m.vh * m.ik)
+        nu = (self.constant * m.dx)**2 * np.sqrt(2 * (Sxx**2 + Syy**2 + 2 * Sxy**2))
+        if just_viscosity:
+            return nu
+        nu_Sxxh = m.fft(nu * Sxx)
+        nu_Sxyh = m.fft(nu * Sxy)
+        nu_Syyh = m.fft(nu * Syy)
+        du = 2 * (m.ifft(nu_Sxxh * m.ik) + m.ifft(nu_Sxyh * m.il))
+        dv = 2 * (m.ifft(nu_Sxyh * m.ik) + m.ifft(nu_Syyh * m.il))
+        return du, dv
+
+class BackscatterBiharmonic(Parameterization):
+    r"""Backscatter parameterization based on [Jansen and Held
+    2014](https://doi.org/10.1016/j.ocemod.2014.06.002) and [Jansen et al.
+    2015](https://doi.org/10.1016/j.ocemod.2015.05.007), and adapted by Pavel
+    Perezhogin. Assumes that a configurable fraction of Smagorinsky dissipation
+    is scattered back to larger scales in an energetically consistent way.
+    """
+
+    def __init__(self, smag_constant=0.1, back_constant=0.9, eps=1e-32):
+        r"""
+        Parameters
+        ----------
+        smag_constant : number
+            Smagorinsky constant :math:`C_S` for the dissipative model.
+            Defaults to 0.1.
+        back_constant : number
+            Backscatter constant :math:`c_{diss}` describing the fraction of
+            Smagorinsky-dissipated energy which should be scattered back to
+            larger scales. Defaults to 0.9. Normally should be less than 1, but
+            larger values may still be stable.
+        eps : number
+            Small constant to add to the denominator of the backscatter formula
+            to prevent division by zero errors. Defaults to 1e-32.
+        """
+
+        self.smagorinsky = Smagorinsky(smag_constant)
+        self.back_constant = back_constant
+        self.eps = eps
+
+    def __call__(self, m):
+        lap = m.ik**2 + m.il**2
+        psi = m.ifft(m.ph)
+        lap_lap_psi = m.ifft(lap**2 * m.ph)
+        dissipation = -m.ifft(lap * m.fft(lap_lap_psi * self.smagorinsky(m, just_viscosity=True)))
+        backscatter = -self.back_constant * lap_lap_psi * (
+            (np.sum(m.Hi * np.mean(psi * dissipation, axis=(-1,-2)))) /
+            (np.sum(m.Hi * np.mean(psi * lap_lap_psi, axis=(-1,-2))) + self.eps)) 
+        dq = dissipation + backscatter
+        return dq
 
 class ZannaBolton2020(Parameterization):
+    r"""Parameterization derived from equation discovery by [Zanna and Bolton
+    2020](https://doi.org/10.1029/2020GL088376) (Eq. 6).
+    """
+
     def __init__(self, constant=-46761284):
+        r"""
+        Parameters
+        ----------
+        constant : number
+            Scaling constant :math:`\kappa_{BC}`. Units: meters :sup:`-2`.
+            Defaults to :math:`approx -4.68 \times 10^7`, a value obtained by
+            empirically minimizing squared error with respect to the subgrid
+            forcing that results from applying the filtering method of [Guan et
+            al. 2022](https://doi.org/10.1016/j.jcp.2022.111090) to a
+            two-layer QGModel with default parameters.
+        """
+
         self.constant = constant
 
     def __call__(self, m):
@@ -25,35 +212,3 @@ class ZannaBolton2020(Parameterization):
         du = kappa * m.ifft(m.ik*(sum_sqs - rv_shear) + m.il*rv_stretch)
         dv = kappa * m.ifft(m.il*(sum_sqs + rv_shear) + m.ik*rv_stretch)
         return du, dv
-
-class Smagorinsky(Parameterization):
-    def __init__(self, constant=0.1):
-        self.constant = constant
-
-    def __call__(self, m, just_viscosity=False):
-        Sxx = m.ifft(m.uh * m.ik)
-        Syy = m.ifft(m.vh * m.il)
-        Sxy = 0.5 * m.ifft(m.uh * m.il + m.vh * m.ik)
-        nu = (self.constant * m.dx)**2 * np.sqrt(2 * (Sxx**2 + Syy**2 + 2 * Sxy**2))
-        if just_viscosity:
-            return nu
-        du = 2 * (m.ifft(nu * Sxx * m.ik) + m.ifft(nu * Sxy * m.il))
-        dv = 2 * (m.ifft(nu * Sxy * m.ik) + m.ifft(nu * Syy * m.il))
-        return du, dv
-
-class BackscatterBiharmonic(Parameterization):
-    def __init__(self, smag_constant=0.1, back_constant=0.9, eps=1e-32):
-        self.smagorinsky = Smagorinsky(smag_constant)
-        self.back_constant = back_constant
-        self.eps = eps
-
-    def __call__(self, m):
-        lap = m.ik**2 + m.il**2
-        psi = m.ifft(m.ph)
-        lap_lap_psi = m.ifft(lap**2 * m.ph)
-        dissipation = -m.ifft(lap * m.fft(lap_lap_psi * self.smagorinsky(m, just_viscosity=True)))
-        backscatter = -self.back_constant * lap_lap_psi * (
-            (np.sum(m.Hi * np.mean(psi * dissipation, axis=(-1,-2)))) /
-            (np.sum(m.Hi * np.mean(psi * lap_lap_psi, axis=(-1,-2))) + self.eps)) 
-        dq = dissipation + backscatter
-        return dq

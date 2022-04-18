@@ -33,8 +33,10 @@ def test_addition_and_scaling(model, rtol=1e-11):
     zb20 = pyqg.ZannaBolton2020()
     comb = 0.5*smag + 0.75*zb20
     du, dv = comb(model)
-    np.testing.assert_allclose(du, 0.5*smag(model)[0] + 0.75*zb20(model)[0])
-    np.testing.assert_allclose(dv, 0.5*smag(model)[1] + 0.75*zb20(model)[1])
+    np.testing.assert_allclose(du, 0.5*smag(model)[0] + 0.75*zb20(model)[0],
+            rtol=rtol)
+    np.testing.assert_allclose(dv, 0.5*smag(model)[1] + 0.75*zb20(model)[1],
+            rtol=rtol)
 
 if __name__ == "__main__":
     unittest.main()

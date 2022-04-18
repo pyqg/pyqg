@@ -7,9 +7,10 @@ is
 .. math::
 
    \begin{aligned}
-   {q_1} &= {\nabla^2}\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-\psi_1}{g'_{1}}\right)\,,  \qquad & n =1{\, ,}\nonumber \\
+   {q_1} &= {\nabla^2}\psi_1 + \frac{f_0^2}{H_1} \left(\frac{\psi_{2}-\psi_1}{g'_{1}}\right)\,, \nonumber \\
    {q_n} &= {\nabla^2}\psi_n + \frac{f_0^2}{H_n} \left(\frac{\psi_{n-1}-\psi_n}{g'_{n-1}}  - \frac{\psi_{n}-\psi_{n+1}}{g'_{n}}\right)\,,  \qquad &n = 2,\dots,{\mathrm{N}}-1 {\, ,}\nonumber \\
-   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\mathrm{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) \,,  \qquad & n ={\mathrm{N}}\,,\end{aligned}
+   {q_{\mathrm{N}}} &= {\nabla^2}\psi_{\mathrm{N}}+ \frac{f_0^2}{H_{\mathrm{N}}} \left(\frac{\psi_{\mathrm{N}-1}-\psi_{\mathrm{N}}}{g'_{{\mathrm{N}}-1}}\right) \,,
+   \end{aligned}
 
 where :math:`q_n` is the `n`-th layer QG potential vorticity, and
 :math:`\psi_n` is the streamfunction, :math:`f_0` is the inertial
@@ -33,9 +34,9 @@ particular, assuming a background flow with background velocity
 
 and
 
-.. math:: q_n^{{\text{tot}}} = Q_n + \delta_{n{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b + q_n {\, ,}
+.. math:: q_n^{{\text{tot}}} = Q_n + \delta_{n,{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b + q_n {\, ,}
 
-where :math:`Q_n + \delta_{n{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b`
+where :math:`Q_n + \delta_{n,{\mathrm{N}}}\frac{f_0}{H_{\mathrm{N}}}h_b`
 is `n`-th layer background PV and :math:`h_b` is the
 bottom topography, we obtain the evolution equations
 
@@ -43,13 +44,13 @@ bottom topography, we obtain the evolution equations
 
    \begin{aligned}
    \label{eq:qg_dynamics}
-   {q_n}_t + \mathsf{J}(\psi_n,q_n + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_b )& + U_n ({q_n}_x + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{bx}) + V_n ({q_n}_y + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{by}) \nonumber
-   \\ & + {Q_n}_y {\psi_n}_x - {Q_n}_x {\psi_n}_y = {\text{ssd}} - r_{ek} \delta_{n{\mathrm{N}}} {\nabla^2}\psi_n {\, ,}\qquad n = 1,\dots,{\mathrm{N}}{\, ,}\end{aligned}
+   {q_n}_t + \mathsf{J}(\psi_n,q_n + \delta_{n,{\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_b )& + U_n ({q_n}_x + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{bx}) + V_n ({q_n}_y + \delta_{n {\mathrm{N}}} \frac{f_0}{H_{\mathrm{N}}}h_{by}) \nonumber
+   \\ & + {Q_n}_y {\psi_n}_x - {Q_n}_x {\psi_n}_y = {\text{ssd}} - r_{ek} \delta_{n,{\mathrm{N}}} {\nabla^2}\psi_n {\, ,}\qquad n = 1,\dots,{\mathrm{N}}{\, ,}\end{aligned}
 
 where :math:`{\text{ssd}}` is stands for small-scale dissipation, which
 is achieved by an spectral exponential filter or hyperviscosity, and
 :math:`r_{ek}` is the linear bottom drag coefficient. The Dirac delta,
-:math:`\delta_{nN}`, indicates that the drag is only applied in the
+:math:`\delta_{n,\mathrm{N}}`, indicates that the drag is only applied in the
 bottom layer. (Note that in QG :math:`h_b/H_{\mathrm{N}} \ll 1`.)
 
 Equations in spectral space

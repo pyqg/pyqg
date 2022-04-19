@@ -55,6 +55,7 @@ Parameterizations
 
 .. automodule:: pyqg.parameterizations
     :members:
+    :member-order: bysource
     :exclude-members: Parameterization, CompositeParameterization, ReweightedParameterization
 
     

@@ -97,6 +97,8 @@ class QGModel(model.Model):
         self.U2 = U2
         #self.filterfac = filterfac
 
+        if 'nz' in kwargs:
+            del kwargs['nz']
 
         super().__init__(nz=2, **kwargs)
 
@@ -106,7 +108,9 @@ class QGModel(model.Model):
                 np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
                 np.zeros_like(self.x) )
 
-
+    @property
+    def H1(self):
+        return self.Hi[0]
 
     ### PRIVATE METHODS - not meant to be called by user ###
 

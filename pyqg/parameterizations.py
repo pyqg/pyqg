@@ -2,25 +2,38 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 class Parameterization(ABC):
-    """A generic class representing a subgrid parameterization."""
+    """A generic class representing a subgrid parameterization. Inherit from
+    this class when defining a new parameterization."""
 
     @abstractmethod
     def __init__(self):
+        ""
         pass
 
     @abstractmethod
-    def __call__(self):
-        r"""
+    def __call__(self, m):
+        r"""Call the parameterization given a pyqg.Model. Override this
+        function in the subclass when defining a new parameterization. 
+
         Parameters
         ----------
         m : Model
             The model for which we are evaluating the parameterization.
+
+        Returns
+        -------
+        forcing : real array or tuple
+            The forcing associated with the model. If the model has been
+            initialized with this parameterization as its
+            :code:`q_parameterization`, this should be an array of shape
+            :code:`(nz, ny, nx)`. For :code:`uv_parameterization`, this should
+            be a tuple of two such arrays or a single array of shape :code:`(2,
+            nz, ny, nx)`.
         """
         pass
 
     def __add__(self, other):
-        """Define a new parameterization as the sum of existing
-        parameterizations.
+        """Add two parameterizations (returning a new object).
 
         Parameters
         ----------
@@ -29,26 +42,25 @@ class Parameterization(ABC):
 
         Returns
         -------
-        param : Parameterization
+        sum : Parameterization
             The sum of the two parameterizations.
         """
         return CompositeParameterization(self, other)
 
-    def __mul__(self, weight):
-        """Define a new parameterization by reweighting an existing
-        parameterization.
+    def __mul__(self, constant):
+        """Multiply a parameterization by a constant (returning a new object).
 
         Parameters
         ----------
-        weight : number
+        constant : number
             Multiplicative factor for scaling the parameterization.
 
         Returns
         -------
-        param : Parameterization
-            The rescaled parameterization.
+        product : Parameterization
+            The parameterization times the constant.
         """
-        return ReweightedParameterization(self, weight)
+        return ReweightedParameterization(self, constant)
 
     __rmul__ = __mul__
 

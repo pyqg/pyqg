@@ -133,6 +133,11 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
+    @property
+    def _config(self):
+        config = super()._config
+        config['H'] = self.Hi
+        return config
 
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """

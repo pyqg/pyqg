@@ -2,6 +2,7 @@ import numpy as np
 from numpy import pi
 import logging
 import warnings
+import inspect
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
@@ -387,6 +388,122 @@ class Model(PseudoSpectralKernel):
 
         return omega, phi
 
+    @property
+    def _config(self):
+        r"""Returns a copy of the set of parameters that can be used to
+        initialize the model in the same way (required for computing subgrid
+        forcing automatically).
+
+        Note that this may need to be overridden in subclasses if parameter
+        names do not match attributes.
+        """
+        res = {}
+        sig1 = inspect.signature(self.__class__.__init__)
+        sig2 = inspect.signature(Model.__init__)
+        for sig in [sig1, sig2]:
+            for param in sig.parameters:
+                if hasattr(self, param):
+                    res[param] = getattr(self, param)
+        return res
+
+    def _reinitialized(self, **kw):
+        r"""Return a new model with the same parameters, except for overrides
+        given in keyword arguments.
+
+        Returns
+        -------
+        model : Model
+            Newly initialized model with same or overridden parameters.
+        """
+        config = self._config
+        config.update(kw)
+        return self.__class__(**config)
+
+    def subgrid_forcing(self,
+            lower_resolution=None,
+            quantities='q',
+            coarsening_function=None,
+            spectral_filter=lambda m: m.filtr):
+        r"""Computes the subgrid forcing of a given :code:`quantity` due to
+        advection, assuming a specific filtering and coarsening scheme down to
+        a :code:`lower_resolution`.
+
+        Parameters
+        ----------
+        lower_resolution : int
+            The resolution to which we are reducing the model. Defaults to 1/4
+            of (and must be strictly smaller than) the current resolution. Must
+            be an even number.
+        quantities : string or iterable
+            The quantities for which we are computing subgrid forcing (either
+            as a string if a single quantity, or as an iterable of strings if
+            multiple). Must all be attributes of the model with shape
+            :code:`(nz, ny, nx)`.
+        coarsening_function : function
+            The function used to coarsen high-resolution variables when
+            computing forcing. Defaults to spectral truncation followed by an
+            application of the low-res model's numerical filter.
+        spectral_filter : function
+            The function used to filter variables during coarsening with the
+            default spectral truncation :code:`coarsening_function`. Defaults
+            to the numerical filter already used in the low-res model for
+            small-scale dissipation.
+        """
+
+        assert self.nx == self.ny, "subgrid forcing function assumes nx==ny"
+
+        if lower_resolution is None:
+            lower_resolution = self.nx // 4
+
+        assert lower_resolution < self.nx, "lower_resolution must be lower"
+        assert lower_resolution % 2 == 0, "lower_resolution must be even"
+
+        return_one = False
+
+        if isinstance(quantities, str):
+            quantities = [quantities]
+            return_one = True
+
+        for q in quantities:
+            assert hasattr(self, q), f"unrecognized property {q}"
+            assert getattr(self, q).shape == self.q.shape, f"{q} has wrong shape"
+
+        # Initialize a lower-res model with the same parameters
+        m1 = self
+        m2 = self._reinitialized(nx=lower_resolution, ny=lower_resolution)
+
+        if coarsening_function is None:
+            def coarsening_function(var):
+                # Convert to spectral (if needed)
+                if var.shape != m1.qh.shape: var = m1.fft(var)
+                # Truncate high-frequency indices
+                keep = m2.qh.shape[1]//2
+                trunc = np.hstack((var[:,:keep,:keep+1], var[:,-keep:,:keep+1]))
+                # Apply filter and normalize FFT
+                filtered = trunc * spectral_filter(m2) * (m1.nx / m2.nx)**2
+                # Convert to real
+                return m2.ifft(filtered)
+
+        # Set its state to the coarsened version
+        m2.q = coarsening_function(m1.qh)
+        m2._invert()
+        m2._calc_derived_fields()
+
+        forcings = []
+
+        for quantity in quantities:
+            # Get the corresponding field
+            x1 = getattr(m1, quantity)
+            x2 = getattr(m2, quantity)
+            # Compute the difference in advected quantities
+            forcing = coarsening_function(m1._advect(x1)) - m2.ifft(m2._advect(x2))
+            forcings.append(forcing)
+
+        if return_one:
+            forcings = forcings[0]
+
+        return forcings
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
@@ -522,9 +639,13 @@ class Model(PseudoSpectralKernel):
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
-    def _advect(self, q, u, v):
+    def _advect(self, q, u=None, v=None):
         """Given real inputs q, u, v, returns the advective tendency for
         q in spectral space."""
+        if u is None:
+            u = self.u
+        if v is None:
+            v = self.v
         uq = u*q
         vq = v*q
         # this is a hack, since fft now requires input to have shape (nz,ny,nx)

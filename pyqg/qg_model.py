@@ -97,6 +97,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
 
+        if 'nz' in kwargs:
+            del kwargs['nz']
 
         super().__init__(nz=2, **kwargs)
 
@@ -106,9 +108,13 @@ class QGModel(qg_diagnostics.QGDiagnostics):
                 np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
                 np.zeros_like(self.x) )
 
-
-
     ### PRIVATE METHODS - not meant to be called by user ###
+
+    @property
+    def _config(self):
+        config = super()._config
+        config['H1'] = self.Hi[0]
+        return config
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""

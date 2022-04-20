@@ -139,10 +139,10 @@ above, we have
 
    \begin{aligned}
        \frac{\partial E(k,l)}{\partial t} &= {\frac{1}{H}\sum_{n=1}^N H_n \mathbb{R}[\hat{\psi}_n^* {\mathsf{\hat{J}}}(\psi_n,\nabla^2\psi_n)]}
-       +\frac{1}{H}\sum_{i=1}^N H_n\mathbb{R}[\hat{\psi}_n^* \hat{\mathsf{J}} (\psi_n,({\mathbf{S}}\boldsymbol\psi)_n)] \nonumber \\
-       &+\frac{1}{H}\sum_{i=1}^N H_n (k U_n + l V_n)\, \mathbb{R}[i \, \hat{\psi}^*_n (\mathbf{S}\hat{\boldsymbol\psi})_n] 
+       +\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}[\hat{\psi}_n^* \hat{\mathsf{J}} (\psi_n,({\mathbf{S}}\boldsymbol\psi)_n)] \nonumber \\
+       &+\frac{1}{H}\sum_{n=1}^N H_n (k U_n + l V_n)\, \mathbb{R}[i \, \hat{\psi}^*_n (\mathbf{S}\hat{\boldsymbol\psi})_n] 
        -r_{ek}\frac{H_N}{H} \kappa^2|\hat{\psi}_N|^2 \nonumber \\
-       &-\frac{1}{H}\sum_{i=1}^N H_n\mathbb{R}[\hat{\psi}_n^* \widehat{\text{ssd}}_n],
+       &-\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}[\hat{\psi}_n^* \widehat{\text{ssd}}_n],
     \end{aligned}
 
 where :math:`*` stands for complex conjugation. We also used the fact that 
@@ -197,7 +197,7 @@ is governed by
     \frac{\partial Z(k,l)}{\partial t} &= \frac{1}{H}\sum_{n=1}^{\mathrm{N}}\mathbb{R}\left[\hat{q}_n^* \mathsf{\hat{J}}(\psi_n,q_n)\right]
         +\frac{1}{H}\sum_{n=1}^{\mathrm{N}}(l {Q_n}_x - k {Q_n}_y)\mathbb{R}\left[i({\mathbf{S}}\hat{\boldsymbol\psi}^*)_n\hat{\psi}_n\right]\\
         &+r_{ek}\frac{H_N}{H} \kappa^2\mathbb{R}\left[\hat{q}_N^*\hat{\psi}_N\right] 
-        +\frac{1}{H}\sum_{i=1}^N H_n\mathbb{R}[\hat{q}_n^* \widehat{\text{ssd}}_n],
+        +\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}[\hat{q}_n^* \widehat{\text{ssd}}_n],
    \end{aligned}
 
 where the terms above on the right represent, from left to right,

@@ -2,7 +2,8 @@ Layered quasi-geostrophic model
 ===============================
 
 Consider an :math:`{N}`-layer quasi-geostrophic (QG) model with rigid lid and
-flat topography (for reference, see Eq. 5.85 in Vallis, 2017). 
+flat topography (for reference, see Eq. 5.85 in 
+`Vallis, 2017 <http://empslocal.ex.ac.uk/people/staff/gv219/aofd/>`__). 
 The :math:`{N}`-layer QG potential vorticity is
 
 .. math::
@@ -17,7 +18,7 @@ where :math:`q_n` is the `n`-th layer QG potential vorticity, and
 frequency, :math:`H_n` is the layer depth. Also the `n`-th buoyancy jump (reduced gravity) is
 
 .. math:: 
-   g'_n \equiv g \frac{\rho_{n}-\rho_{n+1}}{\rho_n}{\, ,}
+   g'_n \equiv g \frac{\rho_{n+1}-\rho_{n}}{\rho_n}{\, ,}
 
 where :math:`g` is the acceleration due to gravity and :math:`\rho_n` is
 the layer density. 
@@ -216,8 +217,9 @@ budget above to be dominated by the balance between I and II.
 Special case: two-layer model
 =============================
 
-With :math:`{\mathrm{N}}= 2`, an alternative notation for the
-perturbation of potential vorticities can be written as
+With :math:`N=2` (see :doc:`notation_twolayer_model`), 
+an alternative notation for the perturbation of potential vorticities can 
+be written as
 
 .. math::
 
@@ -227,7 +229,7 @@ perturbation of potential vorticities can be written as
 
 where we use the following definitions where
 
-.. math:: F_1 \equiv \frac{k_d^2}{1 + \delta^2}\,, \qquad \:\:\text{and} \qquad F_2 \equiv \delta \,F_1\,,
+.. math:: F_1 \equiv \frac{k_d^2}{1 + \delta}\,, \qquad \:\:\text{and} \qquad F_2 \equiv \delta \,F_1\,,
 
 with the deformation wavenumber
 
@@ -237,31 +239,48 @@ With this notation, the stretching matrix is simply
 
 .. math::
 
-   {\mathsf{S}}= \begin{bmatrix}
-   - F_1 \qquad \:\:F_1\\
-   F_2 \qquad - F_2
-   \end{bmatrix}{\, .}
+   {\mathbf{S}}= \begin{bmatrix}
+   -F_1 & F_1\\
+   F_2 & -F_2
+   \end{bmatrix}.
 
 The inversion relationship in Fourier space is
 
 .. math::
 
-   \begin{bmatrix}
+   \begin{pmatrix}
    \widehat{\psi}_1\\
    \widehat{\psi}_2\\
-   \end{bmatrix}
-   = \frac{1}{\text{det} \: {\mathsf{B}}}
+   \end{pmatrix}
+   = -\frac{1}{\kappa^2(\kappa^2 + F_1 + F_2)}
    \begin{bmatrix}
-   -(\kappa^2 + F_2) \qquad \:\:\:\:-F_1\\
-   \:\:\:\: -F_2 \qquad - (\kappa^2 + F_1)
+   \kappa^2 + F_2 & F_1\\
+   F_2 & \kappa^2 + F_1
    \end{bmatrix}
-   \begin{bmatrix}
+   \begin{pmatrix}
    \widehat{q}_1\\
    \widehat{q}_2\\
-   \end{bmatrix}{\, ,}
+   \end{pmatrix}.
 
-where
+Substituting the inversion relationship to the rate of change of the energy
+spectrum above, we have
 
-.. math:: \qquad \text{det}\, {\mathsf{B}}= \kappa^2\left(\kappa^2 + F_1 + F_2\right)\,.
+.. math:: 
+   \begin{aligned}
+    \frac{\partial E(k,l)}{\partial t}
+    =&\mathbb{R}\left[(\delta_1\hat{\psi}_1^*, \delta_2\hat{\psi}_2^*)\cdot
+    \begin{pmatrix}
+     &\hat{J}(\psi_1, q_1) + ik\beta_1\hat{\psi}_1 + ikU_1\hat{q}_1\\[6pt]
+     &\hat{J}(\psi_2, q_2) + ik\beta_2\hat{\psi}_2 + ikU_2\hat{q}_2 - r_{ek}\kappa^2\hat{\psi}_2
+     \end{pmatrix}\right]\\
+    =&\sum_{n=1}^2\delta_n\mathbb{R}\left[\hat{\psi}_n^*\hat{J}(\psi_n, \nabla^2\psi_n)\right]
+    +\delta_1F_1\mathbb{R}\left[(\hat{\psi}_1^*-\hat{\psi}_2^*)\hat{J}(\psi_1, \psi_2)\right]\\
+    &+\delta_1F_1k(U_1-U_2)\mathbb{R}\left[i\hat{\psi}_1^*\hat{\psi}_2\right] - r_{ek}\delta_2\kappa^2|\hat{\psi}_2|^2, 
+    \end{aligned}
 
+in which the right-hand-side terms are, from left to right, the spectral divergence 
+of kinetic energy flux, the spectral divergence of potential energy flux, the spectrum 
+of available potential energy generation, and the spectral contribution by bottom drag. 
+Note that we neglected the contribution from eddy viscosity (spectral filter), but they 
+have the same form as the multi-layer case above.
 

@@ -349,8 +349,17 @@ class LayeredModel(model.Model):
         self.add_diagnostic('ENSgenspec',
                     description='the spectrum of the rate of generation of barotropic enstrophy',
                     function = (lambda self:
-                            -(self.Hi[:,np.newaxis,np.newaxis]*((self.ikQy -
-                            self.ilQx)*(self.Sph.conj()*self.ph)).real).sum(axis=0)/self.H),
+                                (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
+                                self.Sph.conj()*self.ph).real).sum(axis=0)/self.H),
                 units='',
                 dims=('l','k')
         )
+
+        self.add_diagnostic('ENSfrictionspec',
+                    description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
+                    function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
+                        (self.qh[-1].conj()*self.ph[-1]).real), 
+                units='',
+                dims=('l','k')
+        )
+

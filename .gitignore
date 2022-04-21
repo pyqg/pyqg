@@ -63,8 +63,11 @@ docs/_build/
 target/
 
 # notebooks
-*/.ipynb_checkpoints/*
+**/.ipynb_checkpoints/*
 
 # .swp/.swo files from text editors
 *.swp
 *.swo
+
+# remove DS_Store file (for Mac systems)
+**.DS_Store

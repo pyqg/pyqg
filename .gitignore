@@ -65,9 +65,8 @@ target/
 # notebooks
 **/.ipynb_checkpoints/*
 
-# .swp/.swo files from text editors
-*.swp
-*.swo
+# .swp files from vim
+*.sw[a-z]
 
 # remove DS_Store file (for Mac systems)
 **.DS_Store

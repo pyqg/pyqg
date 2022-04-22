@@ -11,41 +11,94 @@ def test_describe_diagnostics():
     m = pyqg.QGModel(1)
     m.describe_diagnostics()
 
-def test_paramspec_diagnostics(rtol=1e-10):
-    # Initialize four models with different (deterministic) parameterizations
-    m1 = pyqg.QGModel()
+def old_qgmodel_calc_paramspec(self, dqh1, dqh2):
+    del1 = self.del1
+    del2 = self.del2
+    F1 = self.F1
+    F2 = self.F2
+    wv2 = self.wv2
+    ph = self.ph
+    return np.real(
+        (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
+        (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
+        (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
+    )
 
-    dq = np.random.normal(size=m1.q.shape)
-    du = np.random.normal(size=m1.u.shape)
-    dv = np.random.normal(size=m1.v.shape)
+def test_paramspec_decomposition(rtol=1e-10):
+    # Initialize a model with a parameterization, step it forward and compute paramspec
+    dq = np.random.normal(size=(2,64,64))
+    m = pyqg.QGModel(q_parameterization = lambda m: dq)
+    m._step_forward()
+    m._increment_diagnostics()
 
-    m2 = pyqg.QGModel(q_parameterization=lambda m: dq)
-    m3 = pyqg.QGModel(uv_parameterization=lambda m: (du,dv))
-    m4 = pyqg.QGModel(q_parameterization=lambda m: dq,
-                      uv_parameterization=lambda m: (du,dv))
+    # Compute the parameterization spectrum at least two ways
+    height_ratios = (m.Hi / m.H)[:,np.newaxis,np.newaxis]
+    dqh = m.fft(dq)
+    ps1 = -np.real((height_ratios * np.conj(m.ph) * dqh).sum(axis=0))
+    ps2 = old_qgmodel_calc_paramspec(m, dqh[0], dqh[1])
+    ps3 = m.get_diagnostic('paramspec') 
 
-    # Give them the same initial conditions
-    for m in [m1,m2,m3,m4]:
-        m.q = m1.q
+    # Ensure they're identical
+    np.testing.assert_allclose(ps1, ps2, rtol=rtol)
+    np.testing.assert_allclose(ps1, ps3, rtol=rtol)
 
-    # Step them forward and manually increment diagnostics
-    for m in [m1,m2,m3,m4]:
-        m._step_forward()
-        m._increment_diagnostics()
+    # Now test it can be decomposed into separate KE and APE components
+    ph_diff = np.subtract(*np.conj(m.ph))
+    apeflux_term = m.del1 * m.del2 / m.rd**2 * np.array([ph_diff, -ph_diff])
+    keflux_term  = m.wv2 * height_ratios * np.conj(m.ph)
 
-    # Unparameterized model should have 0 for its parameterization spectrum
-    np.testing.assert_allclose(m1.get_diagnostic('paramspec'), 0., rtol=rtol)
+    def matvec(m, v):
+        # matrix-vector multiplication over the first two dimensions
+        return np.einsum("ij..., i... -> j...", m, v) 
 
-    # Parameterized models should have nonzero values
-    for m in [m2,m3,m4]:
-        with pytest.raises(AssertionError):
-            np.testing.assert_allclose(m.get_diagnostic('paramspec'), 0., rtol=rtol)
+    paramspec_apeflux = np.real((matvec(m.a, apeflux_term) * dqh).sum(axis=0))
+    paramspec_keflux  = np.real((matvec(m.a,  keflux_term) * dqh).sum(axis=0))
+    ps4 = paramspec_apeflux + paramspec_keflux
+    np.testing.assert_allclose(ps1, ps4, rtol=rtol)
 
-    # Model with both parameterizations should have the sum
-    np.testing.assert_allclose(
-            (m2.get_diagnostic('paramspec') + m3.get_diagnostic('paramspec')),
-            m4.get_diagnostic('paramspec'),
-            rtol=rtol)
+    # Test these terms match the subterms from QGModel
+    np.testing.assert_allclose(paramspec_apeflux,
+            m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
+    np.testing.assert_allclose(paramspec_keflux,
+            m.get_diagnostic('paramspec_keflux'), rtol=rtol)
+
+def test_paramspec_additivity(rtol=1e-10):
+    # Test over multiple model classes
+    for model_class in [pyqg.QGModel, pyqg.LayeredModel]:
+        # Initialize four models with different (deterministic) parameterizations
+        m1 = model_class()
+
+        dq = np.random.normal(size=m1.q.shape)
+        du = np.random.normal(size=m1.u.shape)
+        dv = np.random.normal(size=m1.v.shape)
+
+        m2 = model_class(q_parameterization=lambda m: dq)
+        m3 = model_class(uv_parameterization=lambda m: (du,dv))
+        m4 = model_class(q_parameterization=lambda m: dq,
+                         uv_parameterization=lambda m: (du,dv))
+
+        # Give them the same initial conditions
+        for m in [m1,m2,m3,m4]:
+            m.q = m1.q
+
+        # Step them forward and manually increment diagnostics
+        for m in [m1,m2,m3,m4]:
+            m._step_forward()
+            m._increment_diagnostics()
+
+        # Unparameterized model should have 0 for its parameterization spectrum
+        np.testing.assert_allclose(m1.get_diagnostic('paramspec'), 0., rtol=rtol)
+
+        # Parameterized models should have nonzero values
+        for m in [m2,m3,m4]:
+            with pytest.raises(AssertionError):
+                np.testing.assert_allclose(m.get_diagnostic('paramspec'), 0., rtol=rtol)
+
+        # Model with both parameterizations should have the sum
+        np.testing.assert_allclose(
+                (m2.get_diagnostic('paramspec') + m3.get_diagnostic('paramspec')),
+                m4.get_diagnostic('paramspec'),
+                rtol=rtol)
 
 def test_Dissspec_diagnostics(atol=1e-20):
 
@@ -101,4 +154,3 @@ def test_Dissspec_diagnostics(atol=1e-20):
     np.testing.assert_allclose(diss_contribution_model, 
                                rhs_contribution_filtered - rhs_contribution_unfiltered, 
                                atol=atol)
-

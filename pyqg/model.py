@@ -678,13 +678,35 @@ class Model(PseudoSpectralKernel):
             dims=('l','k')
         )
 
-        self.add_diagnostic('ENSDissspec',
-            description='Spectral contribution of filter dissipation to barotropic enstrophy',
-            function=(lambda self: np.tensordot(self.Hi, 
-                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
+        self.add_diagnostic('paramspec',
+            description='Spectral contribution of subgrid parameterization (if present)',
+            function=lambda self: self._calc_parameterization_spectrum(),
             units='',
             dims=('l','k')
         )
+
+        self.add_diagnostic('ENSDissspec',
+            description='Spectral contribution of filter dissipation to barotropic enstrophy',
+            function=(lambda self: np.tensordot(self.Hi, 
+                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),                           
+            units='',
+            dims=('l','k')
+        )
+
+    def _calc_parameterization_contribution(self):
+        dqh = np.zeros_like(self.qh)
+        if self.uv_parameterization is not None:
+            ik = np.asarray(self._ik).reshape((1, -1)).repeat(self.wv2.shape[0], axis=0)
+            il = np.asarray(self._il).reshape((-1, 1)).repeat(self.wv2.shape[-1], axis=-1)
+            dqh += -il * self.duh + ik * self.dvh
+        if self.q_parameterization is not None:
+            dqh += self.dqh
+        return dqh
+
+    def _calc_parameterization_spectrum(self):
+        dqh = self._calc_parameterization_contribution()
+        height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
+        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0))
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""

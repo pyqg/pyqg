@@ -60,10 +60,10 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         # need to average these diagnostics
         avg_diagnostic_results = {
-             'entspec': 1.5015983257921716e-06,
-              'APEflux': 0.00017889483037254459,
-              'KEflux':  0.00037067750708912918,
-              'APEgenspec': 0.00025837684260178754,
+             'entspec': 1.5015983257921716e-06 / m.M**2,
+              'APEflux': 0.00017889483037254459  / m.M**2,
+              'KEflux':  0.00037067750708912918 / m.M**2,
+              'APEgenspec': 0.00025837684260178754 / m.M**2,
               'KEspec': 2 * (8581.3114357188006 + 163.75201433878425) / (m.M**2)
         }
 

@@ -706,7 +706,7 @@ class Model(PseudoSpectralKernel):
     def _calc_parameterization_spectrum(self):
         dqh = self._calc_parameterization_contribution()
         height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
-        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0))
+        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0)) / self.M**2
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""

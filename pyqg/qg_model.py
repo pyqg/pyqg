@@ -315,5 +315,5 @@ class QGModel(model.Model):
             (
                 np.einsum("ij..., i... -> j...", self.a, term) * 
                 self._calc_parameterization_contribution()
-            ).sum(axis=0)
+            ).sum(axis=0) / self.M**2
         )

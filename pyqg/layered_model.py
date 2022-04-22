@@ -358,7 +358,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('ENSfrictionspec',
                     description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
                     function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
-                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**4), 
+                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**2), 
                 units='second ^-3',
                 dims=('l','k')
         )

@@ -282,7 +282,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('entspec',
                 description='barotropic enstrophy spectrum',
                 function= (lambda self:
-                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H),
+                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H/self.M**2),
                 units='meters second ^-2',
                 dims=('l','k')
         )
@@ -307,7 +307,7 @@ class LayeredModel(model.Model):
                 description='available potential energy spectrum',
                 function= (lambda self:
                            (self.f2gpi*
-                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H),
+                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.M**2),
                 units='meters squared second ^-2',
                 dims=('l','k')
         )
@@ -315,7 +315,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('KEflux_div',
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H),
+                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
                 units='meters squared second ^-3',
                 dims=('l','k')
         )
@@ -333,7 +333,7 @@ class LayeredModel(model.Model):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                 (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
                                  self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
-                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H),
+                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H/self.M**2),
                 units='meters squared second ^-3',
                 dims=('l','k')
         )
@@ -341,7 +341,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('ENSflux',
                  description='barotropic enstrophy flux',
                  function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
-                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
+                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H/self.M**2),
                 units='second ^-3',
                 dims=('l','k')
         )
@@ -350,7 +350,7 @@ class LayeredModel(model.Model):
                     description='the spectrum of the rate of generation of barotropic enstrophy',
                     function = (lambda self:
                                 (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
-                                self.Sph.conj()*self.ph).real).sum(axis=0)/self.H),
+                                self.Sph.conj()*self.ph).real).sum(axis=0)/self.H/self.M**2),
                 units='second ^-3',
                 dims=('l','k')
         )
@@ -358,7 +358,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('ENSfrictionspec',
                     description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
                     function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
-                        (self.qh[-1].conj()*self.ph[-1]).real), 
+                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**4), 
                 units='second ^-3',
                 dims=('l','k')
         )

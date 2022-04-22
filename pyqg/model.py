@@ -634,7 +634,7 @@ class Model(PseudoSpectralKernel):
 
         self.add_diagnostic('KEfrictionspec',
             description='total energy dissipation spectrum by bottom drag',
-            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2),
+            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
             units='meters squared second ^-3',
             dims=('l','k')
         )

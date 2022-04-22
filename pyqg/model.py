@@ -632,6 +632,13 @@ class Model(PseudoSpectralKernel):
             dims=('time',)
         )
 
+        self.add_diagnostic('KEfrictionspec',
+            description='total energy dissipation spectrum by bottom drag',
+            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2),
+            units='',
+            dims=('l','k')
+        )
+
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
@@ -660,11 +667,13 @@ class Model(PseudoSpectralKernel):
             for k in range(m.nz):
                 spectrum[k] = (m.filtr - ones) * (
                     m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k])
-            return -np.real(np.tensordot(m.Hi, np.conj(m.ph) * spectrum, axes = (0, 0))) / m.H / m.dt
+            return spectrum
+            #return -np.real(np.tensordot(m.Hi, np.conj(m.ph) * spectrum, axes = (0, 0))) / m.H / m.dt
 
         self.add_diagnostic('Dissspec',
-            description='Spectral contribution of filter dissipation',
-            function=dissipation_spectrum,
+            description='Spectral contribution of filter dissipation to total energy',
+            function=(lambda self: -np.tensordot(self.Hi, 
+                np.conj(self.ph)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
             units='meters squared second ^-3',
             dims=('l','k')
         )
@@ -672,6 +681,14 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('paramspec',
             description='Spectral contribution of subgrid parameterization (if present)',
             function=lambda self: self._calc_parameterization_spectrum(),
+            units='',
+            dims=('l','k')
+        )
+
+        self.add_diagnostic('ENSDissspec',
+            description='Spectral contribution of filter dissipation to barotropic enstrophy',
+            function=(lambda self: np.tensordot(self.Hi, 
+                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),                           
             units='',
             dims=('l','k')
         )

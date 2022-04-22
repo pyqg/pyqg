@@ -43,6 +43,9 @@ expected_diags = [
     'paramspec_apeflux',
     'paramspec_keflux',
     'Dissspec',
+    'KEfrictionspec',
+    'ENSDissspec',
+    'ENSfrictionspec',
 ]
 
 expected_attrs = [

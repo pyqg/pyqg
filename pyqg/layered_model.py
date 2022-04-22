@@ -323,7 +323,7 @@ class LayeredModel(model.Model):
         self.add_diagnostic('APEflux_div',
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H),
+                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
                 units='meters squared second ^-3',
                 dims=('l','k')
         )

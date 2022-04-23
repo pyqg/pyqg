@@ -289,31 +289,39 @@ class QGModel(model.Model):
             dims=('time',)
        )
 
+        # Obtain S matrix
+        def get_S_matrix(self):
+            try:
+                getattr(self, 'S')
+            except:
+                self.S = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
+                self.S[0,0] = -self.F1
+                self.S[0,1] = self.F1
+                self.S[1,0] = self.F2
+                self.S[1,1] = -self.F2
+        get_S_matrix(m_param)
+
         self.add_diagnostic('paramspec_apeflux',
             description='total additional APE flux due to subgrid parameterization',
-            function=(lambda self: self._calc_paramspec_contribution(
-                self.del1 * self.del2 / self.rd**2 * (
-                    np.array([1,-1])[:,np.newaxis,np.newaxis] *
-                    np.subtract(*np.conj(self.ph))
-                )
-            )),
+            function=(lambda self: 
+                self._calc_paramspec_contribution(-np.einsum("ij..., j... -> i...", self.S, np.conj(self.ph)))
+                ),
             units='',
             dims=('l','k')
        )
 
         self.add_diagnostic('paramspec_keflux',
             description='total additional KE flux due to subgrid parameterization',
-            function=(lambda self: self._calc_paramspec_contribution(
-                self.wv2 * (self.Hi / self.H)[:,np.newaxis,np.newaxis] * np.conj(self.ph)
-            )),
+            function=(lambda self: 
+                self._calc_paramspec_contribution(self, self.wv2*np.conj(self.ph))
+                ),
             units='',
             dims=('l','k')
        )
 
     def _calc_paramspec_contribution(self, term):
-        return np.real(
-            (
-                np.einsum("ij..., i... -> j...", self.a, term) * 
-                self._calc_parameterization_contribution()
-            ).sum(axis=0)
-        )
+        height_ratios = (self.Hi/self.H)[:,np.newaxis,np.newaxis]
+        return np.real(height_ratios*
+                (np.einsum("ij..., j... -> i...", self.a, term)*self._calc_parameterization_contribution())
+                ).sum(axis=0)
+

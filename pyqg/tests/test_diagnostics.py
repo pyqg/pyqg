@@ -43,16 +43,8 @@ def test_paramspec_decomposition(rtol=1e-10):
     np.testing.assert_allclose(ps1, ps3, rtol=rtol)
 
     # Now test it can be decomposed into separate KE and APE components
-    ph_diff = np.subtract(*np.conj(m.ph))
-    apeflux_term = m.del1 * m.del2 / m.rd**2 * np.array([ph_diff, -ph_diff])
-    keflux_term  = m.wv2 * height_ratios * np.conj(m.ph)
-
-    def matvec(m, v):
-        # matrix-vector multiplication over the first two dimensions
-        return np.einsum("ij..., i... -> j...", m, v) 
-
-    paramspec_apeflux = np.real((matvec(m.a, apeflux_term) * dqh).sum(axis=0))
-    paramspec_keflux  = np.real((matvec(m.a,  keflux_term) * dqh).sum(axis=0))
+    paramspec_apeflux = m.get_diagnostic('paramspec_apeflux')
+    paramspec_keflux = m.get_diagnostic('paramspec_keflux')
     ps4 = paramspec_apeflux + paramspec_keflux
     np.testing.assert_allclose(ps1, ps4, rtol=rtol)
 

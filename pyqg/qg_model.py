@@ -299,7 +299,7 @@ class QGModel(model.Model):
                 self.S[0,1] = self.F1
                 self.S[1,0] = self.F2
                 self.S[1,1] = -self.F2
-        get_S_matrix(m_param)
+        get_S_matrix(self)
 
         self.add_diagnostic('paramspec_apeflux',
             description='total additional APE flux due to subgrid parameterization',
@@ -313,7 +313,7 @@ class QGModel(model.Model):
         self.add_diagnostic('paramspec_keflux',
             description='total additional KE flux due to subgrid parameterization',
             function=(lambda self: 
-                self._calc_paramspec_contribution(self, self.wv2*np.conj(self.ph))
+                self._calc_paramspec_contribution(self.wv2*np.conj(self.ph))
                 ),
             units='',
             dims=('l','k')

@@ -183,6 +183,27 @@ From the derivations above, we have
 
 which is the spectrum of the energy contribution from parameterizations.
 
+We can further expand the contribution of parameterization into its contribution to 
+kinetic energy and potential energy. To see how, let 
+:math:`\mathbf{A}(\mathbf{k}) = (\mathbf{S} - \kappa^2\mathbf{I})^{-1}`, then 
+
+.. math::
+    
+    \hat{\psi}^*_n = (\mathbf{A}\hat{\mathbf{q}}^*)_n = [\mathbf{A}(\mathbf{S} - \kappa^2\mathbf{I})\hat{\boldsymbol{\psi}}^*]_n
+
+We can thus separate the contribution of subgrid-scale forcing as
+
+.. math::
+    
+    \begin{align}
+    \left(\frac{\partial E(k, l)}{\partial t}\right)^{\text{sub}} =& 
+    \frac{1}{H}\sum_{n=1}^NH_n\mathbb{R}\left[\kappa^2(\mathbf{A}\hat{\boldsymbol{\psi}}^*)_n\hat{S}_{q_n}\right]\\
+    -&\frac{1}{H}\sum_{n=1}^NH_n\mathbb{R}\left[(\mathbf{A}\mathbf{S}\hat{\boldsymbol{\psi}}^*)_n\hat{S}_{q_n}\right],
+    \end{align}
+
+where on the right-hand side, the first term is towards kinetic energy, and the 
+second term is towards potential energy. 
+
 Enstrophy spectrum
 ------------------
 

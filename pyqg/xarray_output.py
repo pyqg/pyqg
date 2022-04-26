@@ -41,7 +41,7 @@ var_attr_database = {
     'ph':    { 'units': 'm^2 s^-1',  'long_name': 'streamfunction in spectral space',},
     'p':     { 'units': 'm^2 s^-1',  'long_name': 'streamfunction in real space',},
     'Ubg':   { 'units': 'm s^-1',    'long_name': 'background zonal velocity',},
-    'Qy':    { 'units': 's^-1 m^-1', 'long_name': 'background potential vorticity gradient',} , 
+    'Qy':    { 'units': 'm^-1 s^-1', 'long_name': 'background potential vorticity gradient',} , 
     'dqhdt': { 'units': 's^-2',      'long_name': 'previous partial derivative of potential vorticity wrt. time in spectral space',} , 
     'dqdt':  { 'units': 's^-2',      'long_name': 'previous partial derivative of potential vorticity wrt. time in real space',} , 
 }

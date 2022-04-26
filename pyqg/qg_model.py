@@ -244,7 +244,7 @@ class QGModel(model.Model):
             description='barotropic enstrophy spectrum',
             function= (lambda self:
                       np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2./self.M**2),
-            units='second ^-2',
+            units='s^-2',
             dims=('l','k')
         )
 
@@ -253,7 +253,7 @@ class QGModel(model.Model):
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc))/self.M**2 ),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -262,7 +262,7 @@ class QGModel(model.Model):
             function= (lambda self:
               (np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
                np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])))/self.M**2 ),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -271,7 +271,7 @@ class QGModel(model.Model):
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
                                   np.conj(self.ph[0] - self.ph[1]))/self.M**2 ),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -285,7 +285,7 @@ class QGModel(model.Model):
                             (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
                             (self.M**2) ),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('time',)
        )
 
@@ -297,7 +297,7 @@ class QGModel(model.Model):
                     np.subtract(*np.conj(self.ph))
                 )
             )),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -306,7 +306,7 @@ class QGModel(model.Model):
             function=(lambda self: self._calc_paramspec_contribution(
                 self.wv2 * (self.Hi / self.H)[:,np.newaxis,np.newaxis] * np.conj(self.ph)
             )),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
        )
 

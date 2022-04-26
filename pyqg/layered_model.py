@@ -174,8 +174,8 @@ class LayeredModel(model.Model):
         self.H = self.Hi.sum()
 
         if not (self.nz==2):
-            self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1] # m/s2
-            self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis] # 1/m
+            self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1] # m s^-2
+            self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis] # m^-1
 
             assert self.gpi.size == self.nz-1, "Invalid size of gpi"
 
@@ -201,13 +201,13 @@ class LayeredModel(model.Model):
         self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
-        self.Qy = self.beta - np.dot(self.S,self.Ubg) # s^-1 m^-1
-        self.Qx = np.dot(self.S,self.Vbg)             # s^-1 m^-1
+        self.Qy = self.beta - np.dot(self.S,self.Ubg) # m^-1 s^-1 
+        self.Qx = np.dot(self.S,self.Vbg)             # m^-1 s^-1 
 
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k # s^-1 m^-2
-        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l # s^-1 m^-2
+        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k # m^-2 s^-1 
+        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l # m^-2 s^-1 
 
     def _initialize_inversion_matrix(self):
 

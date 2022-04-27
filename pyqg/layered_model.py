@@ -137,7 +137,7 @@ class LayeredModel(model.Model):
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
 
-        self.S = np.zeros((self.nz, self.nz))
+        self.S = np.zeros((self.nz, self.nz)) # m^-2
 
         if (self.nz==2) and (self.rd) and (self.delta):
 
@@ -145,7 +145,7 @@ class LayeredModel(model.Model):
             self.del2 = (self.delta+1.)**-1
             self.Us = self.Ubg[0]-self.Ubg[1]
 
-            self.F1 = self.rd**-2 / (1.+self.delta)
+            self.F1 = self.rd**-2 / (1.+self.delta) # m^-2
             self.F2 = self.delta*self.F1
             self.S[0,0], self.S[0,1] = -self.F1,  self.F1
             self.S[1,0], self.S[1,1] =  self.F2, -self.F2
@@ -174,8 +174,8 @@ class LayeredModel(model.Model):
         self.H = self.Hi.sum()
 
         if not (self.nz==2):
-            self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1]
-            self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis]
+            self.gpi = self.g*(self.rhoi[1:]-self.rhoi[:-1])/self.rhoi[:-1] # m s^-2
+            self.f2gpi = (self.f2/self.gpi)[:,np.newaxis,np.newaxis] # m^-1
 
             assert self.gpi.size == self.nz-1, "Invalid size of gpi"
 
@@ -201,13 +201,13 @@ class LayeredModel(model.Model):
         self._initialize_stretching_matrix()
 
         # the meridional PV gradients in each layer
-        self.Qy = self.beta - np.dot(self.S,self.Ubg)
-        self.Qx = np.dot(self.S,self.Vbg)
+        self.Qy = self.beta - np.dot(self.S,self.Ubg) # m^-1 s^-1 
+        self.Qx = np.dot(self.S,self.Vbg)             # m^-1 s^-1 
 
 
         # complex versions, multiplied by k, speeds up computations to precompute
-        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k
-        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l
+        self.ikQy = self.Qy[:,np.newaxis,np.newaxis]*1j*self.k # m^-2 s^-1 
+        self.ilQx = self.Qx[:,np.newaxis,np.newaxis]*1j*self.l # m^-2 s^-1 
 
     def _initialize_inversion_matrix(self):
 
@@ -264,16 +264,16 @@ class LayeredModel(model.Model):
 
     def _calc_derived_fields(self):
 
-        self.p = self.ifft(self.ph)
-        self.xi =self.ifft(-self.wv2*self.ph)
-        self.Jpxi = self._advect(self.xi, self.u, self.v)
-        self.Jq = self._advect(self.q, self.u, self.v)
+        self.p = self.ifft(self.ph) # m^2 s^-1
+        self.xi =self.ifft(-self.wv2*self.ph) # s^-1
+        self.Jpxi = self._advect(self.xi, self.u, self.v) # s^-2
+        self.Jq = self._advect(self.q, self.u, self.v) # s^-2
 
-        self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph)
+        self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph) # s^-1
         self.Sp = self.ifft(self.Sph)
-        self.JSp = self._advect(self.Sp,self.u,self.v)
+        self.JSp = self._advect(self.Sp,self.u,self.v) # s^-2
 
-        self.phn = self.modal_projection(self.ph)
+        self.phn = self.modal_projection(self.ph) # m^2 s^-1
 
 
     def _initialize_model_diagnostics(self):
@@ -282,8 +282,8 @@ class LayeredModel(model.Model):
         self.add_diagnostic('entspec',
                 description='barotropic enstrophy spectrum',
                 function= (lambda self:
-                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H),
-                units='',
+                    np.abs((self.Hi[:,np.newaxis,np.newaxis]*self.qh).sum(axis=0))**2/self.H/self.M**2),
+                units='m s^-2',
                 dims=('l','k')
         )
 
@@ -291,7 +291,7 @@ class LayeredModel(model.Model):
                 description='modal kinetic energy spectra',
                 function= (lambda self:
                     self.wv2*(np.abs(self.phn)**2)/self.M**2 ),
-                units='',
+                units='m^2 s^-2',
                 dims=('lev','l','k')
         )
 
@@ -299,7 +299,7 @@ class LayeredModel(model.Model):
                 description='modal potential energy spectra',
                 function= (lambda self:
                     self.kdi2[1:,np.newaxis,np.newaxis]*(np.abs(self.phn[1:,:,:])**2)/self.M**2),
-                units='',
+                units='m^2 s^-2',
                 dims=('lev_mid','l','k')
         )
         
@@ -307,24 +307,24 @@ class LayeredModel(model.Model):
                 description='available potential energy spectrum',
                 function= (lambda self:
                            (self.f2gpi*
-                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H),
-                units='',
+                            np.abs(self.ph[:-1]-self.ph[1:])**2).sum(axis=0)/self.H/self.M**2),
+                units='m^2 s^-2',
                 dims=('l','k')
         )
         
         self.add_diagnostic('KEflux_div',
                     description='spectral divergence of flux of kinetic energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H),
-                units='',
+                               (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
+                units='m^2 s^-3',
                 dims=('l','k')
         )
         
         self.add_diagnostic('APEflux_div',
                     description='spectral divergence of flux of available potential energy',
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
-                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H),
-                units='',
+                               (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
+                units='m^2 s^-3',
                 dims=('l','k')
         )
         
@@ -333,16 +333,16 @@ class LayeredModel(model.Model):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                 (self.Ubg[:,np.newaxis,np.newaxis]*self.k +
                                  self.Vbg[:,np.newaxis,np.newaxis]*self.l)*
-                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H),
-                units='',
+                                (1j*self.ph.conj()*self.Sph).real).sum(axis=0)/self.H/self.M**2),
+                units='m^2 s^-3',
                 dims=('l','k')
         )
 
         self.add_diagnostic('ENSflux',
                  description='barotropic enstrophy flux',
                  function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
-                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
-                units='',
+                              (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H/self.M**2),
+                units='s^-3',
                 dims=('l','k')
         )
 
@@ -350,16 +350,16 @@ class LayeredModel(model.Model):
                     description='the spectrum of the rate of generation of barotropic enstrophy',
                     function = (lambda self:
                                 (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
-                                self.Sph.conj()*self.ph).real).sum(axis=0)/self.H),
-                units='',
+                                self.Sph.conj()*self.ph).real).sum(axis=0)/self.H/self.M**2),
+                units='s^-3',
                 dims=('l','k')
         )
 
         self.add_diagnostic('ENSfrictionspec',
                     description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
                     function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
-                        (self.qh[-1].conj()*self.ph[-1]).real), 
-                units='',
+                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**2), 
+                units='s^-3',
                 dims=('l','k')
         )
 

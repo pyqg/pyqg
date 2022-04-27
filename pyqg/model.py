@@ -613,14 +613,14 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('Ensspec',
             description='enstrophy spectrum',
             function= (lambda self: np.abs(self.qh)**2/self.M**2),
-            units='',
+            units='s^-2',
             dims=('lev','l','k')         
         )
 
         self.add_diagnostic('KEspec',
             description='kinetic energy spectrum',
             function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2),
-            units='',
+            units='m^2 s^-2',
             dims=('lev','l','k')  
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
@@ -628,21 +628,21 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
-            units='',
+            units='m^2 s^-3',
             dims=('time',)
         )
 
         self.add_diagnostic('KEfrictionspec',
             description='total energy dissipation spectrum by bottom drag',
-            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2),
-            units='',
+            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
+            units='m^2 s^-3',
             dims=('l','k')
         )
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
-            units='',
+            units='m^2 s^-2',
             dims=('lev',)
         )
 
@@ -674,22 +674,22 @@ class Model(PseudoSpectralKernel):
             description='Spectral contribution of filter dissipation to total energy',
             function=(lambda self: -np.tensordot(self.Hi, 
                 np.conj(self.ph)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
-            units='meters squared second ^-3',
+            units='m^2 s^-3',
             dims=('l','k')
         )
 
         self.add_diagnostic('paramspec',
             description='Spectral contribution of subgrid parameterization (if present)',
             function=lambda self: self._calc_parameterization_spectrum(),
-            units='',
+            units='m^2 s^-3',
             dims=('l','k')
         )
 
         self.add_diagnostic('ENSDissspec',
             description='Spectral contribution of filter dissipation to barotropic enstrophy',
             function=(lambda self: np.tensordot(self.Hi, 
-                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),                           
-            units='',
+                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
+            units='m^2 s^-3',
             dims=('l','k')
         )
 
@@ -706,7 +706,7 @@ class Model(PseudoSpectralKernel):
     def _calc_parameterization_spectrum(self):
         dqh = self._calc_parameterization_contribution()
         height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
-        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0))
+        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0)) / self.M**2
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""

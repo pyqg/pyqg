@@ -30,20 +30,20 @@ dim_database = {
 
 # dict for variable dimensions
 var_attr_database = {
-    'q': {'long_name': 'potential vorticity in real space', 'units': 'second -1',},
-    'u': {'long_name': 'zonal velocity anomaly', 'units': 'meters second ^-1',},
-    'v': {'long_name': 'meridional velocity anomaly', 'units': 'meters second ^-1',},
-    'ufull': {'long_name': 'zonal full velocities in real space', 'units': 'meters second ^-1',},
-    'vfull': {'long_name': 'meridional full velocities in real space', 'units': 'meters second ^-1',},
-    'qh': {'long_name': 'potential vorticity in spectral space', 'units': 'second ^-1',},
-    'uh': {'long_name': 'zonal velocity anomaly in spectral space', 'units': 'meters second ^-1',},
-    'vh': {'long_name': 'meridional velocity anomaly in spectral space', 'units': 'meters second ^-1',},
-    'ph': {'long_name': 'streamfunction in spectral space', 'units': 'meters squared second ^-1',},
-    'p': {'long_name': 'streamfunction in real space', 'units': 'meters squared second ^-1',},
-    'Ubg': {'long_name': 'background zonal velocity', 'units': 'meters second ^-1',},
-    'Qy': {'long_name': 'background potential vorticity gradient', 'units': 'second ^-1 meter ^-1',} , 
-    'dqhdt': {'long_name': 'previous partial derivative of potential vorticity wrt. time in spectral space', 'units': 'second ^-2',} , 
-    'dqdt': {'long_name': 'previous partial derivative of potential vorticity wrt. time in real space', 'units': 'second ^-2',} , 
+    'q':     { 'units': 's^-1',      'long_name': 'potential vorticity in real space',},
+    'u':     { 'units': 'm s^-1',    'long_name': 'zonal velocity anomaly',},
+    'v':     { 'units': 'm s^-1',    'long_name': 'meridional velocity anomaly',},
+    'ufull': { 'units': 'm s^-1',    'long_name': 'zonal full velocities in real space',},
+    'vfull': { 'units': 'm s^-1',    'long_name': 'meridional full velocities in real space',},
+    'qh':    { 'units': 's^-1',      'long_name': 'potential vorticity in spectral space',},
+    'uh':    { 'units': 'm s^-1',    'long_name': 'zonal velocity anomaly in spectral space',},
+    'vh':    { 'units': 'm s^-1',    'long_name': 'meridional velocity anomaly in spectral space',},
+    'ph':    { 'units': 'm^2 s^-1',  'long_name': 'streamfunction in spectral space',},
+    'p':     { 'units': 'm^2 s^-1',  'long_name': 'streamfunction in real space',},
+    'Ubg':   { 'units': 'm s^-1',    'long_name': 'background zonal velocity',},
+    'Qy':    { 'units': 'm^-1 s^-1', 'long_name': 'background potential vorticity gradient',} , 
+    'dqhdt': { 'units': 's^-2',      'long_name': 'previous partial derivative of potential vorticity wrt. time in spectral space',} , 
+    'dqdt':  { 'units': 's^-2',      'long_name': 'previous partial derivative of potential vorticity wrt. time in real space',} , 
 }
 
 # dict for variables to convert back from spectral to spatial
@@ -65,7 +65,7 @@ coord_database = {
 
 # dict for coordinate attributes 
 coord_attr_database = {
-    'time': {'long_name': 'model time', 'units': 'seconds',},
+    'time': {'long_name': 'model time', 'units': 's',},
     'lev': {'long_name': 'vertical levels',},
     'lev_mid': {'long_name': 'vertical level interface',},
     'x': {'long_name': 'real space grid points in the x direction', 'units': 'grid point',},

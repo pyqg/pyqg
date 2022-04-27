@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi
 from . import model
+from functools import cached_property
 
 try:
     import mkl
@@ -139,12 +140,18 @@ class QGModel(model.Model):
         self.del1 = self.delta/(self.delta+1.)
         self.del2 = (self.delta+1.)**-1
 
+    @cached_property
+    def S(self):
+        # Define stretching matrix to be used in diagnostics
+        return np.array([[-self.F1, self.F1],
+                         [self.F2, -self.F2]]).astype(np.float64)
+
     def _initialize_inversion_matrix(self):
 
         # The matrix multiplication will look like this
         # ph[0] = a[0,0] * self.qh[0] + a[0,1] * self.qh[1]
         # ph[1] = a[1,0] * self.qh[0] + a[1,1] * self.qh[1]
-
+        
         a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
         # inverse determinant
         det_inv =  np.ma.masked_equal(
@@ -237,6 +244,9 @@ class QGModel(model.Model):
         # fix for delta.neq.1
         self.Jpxi = self._advect(self.xi, self.u, self.v)
 
+        self.Jq = self._advect(self.q, self.u, self.v)
+        self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph)
+
     def _initialize_model_diagnostics(self):
         """Extra diagnostics for two-layer model"""
 
@@ -289,39 +299,29 @@ class QGModel(model.Model):
             dims=('time',)
        )
 
-        # Obtain S matrix
-        def get_S_matrix(self):
-            try:
-                getattr(self, 'S')
-            except:
-                self.S = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
-                self.S[0,0] = -self.F1
-                self.S[0,1] = self.F1
-                self.S[1,0] = self.F2
-                self.S[1,1] = -self.F2
-        get_S_matrix(self)
-
-        self.add_diagnostic('paramspec_apeflux',
-            description='total additional APE flux due to subgrid parameterization',
-            function=(lambda self: 
-                self._calc_paramspec_contribution(-np.einsum("ij..., j... -> i...", self.S, np.conj(self.ph)))
-                ),
+        self.add_diagnostic('ENSflux',
+            description='barotropic enstrophy flux',
+            function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
+                        (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
             units='',
             dims=('l','k')
        )
 
-        self.add_diagnostic('paramspec_keflux',
-            description='total additional KE flux due to subgrid parameterization',
-            function=(lambda self: 
-                self._calc_paramspec_contribution(self.wv2*np.conj(self.ph))
-                ),
-            units='',
-            dims=('l','k')
+        self.add_diagnostic('ENSgenspec',
+            description='the spectrum of the rate of generation of barotropic enstrophy',
+            function = (lambda self:
+                        (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
+                        self.Sph.conj()*self.ph).real).sum(axis=0)/self.H),
+        units='',
+        dims=('l','k')
        )
 
-    def _calc_paramspec_contribution(self, term):
-        height_ratios = (self.Hi/self.H)[:,np.newaxis,np.newaxis]
-        return np.real(height_ratios*
-                (np.einsum("ij..., j... -> i...", self.a, term)*self._calc_parameterization_contribution())
-                ).sum(axis=0)
+        self.add_diagnostic('ENSfrictionspec',
+            description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
+            function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
+                        (self.qh[-1].conj()*self.ph[-1]).real),
+        units='',
+        dims=('l','k')
+       )
+
 

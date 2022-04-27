@@ -362,27 +362,4 @@ class LayeredModel(model.Model):
                 units='',
                 dims=('l','k')
         )
-        self.add_diagnostic('paramspec_apeflux',
-            description='total additional APE flux due to subgrid parameterization',
-            function=(lambda self:
-                self._calc_paramspec_contribution(-np.einsum("ij..., j... -> i...", self.S, np.conj(self.ph)))
-                ),
-            units='',
-            dims=('l','k')
-        )
-
-        self.add_diagnostic('paramspec_keflux',
-            description='total additional KE flux due to subgrid parameterization',
-            function=(lambda self:
-                self._calc_paramspec_contribution(self.wv2*np.conj(self.ph))
-                ),
-            units='',
-            dims=('l','k')
-        )
-
-    def _calc_paramspec_contribution(self, term):
-        height_ratios = (self.Hi/self.H)[:,np.newaxis,np.newaxis]
-        return np.real(height_ratios*
-                (np.einsum("ij..., j... -> i...", self.a, term)*self._calc_parameterization_contribution())
-                ).sum(axis=0)
 

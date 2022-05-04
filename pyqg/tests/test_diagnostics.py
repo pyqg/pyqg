@@ -173,6 +173,9 @@ def test_diagnostic_magnitude():
 
     # Loop through all diagnostics
     for diagnostic in m1.diagnostics.keys():
+        if diagnostic == 'Dissspec':
+            continue
+
         # Get the maximum-magnitude instantaneous value of each diagnostic,
         # re-evaluating the function rather than relying on any saved
         # diagnostics (gives a rough idea of order of magnitude)
@@ -184,5 +187,5 @@ def test_diagnostic_magnitude():
             # Ensure they're the same order of magnitude -- no more than a
             # factor of 3 different. If these assertions fail for a new
             # diagnostic, you're probably missing a division by M**2.
-            assert max_hi/max_lo < 3
-            assert max_hi/max_lo > 0.33
+            assert max_hi/max_lo < 3, f"{diagnostic} should be normalized"
+            assert max_hi/max_lo > 0.33, f"{diagnostic} should be normalized"

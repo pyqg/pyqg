@@ -172,16 +172,46 @@ space, let the effect of parameterization be
 
 .. math::
 
-    \left(\frac{\partial \hat{q}_n}{\partial t}\right)^{\text{sub}} = \hat{S}_{q_n}
+    \left(\frac{\partial \hat{q}_n}{\partial t}\right)^{\text{sub}} = \hat{\dot{q}}^{\text{sub}}_n
 
 From the derivations above, we have
 
 .. math::
 
     \left(\frac{\partial E(k, l)}{\partial t}\right)^{\text{sub}} = 
-        -\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{\psi}_n^*\hat{S}_{q_n}\right],
+        -\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{\psi}_n^*\hat{\dot{q}}^{\text{sub}}_n\right],
 
 which is the spectrum of the energy contribution from parameterizations.
+
+We can further expand the contribution of parameterization into its contribution to 
+kinetic energy and potential energy. To see how, we consider again the time derivative
+of the total energy in matrix form: 
+
+.. math::
+
+    \frac{\partial E(k, l)}{\partial t} = 
+        -\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{\psi}_n^*\left((-\kappa^2\mathbf{I} + 
+        \mathbf{S})\frac{\partial\hat{\boldsymbol\psi}}{\partial t}\right)_n\right], 
+
+where the first term on the right-hand side is the change in kinetic energy, 
+and the second term is the change in potential energy. Considering the streamfunction 
+tendency is from parameterizations, and letting 
+:math:`\mathbf{A}(\mathbf{k}) = (\mathbf{S} - \kappa^2\mathbf{I})^{-1}`
+so that :math:`\hat{\boldsymbol\psi} = \mathbf{A}(\mathbf{k})\hat{\mathbf{q}}`,
+we have 
+
+.. math::
+    
+    \begin{align}
+    \left(\frac{\partial E(k, l)}{\partial t}\right)^{\text{sub}} =& 
+        \frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\kappa^2\hat{\psi}_n^*
+        \left(\mathbf{A}\hat{\dot{\mathbf{q}}}^{\text{sub}}\right)_n\right] - 
+        \frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{\psi}_n^*
+        \left(\mathbf{SA}\hat{\dot{\mathbf{q}}}^{\text{sub}}\right)_n\right]
+    \end{align}
+
+where on the right-hand side, the first term is the parameterized contribution towards 
+kinetic energy, and the second term is towards potential energy. 
 
 Enstrophy spectrum
 ------------------

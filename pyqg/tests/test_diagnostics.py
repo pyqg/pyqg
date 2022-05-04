@@ -43,23 +43,19 @@ def test_paramspec_decomposition(rtol=1e-10):
     np.testing.assert_allclose(ps1, ps3, rtol=rtol)
 
     # Now test it can be decomposed into separate KE and APE components
-    ph_diff = np.subtract(*np.conj(m.ph))
-    apeflux_term = m.del1 * m.del2 / m.rd**2 * np.array([ph_diff, -ph_diff])
-    keflux_term  = m.wv2 * height_ratios * np.conj(m.ph)
-
-    def matvec(m, v):
-        # matrix-vector multiplication over the first two dimensions
-        return np.einsum("ij..., i... -> j...", m, v) 
-
-    paramspec_apeflux = np.real((matvec(m.a, apeflux_term) * dqh).sum(axis=0))
-    paramspec_keflux  = np.real((matvec(m.a,  keflux_term) * dqh).sum(axis=0))
-    ps4 = (paramspec_apeflux + paramspec_keflux) / m.M**2
+    apeflux_term = np.einsum("ij, jk..., k... -> i...", m.S, m.a, dqh)
+    keflux_term  = np.einsum("ij..., j... -> i...", m.a, dqh)
+    height_ratios = (m.Hi/m.H)[:,np.newaxis,np.newaxis]
+    paramspec_apeflux = -np.real(height_ratios*m.ph.conj()*apeflux_term).sum(axis=0) / m.M**2
+    paramspec_keflux  = m.wv2*np.real(height_ratios*m.ph.conj()* keflux_term).sum(axis=0) / m.M**2
+    
+    ps4 = paramspec_apeflux + paramspec_keflux
     np.testing.assert_allclose(ps1, ps4, rtol=rtol)
 
     # Test these terms match the subterms from QGModel
-    np.testing.assert_allclose(paramspec_apeflux / m.M**2,
+    np.testing.assert_allclose(paramspec_apeflux,
             m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
-    np.testing.assert_allclose(paramspec_keflux / m.M**2,
+    np.testing.assert_allclose(paramspec_keflux,
             m.get_diagnostic('paramspec_keflux'), rtol=rtol)
 
 def test_paramspec_additivity(rtol=1e-10):
@@ -136,7 +132,7 @@ def test_Dissspec_diagnostics(atol=1e-20):
         rhs_unfiltered[k] = m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k]
         diss_spectrum[k] = (m.filtr - ones) * rhs_unfiltered[k]
 
-    diss_contribution = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*diss_spectrum, axes=(0, 0)))/m.H/m.dt
+    diss_contribution = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*diss_spectrum, axes=(0, 0)))/m.H/m.dt/m.M**2
     diss_contribution_model = m.get_diagnostic('Dissspec')
 
     # Ensure that the above calculation is consistent with the model's internal calculation
@@ -146,8 +142,8 @@ def test_Dissspec_diagnostics(atol=1e-20):
     qh_new = m.qh.copy()
     for k in range(m.nz):
         qh_new[k] = m.filtr * rhs_unfiltered[k]
-    rhs_contribution_filtered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*qh_new, axes=(0, 0)))/m.H/m.dt
-    rhs_contribution_unfiltered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*rhs_unfiltered, axes=(0, 0)))/m.H/m.dt
+    rhs_contribution_filtered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*qh_new, axes=(0, 0)))/m.H/m.dt/m.M**2
+    rhs_contribution_unfiltered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*rhs_unfiltered, axes=(0, 0)))/m.H/m.dt/m.M**2
 
     # Ensure that the difference between the filtered contribution and the unfiltered contribution is 
     # completely the effect of dissipation

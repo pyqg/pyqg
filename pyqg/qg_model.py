@@ -139,12 +139,18 @@ class QGModel(model.Model):
         self.del1 = self.delta/(self.delta+1.)
         self.del2 = (self.delta+1.)**-1
 
+    @property
+    def S(self):
+        # Define stretching matrix to be used in diagnostics
+        return np.array([[-self.F1, self.F1],
+                         [self.F2, -self.F2]]).astype(np.float64)
+
     def _initialize_inversion_matrix(self):
 
         # The matrix multiplication will look like this
         # ph[0] = a[0,0] * self.qh[0] + a[0,1] * self.qh[1]
         # ph[1] = a[1,0] * self.qh[0] + a[1,1] * self.qh[1]
-
+        
         a = np.ma.zeros((self.nz, self.nz, self.nl, self.nk), np.dtype('float64'))
         # inverse determinant
         det_inv =  np.ma.masked_equal(
@@ -237,6 +243,9 @@ class QGModel(model.Model):
         # fix for delta.neq.1
         self.Jpxi = self._advect(self.xi, self.u, self.v)
 
+        self.Jq = self._advect(self.q, self.u, self.v)
+        self.Sph = np.einsum("ij,jkl->ikl",self.S,self.ph)
+
     def _initialize_model_diagnostics(self):
         """Extra diagnostics for two-layer model"""
 
@@ -288,6 +297,32 @@ class QGModel(model.Model):
             units='m^2 s^-3',
             dims=('time',)
        )
+
+        self.add_diagnostic('ENSflux',
+            description='barotropic enstrophy flux',
+            function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
+                        (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H/self.M**2),
+            units='s^-3',
+            dims=('l','k')
+       )
+
+        self.add_diagnostic('ENSgenspec',
+            description='the spectrum of the rate of generation of barotropic enstrophy',
+            function = (lambda self:
+                        (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
+                        self.Sph.conj()*self.ph).real).sum(axis=0)/self.H/self.M**2),
+            units='s^-3',
+            dims=('l','k')
+       )
+
+        self.add_diagnostic('ENSfrictionspec',
+            description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
+            function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
+                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**2),
+            units='s^-3',
+            dims=('l','k')
+       )
+
 
         self.add_diagnostic('paramspec_apeflux',
             description='total additional APE flux due to subgrid parameterization',

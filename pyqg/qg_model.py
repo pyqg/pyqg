@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import pi
 from . import model
-from functools import cached_property
 
 try:
     import mkl
@@ -140,7 +139,7 @@ class QGModel(model.Model):
         self.del1 = self.delta/(self.delta+1.)
         self.del2 = (self.delta+1.)**-1
 
-    @cached_property
+    @property
     def S(self):
         # Define stretching matrix to be used in diagnostics
         return np.array([[-self.F1, self.F1],

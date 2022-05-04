@@ -46,16 +46,16 @@ def test_paramspec_decomposition(rtol=1e-10):
     apeflux_term = np.einsum("ij, jk..., k... -> i...", m.S, m.a, dqh)
     keflux_term  = np.einsum("ij..., j... -> i...", m.a, dqh)
     height_ratios = (m.Hi/m.H)[:,np.newaxis,np.newaxis]
-    paramspec_apeflux = -np.real(height_ratios*m.ph.conj()*apeflux_term).sum(axis=0)
-    paramspec_keflux  = m.wv2*np.real(height_ratios*m.ph.conj()* keflux_term).sum(axis=0)
+    paramspec_apeflux = -np.real(height_ratios*m.ph.conj()*apeflux_term).sum(axis=0) / m.M**2
+    paramspec_keflux  = m.wv2*np.real(height_ratios*m.ph.conj()* keflux_term).sum(axis=0) / m.M**2
     
     ps4 = paramspec_apeflux + paramspec_keflux
     np.testing.assert_allclose(ps1, ps4, rtol=rtol)
 
     # Test these terms match the subterms from QGModel
-    np.testing.assert_allclose(paramspec_apeflux / m.M**2,
+    np.testing.assert_allclose(paramspec_apeflux,
             m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
-    np.testing.assert_allclose(paramspec_keflux / m.M**2,
+    np.testing.assert_allclose(paramspec_keflux,
             m.get_diagnostic('paramspec_keflux'), rtol=rtol)
 
 def test_paramspec_additivity(rtol=1e-10):

@@ -3,6 +3,8 @@ import pytest
 import unittest
 import numpy as np
 import pyqg
+import pickle
+import os
 from pyqg import diagnostic_tools as diag
 
 def test_describe_diagnostics():
@@ -150,3 +152,37 @@ def test_Dissspec_diagnostics(atol=1e-20):
     np.testing.assert_allclose(diss_contribution_model, 
                                rhs_contribution_filtered - rhs_contribution_unfiltered, 
                                atol=atol)
+
+def test_diagnostic_magnitude():
+    # Load a set of pre-run fixture models from
+    # examples/diagnostic_normalization.ipynb (running from scratch would take
+    # a bit too long for a test)
+    fixtures_path = f"{os.path.dirname(os.path.realpath(__file__))}/fixtures"
+
+    with open(f"{fixtures_path}/LayeredModel_params.pkl", 'rb') as f:
+        # Common set of parameters for each model
+        params = pickle.load(f)
+
+    m1 = pyqg.LayeredModel(nx=96, **params)
+    m2 = pyqg.LayeredModel(nx=64, **params)
+    m1.q = np.load(f"{fixtures_path}/LayeredModel_nx96_q.npy")
+    m2.q = np.load(f"{fixtures_path}/LayeredModel_nx64_q.npy")
+    for m in [m1, m2]:
+        m._invert()
+        m._calc_derived_fields()
+
+    # Loop through all diagnostics
+    for diagnostic in m1.diagnostics.keys():
+        # Get the maximum-magnitude instantaneous value of each diagnostic,
+        # re-evaluating the function rather than relying on any saved
+        # diagnostics (gives a rough idea of order of magnitude)
+        max_hi = np.abs(m1.diagnostics[diagnostic]['function'](m1)).max()
+        max_lo = np.abs(m2.diagnostics[diagnostic]['function'](m2)).max()
+        if max_lo == 0:
+            assert max_hi == 0
+        else:
+            # Ensure they're the same order of magnitude -- no more than a
+            # factor of 3 different. If these assertions fail for a new
+            # diagnostic, you're probably missing a division by M**2.
+            assert max_hi/max_lo < 3
+            assert max_hi/max_lo > 0.33

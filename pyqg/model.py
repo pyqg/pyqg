@@ -688,7 +688,7 @@ class Model(PseudoSpectralKernel):
             description='Spectral contribution of filter dissipation to barotropic enstrophy',
             function=(lambda self: np.tensordot(self.Hi, 
                 np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
-            units='m^2 s^-3',
+            units='s^-3',
             dims=('l','k')
         )
 
@@ -701,7 +701,7 @@ class Model(PseudoSpectralKernel):
                     -self._calc_paramspec_contribution(np.einsum("ij, jk..., k... -> i...", 
                             self.S, self.a, self._calc_parameterization_contribution()))
                     ),
-                units='',
+                units='m^2 s^-3',
                 dims=('l','k')
            )
 
@@ -711,7 +711,7 @@ class Model(PseudoSpectralKernel):
                     self.wv2*self._calc_paramspec_contribution(np.einsum("ij..., j... -> i...", 
                             self.a, self._calc_parameterization_contribution()))
                     ),
-                units='',
+                units='m^2 s^-3',
                 dims=('l','k')
            )
 

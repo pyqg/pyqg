@@ -303,7 +303,7 @@ class QGModel(model.Model):
             description='barotropic enstrophy flux',
             function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
                         (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H),
-            units='',
+            units='s^-3',
             dims=('l','k')
        )
 
@@ -312,16 +312,16 @@ class QGModel(model.Model):
             function = (lambda self:
                         (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
                         self.Sph.conj()*self.ph).real).sum(axis=0)/self.H),
-        units='',
-        dims=('l','k')
+            units='s^-3',
+            dims=('l','k')
        )
 
         self.add_diagnostic('ENSfrictionspec',
             description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
             function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
                         (self.qh[-1].conj()*self.ph[-1]).real),
-        units='',
-        dims=('l','k')
+            units='s^-3',
+            dims=('l','k')
        )
 
 

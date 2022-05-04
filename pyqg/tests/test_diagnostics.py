@@ -132,7 +132,7 @@ def test_Dissspec_diagnostics(atol=1e-20):
         rhs_unfiltered[k] = m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k]
         diss_spectrum[k] = (m.filtr - ones) * rhs_unfiltered[k]
 
-    diss_contribution = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*diss_spectrum, axes=(0, 0)))/m.H/m.dt
+    diss_contribution = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*diss_spectrum, axes=(0, 0)))/m.H/m.dt/m.M**2
     diss_contribution_model = m.get_diagnostic('Dissspec')
 
     # Ensure that the above calculation is consistent with the model's internal calculation
@@ -143,7 +143,7 @@ def test_Dissspec_diagnostics(atol=1e-20):
     for k in range(m.nz):
         qh_new[k] = m.filtr * rhs_unfiltered[k]
     rhs_contribution_filtered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*qh_new, axes=(0, 0)))/m.H/m.dt
-    rhs_contribution_unfiltered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*rhs_unfiltered, axes=(0, 0)))/m.H/m.dt
+    rhs_contribution_unfiltered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*rhs_unfiltered, axes=(0, 0)))/m.H/m.dt/m.M**2
 
     # Ensure that the difference between the filtered contribution and the unfiltered contribution is 
     # completely the effect of dissipation

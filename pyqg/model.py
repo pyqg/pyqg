@@ -677,13 +677,6 @@ class Model(PseudoSpectralKernel):
             dims=('l','k')
         )
 
-        self.add_diagnostic('paramspec',
-            description='Spectral contribution of subgrid parameterization (if present)',
-            function=lambda self: self._calc_parameterization_spectrum(),
-            units='m^2 s^-3',
-            dims=('l','k')
-        )
-
         self.add_diagnostic('ENSDissspec',
             description='Spectral contribution of filter dissipation to barotropic enstrophy',
             function=(lambda self: np.tensordot(self.Hi, 
@@ -692,32 +685,12 @@ class Model(PseudoSpectralKernel):
             dims=('l','k')
         )
 
-        if hasattr(self, 'S'):
-            # If the stretching matrix is implemented by subclass, calculate 
-            # the separation of subgrid parameterization spectra
-            self.add_diagnostic('paramspec_apeflux',
-                description='total additional APE flux due to subgrid parameterization',
-                function=(lambda self: 
-                    -self._calc_paramspec_contribution(np.einsum("ij, jk..., k... -> i...", 
-                            self.S, self.a, self._calc_parameterization_contribution()))
-                    ),
-                units='m^2 s^-3',
-                dims=('l','k')
-           )
-
-            self.add_diagnostic('paramspec_keflux',
-                description='total additional KE flux due to subgrid parameterization',
-                function=(lambda self: 
-                    self.wv2*self._calc_paramspec_contribution(np.einsum("ij..., j... -> i...", 
-                            self.a, self._calc_parameterization_contribution()))
-                    ),
-                units='m^2 s^-3',
-                dims=('l','k')
-           )
-
-    def _calc_paramspec_contribution(self, term):
-        height_ratios = (self.Hi/self.H)[:,np.newaxis,np.newaxis]
-        return np.real(height_ratios*self.ph.conj()*term).sum(axis=0)
+        self.add_diagnostic('paramspec',
+            description='Spectral contribution of subgrid parameterization (if present)',
+            function=lambda self: self._calc_parameterization_spectrum(),
+            units='m^2 s^-3',
+            dims=('l','k')
+        )
 
     def _calc_parameterization_contribution(self):
         dqh = np.zeros_like(self.qh)

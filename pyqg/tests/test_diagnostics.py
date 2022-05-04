@@ -56,9 +56,9 @@ def test_paramspec_decomposition(rtol=1e-10):
 
     # Test these terms match the subterms from QGModel
     np.testing.assert_allclose(paramspec_apeflux,
-            m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
+            m.get_diagnostic('paramspec_APEflux'), rtol=rtol)
     np.testing.assert_allclose(paramspec_keflux,
-            m.get_diagnostic('paramspec_keflux'), rtol=rtol)
+            m.get_diagnostic('paramspec_KEflux'), rtol=rtol)
 
 def test_paramspec_additivity(rtol=1e-10):
     # Test over multiple model classes

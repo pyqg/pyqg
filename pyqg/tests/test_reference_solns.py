@@ -82,13 +82,16 @@ class ReferenceSolutionsTester(unittest.TestCase):
         # now do assertions
         for name, des in iteritems(diagnostic_results):
             res = m.get_diagnostic(name)
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name}")
         for name, des in iteritems(sum_diagnostic_results):
             res = m.get_diagnostic(name).sum()
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name} sum")
         for name, des in iteritems(avg_diagnostic_results):
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name} spec sum")
 
 
     def test_bt(self):

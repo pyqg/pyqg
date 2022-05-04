@@ -672,7 +672,7 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('Dissspec',
             description='Spectral contribution of filter dissipation to total energy',
             function=(lambda self: -np.tensordot(self.Hi, 
-                np.conj(self.ph)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
+                np.conj(self.ph)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt/self.M**2),
             units='m^2 s^-3',
             dims=('l','k')
         )
@@ -687,7 +687,7 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('ENSDissspec',
             description='Spectral contribution of filter dissipation to barotropic enstrophy',
             function=(lambda self: np.tensordot(self.Hi, 
-                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt),
+                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt/self.M**2),
             units='s^-3',
             dims=('l','k')
         )

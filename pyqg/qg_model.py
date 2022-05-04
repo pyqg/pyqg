@@ -253,8 +253,8 @@ class QGModel(model.Model):
         self.add_diagnostic('entspec',
             description='barotropic enstrophy spectrum',
             function= (lambda self:
-                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2.),
-            units='',
+                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2./self.M**2),
+            units='s^-2',
             dims=('l','k')
         )
 
@@ -262,17 +262,17 @@ class QGModel(model.Model):
             description='spectral flux of available potential energy',
             function= (lambda self:
               self.rd**-2 * self.del1*self.del2 *
-              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc)) ),
-            units='',
+              np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc))/self.M**2 ),
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
         self.add_diagnostic('KEflux',
             description='spectral flux of kinetic energy',
             function= (lambda self:
-              np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
-              np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])) ),
-            units='',
+              (np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
+               np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])))/self.M**2 ),
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -280,8 +280,8 @@ class QGModel(model.Model):
             description='spectrum of available potential energy generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
                        np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
-                                  np.conj(self.ph[0] - self.ph[1])) ),
-            units='',
+                                  np.conj(self.ph[0] - self.ph[1]))/self.M**2 ),
+            units='m^2 s^-3',
             dims=('l','k')
        )
 
@@ -295,7 +295,7 @@ class QGModel(model.Model):
                             (self.del1*self.ph[0,:,1:-2] + self.del2*self.ph[1,:,1:-2]) *
                             np.conj(self.ph[0,:,1:-2] - self.ph[1,:,1:-2])).sum()) /
                             (self.M**2) ),
-            units='',
+            units='m^2 s^-3',
             dims=('time',)
        )
 
@@ -325,3 +325,31 @@ class QGModel(model.Model):
        )
 
 
+        self.add_diagnostic('paramspec_apeflux',
+            description='total additional APE flux due to subgrid parameterization',
+            function=(lambda self: self._calc_paramspec_contribution(
+                self.del1 * self.del2 / self.rd**2 * (
+                    np.array([1,-1])[:,np.newaxis,np.newaxis] *
+                    np.subtract(*np.conj(self.ph))
+                )
+            )),
+            units='m^2 s^-3',
+            dims=('l','k')
+       )
+
+        self.add_diagnostic('paramspec_keflux',
+            description='total additional KE flux due to subgrid parameterization',
+            function=(lambda self: self._calc_paramspec_contribution(
+                self.wv2 * (self.Hi / self.H)[:,np.newaxis,np.newaxis] * np.conj(self.ph)
+            )),
+            units='m^2 s^-3',
+            dims=('l','k')
+       )
+
+    def _calc_paramspec_contribution(self, term):
+        return np.real(
+            (
+                np.einsum("ij..., i... -> j...", self.a, term) * 
+                self._calc_parameterization_contribution()
+            ).sum(axis=0) / self.M**2
+        )

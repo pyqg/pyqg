@@ -34,8 +34,8 @@ def test_paramspec_decomposition(rtol=1e-10):
     # Compute the parameterization spectrum at least two ways
     height_ratios = (m.Hi / m.H)[:,np.newaxis,np.newaxis]
     dqh = m.fft(dq)
-    ps1 = -np.real((height_ratios * np.conj(m.ph) * dqh).sum(axis=0))
-    ps2 = old_qgmodel_calc_paramspec(m, dqh[0], dqh[1])
+    ps1 = -np.real((height_ratios * np.conj(m.ph) * dqh).sum(axis=0)) / m.M**2
+    ps2 = old_qgmodel_calc_paramspec(m, dqh[0], dqh[1]) / m.M**2
     ps3 = m.get_diagnostic('paramspec') 
 
     # Ensure they're identical
@@ -53,9 +53,9 @@ def test_paramspec_decomposition(rtol=1e-10):
     np.testing.assert_allclose(ps1, ps4, rtol=rtol)
 
     # Test these terms match the subterms from QGModel
-    np.testing.assert_allclose(paramspec_apeflux,
+    np.testing.assert_allclose(paramspec_apeflux / m.M**2,
             m.get_diagnostic('paramspec_apeflux'), rtol=rtol)
-    np.testing.assert_allclose(paramspec_keflux,
+    np.testing.assert_allclose(paramspec_keflux / m.M**2,
             m.get_diagnostic('paramspec_keflux'), rtol=rtol)
 
 def test_paramspec_additivity(rtol=1e-10):

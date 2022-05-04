@@ -142,7 +142,7 @@ def test_Dissspec_diagnostics(atol=1e-20):
     qh_new = m.qh.copy()
     for k in range(m.nz):
         qh_new[k] = m.filtr * rhs_unfiltered[k]
-    rhs_contribution_filtered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*qh_new, axes=(0, 0)))/m.H/m.dt
+    rhs_contribution_filtered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*qh_new, axes=(0, 0)))/m.H/m.dt/m.M**2
     rhs_contribution_unfiltered = -np.real(np.tensordot(m.Hi, np.conj(m.ph)*rhs_unfiltered, axes=(0, 0)))/m.H/m.dt/m.M**2
 
     # Ensure that the difference between the filtered contribution and the unfiltered contribution is 

@@ -64,8 +64,8 @@ def test_calc_ispec_units():
 
             scale_ratio = max(scales) / min(scales)
 
-            assert scale_ratio < 5, \
+            assert scale_ratio < 4, \
                 f"calc_ispec should preserve units of {diagnostic}"
-            assert scale_ratio > 0.2, \
+            assert scale_ratio > 0.25, \
                 f"calc_ispec should preserve units of {diagnostic}"
 

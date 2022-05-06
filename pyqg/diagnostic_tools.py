@@ -115,14 +115,9 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
     # convert left border of the bin to center
     kr = kr + dkr/2
 
-    # convert to non-dimensional wavenumber 
-    # preserving integral over spectrum
+    # normalize / potentially convert to non-dimensional wavenumber 
+    phr = phr * kmin
     if nd_wavenumber:
         kr = kr / kmin
-        phr = phr * kmin
-    else:
-        # Otherwise, multiply by dkr to approximately preserve the original
-        # units of the spectrum.
-        phr = phr * dkr
 
     return kr, phr

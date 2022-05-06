@@ -77,9 +77,6 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
         isotropic wavenumber
     phr : array
         isotropic spectrum
-
-    Normalization:
-    signal2d.var()/2 = phr.sum() * (kr[1] - kr[0])
     """
 
     # account for complex conjugate

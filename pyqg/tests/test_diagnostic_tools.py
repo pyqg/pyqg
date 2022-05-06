@@ -40,7 +40,7 @@ def test_calc_ispec_units():
         m._calc_derived_fields()
 
     for diagnostic in m1.diagnostics.keys():
-        if 'Dissspec' in diagnostic:
+        if diagnostic == 'Dissspec':
             continue
 
         if m1.diagnostics[diagnostic]['dims'] == ('l','k'):
@@ -54,7 +54,7 @@ def test_calc_ispec_units():
             _, spec2r = calc_ispec(m2, spec2)
 
             scales = [
-                np.abs(spec).max()
+                np.abs(spec).mean()
                 for spec in [spec1x, spec1y, spec1r,
                              spec2x, spec2y, spec2r]
             ]

@@ -49,7 +49,8 @@ def spec_sum(ph2):
     return ph2.sum(axis=(-1,-2))
 
 def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=False, nfactor = 1):
-    """Compute isotropic spectrum `phr` from 2D spectrum of variable signal2d.
+    """Compute isotropic spectrum `phr` from 2D spectrum of variable `signal2d`
+    such that `signal2d.var() = phr.sum() * (kr[1] - kr[0])`.
 
     Parameters
     ----------
@@ -57,7 +58,7 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
         The model object from which `var_dens` originates
     
     var_dens : squared modulus of fourier coefficients like this:
-        np.abs(signal2d_fft)**2/m.M**2
+        `np.abs(signal2d_fft)**2/m.M**2`
 
     averaging: If True, spectral density is estimated with averaging over circles,
         otherwise summation is used and Parseval identity holds
@@ -102,22 +103,24 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
     phr = np.zeros(kr.size)
 
     for i in range(kr.size):
-        if averaging:
-            fkr =  (model.wv>=kr[i]) & (model.wv<=kr[i]+dkr)    
-            if fkr.sum() == 0:
-                phr[i] = 0.
-            else:
-                phr[i] = var_dens[fkr].mean() * (kr[i]+dkr/2) * pi / (model.dk * model.dl)
+        if i == kr.size-1:
+            fkr = (model.wv>=kr[i]) & (model.wv<=kr[i]+dkr)
         else:
-            fkr =  (model.wv>=kr[i]) & (model.wv<kr[i]+dkr)
+            fkr = (model.wv>=kr[i]) & (model.wv<kr[i]+dkr)
+        if averaging:
+            phr[i] = var_dens[fkr].mean() * (kr[i]+dkr/2) * pi / (model.dk * model.dl)
+        else:
             phr[i] = var_dens[fkr].sum() / dkr
+
+        phr[i] *= 2 # include full circle
     
     # convert left border of the bin to center
     kr = kr + dkr/2
 
-    # normalize / potentially convert to non-dimensional wavenumber 
-    phr = phr * kmin
+    # convert to non-dimensional wavenumber 
+    # preserving integral over spectrum
     if nd_wavenumber:
         kr = kr / kmin
+        phr = phr * kmin
 
     return kr, phr

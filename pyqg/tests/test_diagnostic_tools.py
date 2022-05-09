@@ -46,17 +46,14 @@ def test_calc_ispec_units():
         if m1.diagnostics[diagnostic]['dims'] == ('l','k'):
             spec1 = m1.diagnostics[diagnostic]['function'](m1)
             spec2 = m2.diagnostics[diagnostic]['function'](m2)
-            spec1x = spec1.sum(axis=0)
-            spec1y = spec1.sum(axis=1)
-            spec2x = spec2.sum(axis=0)
-            spec2y = spec2.sum(axis=1)
-            _, spec1r = calc_ispec(m1, spec1)
-            _, spec2r = calc_ispec(m2, spec2)
+            k1r, spec1r = calc_ispec(m1, spec1)
+            k2r, spec2r = calc_ispec(m2, spec2)
 
             scales = [
-                np.abs(spec).mean()
-                for spec in [spec1x, spec1y, spec1r,
-                             spec2x, spec2y, spec2r]
+                np.abs(spec1).sum(),
+                np.abs(spec2).sum(),
+                np.trapz(np.abs(spec1r), k1r),
+                np.trapz(np.abs(spec2r), k2r)
             ]
 
             if max(scales) == 0:
@@ -64,8 +61,8 @@ def test_calc_ispec_units():
 
             scale_ratio = max(scales) / min(scales)
 
-            assert scale_ratio < 4, \
-                f"calc_ispec should preserve units of {diagnostic}"
-            assert scale_ratio > 0.25, \
-                f"calc_ispec should preserve units of {diagnostic}"
+            assert scale_ratio < 10, \
+                f"calc_ispec should have correct units for {diagnostic}"
+            assert scale_ratio > 0.1, \
+                f"calc_ispec should have correct units for {diagnostic}"
 

@@ -24,7 +24,7 @@ def test_calc_ispec_peak():
     sinewave_freq_idx = np.argmin(np.abs(iso_wavenumbers - frequency))
     assert spectrum_peak_idx == sinewave_freq_idx
 
-def test_calc_ispec_units():
+def test_calc_ispec_units(rtol=1e-2):
     fixtures_path = f"{os.path.dirname(os.path.realpath(__file__))}/fixtures"
 
     with open(f"{fixtures_path}/LayeredModel_params.pkl", 'rb') as f:
@@ -38,31 +38,19 @@ def test_calc_ispec_units():
     for m in [m1, m2]:
         m._invert()
         m._calc_derived_fields()
+        for a in ['q','p']:
+            for z in [0,1]:
+                ah = a+'h'
+                signal2d = getattr(m, a)[z]
+                power = np.abs(getattr(m, ah)[z])**2/m.M**2
+                k, ispec = calc_ispec(m, power, averaging=False)
+                np.testing.assert_allclose(
+                    signal2d.var()/2,
+                    ispec.sum()*(k[1]-k[0])/2,
+                    rtol,
+                    err_msg=f"ispec should have correct units for {a} at z={z}"
+                )
 
-    for diagnostic in m1.diagnostics.keys():
-        if diagnostic == 'Dissspec':
-            continue
-
-        if m1.diagnostics[diagnostic]['dims'] == ('l','k'):
-            spec1 = m1.diagnostics[diagnostic]['function'](m1)
-            spec2 = m2.diagnostics[diagnostic]['function'](m2)
-            k1r, spec1r = calc_ispec(m1, spec1)
-            k2r, spec2r = calc_ispec(m2, spec2)
-
-            scales = [
-                np.abs(spec1).sum(),
-                np.abs(spec2).sum(),
-                np.trapz(np.abs(spec1r), k1r),
-                np.trapz(np.abs(spec2r), k2r)
-            ]
-
-            if max(scales) == 0:
-                continue
-
-            scale_ratio = max(scales) / min(scales)
-
-            assert scale_ratio < 10, \
-                f"calc_ispec should have correct units for {diagnostic}"
-            assert scale_ratio > 0.1, \
-                f"calc_ispec should have correct units for {diagnostic}"
-
+if __name__ == "__main__":
+    test_calc_ispec_peak()
+    test_calc_ispec_units()

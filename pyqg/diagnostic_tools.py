@@ -112,7 +112,7 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
         else:
             phr[i] = var_dens[fkr].sum() / dkr
 
-        phr[i] *= 2 # include full circle
+        #phr[i] *= 2 # include full circle
     
     # convert left border of the bin to center
     kr = kr + dkr/2

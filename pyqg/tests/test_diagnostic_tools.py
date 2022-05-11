@@ -40,15 +40,16 @@ def test_calc_ispec_units(rtol=1e-2):
         m._calc_derived_fields()
         for a in ['q','p']:
             for z in [0,1]:
-                ah = a+'h'
                 signal2d = getattr(m, a)[z]
-                power = np.abs(getattr(m, ah)[z])**2/m.M**2
+                spectral = getattr(m, a+'h')[z]
+                power = np.abs(spectral)**2/m.M**2
                 k, ispec = calc_ispec(m, power, averaging=False)
+                dk = k[1]-k[0]
                 np.testing.assert_allclose(
                     signal2d.var()/2,
-                    ispec.sum()*(k[1]-k[0])/2,
+                    ispec.sum()*dk,
                     rtol,
-                    err_msg=f"ispec should have correct units for {a} at z={z}"
+                    err_msg=f"ispec should have correct integral for {a}{z+1}"
                 )
 
 if __name__ == "__main__":

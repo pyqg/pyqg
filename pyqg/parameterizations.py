@@ -32,6 +32,23 @@ class Parameterization(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def parameterization_type(self):
+        """Whether the parameterization applies to velocity (in which case this
+        property should return `"uv_parameterization"`) or potential vorticity
+        (in which case this property should return `"q_parameterization"`). If
+        you inherit from UVParameterization or QParameterization, this will be
+        defined automatically.
+
+        Returns
+        -------
+        parameterization_type : string
+            Either `"uv_parameterization"` or `"q_parameterization"`, depending
+            on how the output should be interpreted.
+        """
+        pass
+
     def __add__(self, other):
         """Add two parameterizations (returning a new object).
 
@@ -63,6 +80,7 @@ class Parameterization(ABC):
         return WeightedParameterization(self, constant)
 
     __rmul__ = __mul__
+
 
 class CompositeParameterization(Parameterization):
     """A sum of multiple parameterizations. Used in
@@ -100,7 +118,22 @@ class WeightedParameterization(Parameterization):
     def __repr__(self):
         return f"{self.weight} * {self.param}"
 
-class Smagorinsky(Parameterization):
+class UVParameterization(Parameterization):
+    """A generic class representing a subgrid parameterization in terms of velocity."""
+
+    @property
+    def parameterization_type(self):
+        return 'uv_parameterization'
+
+class QParameterization(Parameterization):
+    """A generic class representing a subgrid parameterization in terms of
+    potential vorticity."""
+
+    @property
+    def parameterization_type(self):
+        return 'q_parameterization'
+
+class Smagorinsky(UVParameterization):
     r"""Velocity parameterization from `Smagorinsky 1963`_.
 
     This parameterization assumes that due to subgrid stress, there is an
@@ -122,8 +155,6 @@ class Smagorinsky(Parameterization):
 
     .. _Smagorinsky 1963: https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2
     """
-
-    parameterization_type = 'uv_parameterization'
 
     def __init__(self, constant=0.1):
         r"""
@@ -164,7 +195,7 @@ class Smagorinsky(Parameterization):
     def __repr__(self):
         return f"Smagorinsky(Cs={self.constant})"
 
-class BackscatterBiharmonic(Parameterization):
+class BackscatterBiharmonic(QParameterization):
     r"""PV parameterization based on `Jansen and Held 2014`_ and
     `Jansen et al.  2015`_ (adapted by Pavel Perezhogin). Assumes that a
     configurable fraction of Smagorinsky dissipation is scattered back to
@@ -173,8 +204,6 @@ class BackscatterBiharmonic(Parameterization):
     .. _Jansen and Held 2014: https://doi.org/10.1016/j.ocemod.2014.06.002
     .. _Jansen et al. 2015: https://doi.org/10.1016/j.ocemod.2015.05.007
     """
-
-    parameterization_type = 'q_parameterization'
 
     def __init__(self, smag_constant=0.08, back_constant=0.99, eps=1e-32):
         r"""
@@ -214,14 +243,12 @@ class BackscatterBiharmonic(Parameterization):
         return f"BackscatterBiharmonic(Cs={self.smagorinsky.constant}, "\
                                      f"Cb={self.back_constant})"
 
-class ZannaBolton2020(Parameterization):
+class ZannaBolton2020(UVParameterization):
     r"""Velocity parameterization derived from equation discovery by `Zanna and
     Bolton 2020`_ (Eq. 6).
 
     .. _Zanna and Bolton 2020: https://doi.org/10.1029/2020GL088376
     """
-
-    parameterization_type = 'uv_parameterization'
 
     def __init__(self, constant=-46761284):
         r"""

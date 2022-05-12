@@ -9,7 +9,13 @@ def QG():
 def Layered():
     return pyqg.LayeredModel
 
-@pytest.fixture(params=[QG, Layered])
+def SQG():
+    return pyqg.SQGModel
+
+def BT():
+    return pyqg.BTModel
+
+@pytest.fixture(params=[QG, Layered, SQG, BT])
 def model(request):
     klass = request.param()
     model = klass()

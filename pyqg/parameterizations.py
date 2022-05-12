@@ -60,7 +60,7 @@ class Parameterization(ABC):
         product : Parameterization
             The parameterization times the constant.
         """
-        return ReweightedParameterization(self, constant)
+        return WeightedParameterization(self, constant)
 
     __rmul__ = __mul__
 
@@ -77,7 +77,7 @@ class CompositeParameterization(Parameterization):
     def __repr__(self):
         return f"CompositeParameterization{self.params}"
 
-class ReweightedParameterization(Parameterization):
+class WeightedParameterization(Parameterization):
     """A weighted parameterization. Used in Parameterization#__mul__."""
 
     def __init__(self, param, weight):
@@ -109,7 +109,6 @@ class Smagorinsky(Parameterization):
 
     .. math:: S_{i,j} = \frac{1}{2}(\partial_i \mathbf{u}_j
                                   + \partial_j \mathbf{u}_i)
-
 
     .. _Smagorinsky 1963: https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2
     """
@@ -180,10 +179,10 @@ class BackscatterBiharmonic(Parameterization):
         self.eps = eps
 
     def __call__(self, m):
-        lap = m.ik**2 + m.il**2
         psi = m.ifft(m.ph)
-        lap_lap_psi = m.ifft(lap**2 * m.ph)
-        dissipation = -m.ifft(lap * m.fft(lap_lap_psi * self.smagorinsky(m, just_viscosity=True)))
+        lap_lap_psi = m.ifft(m.wv2**2 * m.ph)
+        dissipation = m.ifft(m.wv2 * m.fft(lap_lap_psi * self.smagorinsky(m,
+            just_viscosity=True)))
         backscatter = -self.back_constant * lap_lap_psi * (
             (np.sum(m.Hi * np.mean(psi * dissipation, axis=(-1,-2)))) /
             (np.sum(m.Hi * np.mean(psi * lap_lap_psi, axis=(-1,-2))) + self.eps)) 

@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import pi
-from . import model
+from . import qg_diagnostics
 
 try:
     import mkl
@@ -14,7 +14,7 @@ try:
 except ImportError:
     pass
 
-class QGModel(model.Model):
+class QGModel(qg_diagnostics.QGDiagnostics):
     r"""Two layer quasigeostrophic model.
 
     This model is meant to representflows driven by baroclinic instabilty of a
@@ -117,6 +117,7 @@ class QGModel(model.Model):
         self.H = self.Hi.sum()
         self.set_U1U2(self.U1, self.U2)
         self.U = self.U1 - self.U2
+        self.Vbg = np.zeros_like(self.Ubg)
 
         # the F parameters
         self.F1 = self.rd**-2 / (1.+self.delta)
@@ -211,27 +212,6 @@ class QGModel(model.Model):
         self.Ubg = np.array([U1,U2])
 
     ### All the diagnostic stuff follows. ###
-    def _calc_cfl(self):
-        return np.abs(
-            np.hstack([self.u + self.Ubg[:,np.newaxis,np.newaxis], self.v])
-        ).max()*self.dt/self.dx
-
-    # calculate KE: this has units of m^2 s^{-2}
-    #   (should also multiply by H1 and H2...)
-    def _calc_ke(self):
-        ke1 = .5*self.Hi[0]*self.spec_var(self.wv*self.ph[0])
-        ke2 = .5*self.Hi[1]*self.spec_var(self.wv*self.ph[1])
-        return ( ke1.sum() + ke2.sum() ) / self.H
-
-    # calculate eddy turn over time
-    # (perhaps should change to fraction of year...)
-    def _calc_eddy_time(self):
-        """ estimate the eddy turn-over time in days """
-
-        ens = .5*self.Hi[0] * self.spec_var(self.wv2*self.ph1) + \
-            .5*self.Hi[1] * self.spec_var(self.wv2*self.ph2)
-
-        return 2.*pi*np.sqrt( self.H / ens ) / 86400
 
     def _calc_derived_fields(self):
         self.p = self.ifft(self.ph)
@@ -249,13 +229,7 @@ class QGModel(model.Model):
     def _initialize_model_diagnostics(self):
         """Extra diagnostics for two-layer model"""
 
-        self.add_diagnostic('entspec',
-            description='barotropic enstrophy spectrum',
-            function= (lambda self:
-                      np.abs(self.del1*self.qh[0] + self.del2*self.qh[1])**2./self.M**2),
-            units='s^-2',
-            dims=('l','k')
-        )
+        super()._initialize_model_diagnostics()
 
         self.add_diagnostic('APEflux',
             description='spectral flux of available potential energy',
@@ -275,15 +249,6 @@ class QGModel(model.Model):
             dims=('l','k')
        )
 
-        self.add_diagnostic('APEgenspec',
-            description='spectrum of available potential energy generation',
-            function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
-                       np.real(1j*self.k*(self.del1*self.ph[0] + self.del2*self.ph[1]) *
-                                  np.conj(self.ph[0] - self.ph[1]))/self.M**2 ),
-            units='m^2 s^-3',
-            dims=('l','k')
-       )
-
         self.add_diagnostic('APEgen',
             description='total available potential energy generation',
             function= (lambda self: self.U * self.rd**-2 * self.del1 * self.del2 *
@@ -298,57 +263,4 @@ class QGModel(model.Model):
             dims=('time',)
        )
 
-        self.add_diagnostic('ENSflux',
-            description='barotropic enstrophy flux',
-            function = (lambda self: (-self.Hi[:,np.newaxis,np.newaxis]*
-                        (self.qh.conj()*self.Jq).real).sum(axis=0)/self.H/self.M**2),
-            units='s^-3',
-            dims=('l','k')
-       )
 
-        self.add_diagnostic('ENSgenspec',
-            description='the spectrum of the rate of generation of barotropic enstrophy',
-            function = (lambda self:
-                        (self.Hi[:,np.newaxis,np.newaxis]*((self.ilQx-self.ikQy)*
-                        self.Sph.conj()*self.ph).real).sum(axis=0)/self.H/self.M**2),
-            units='s^-3',
-            dims=('l','k')
-       )
-
-        self.add_diagnostic('ENSfrictionspec',
-            description='the spectrum of the rate of dissipation of barotropic enstrophy due to bottom friction',
-            function = (lambda self: self.rek*self.Hi[-1]/self.H*self.wv2*
-                        (self.qh[-1].conj()*self.ph[-1]).real/self.M**2),
-            units='s^-3',
-            dims=('l','k')
-       )
-
-
-        self.add_diagnostic('paramspec_apeflux',
-            description='total additional APE flux due to subgrid parameterization',
-            function=(lambda self: self._calc_paramspec_contribution(
-                self.del1 * self.del2 / self.rd**2 * (
-                    np.array([1,-1])[:,np.newaxis,np.newaxis] *
-                    np.subtract(*np.conj(self.ph))
-                )
-            )),
-            units='m^2 s^-3',
-            dims=('l','k')
-       )
-
-        self.add_diagnostic('paramspec_keflux',
-            description='total additional KE flux due to subgrid parameterization',
-            function=(lambda self: self._calc_paramspec_contribution(
-                self.wv2 * (self.Hi / self.H)[:,np.newaxis,np.newaxis] * np.conj(self.ph)
-            )),
-            units='m^2 s^-3',
-            dims=('l','k')
-       )
-
-    def _calc_paramspec_contribution(self, term):
-        return np.real(
-            (
-                np.einsum("ij..., i... -> j...", self.a, term) * 
-                self._calc_parameterization_contribution()
-            ).sum(axis=0) / self.M**2
-        )

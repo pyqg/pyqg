@@ -176,18 +176,19 @@ class BackscatterBiharmonic(Parameterization):
 
     parameterization_type = 'q_parameterization'
 
-    def __init__(self, smag_constant=0.1, back_constant=0.9, eps=1e-32):
+    def __init__(self, smag_constant=0.08, back_constant=0.99, eps=1e-32):
         r"""
         Parameters
         ----------
         smag_constant : number
             Smagorinsky constant :math:`C_S` for the dissipative model.
-            Defaults to 0.1.
+            Defaults to 0.08.
         back_constant : number
-            Backscatter constant :math:`c_{diss}` describing the fraction of
+            Backscatter constant :math:`C_B` describing the fraction of
             Smagorinsky-dissipated energy which should be scattered back to
-            larger scales. Defaults to 0.9. Normally should be less than 1, but
-            larger values may still be stable.
+            larger scales. Defaults to 0.99. Normally should be less than 1,
+            but larger values may still be stable, e.g. due to additional
+            dissipation in the model from numerical filtering.
         eps : number
             Small constant to add to the denominator of the backscatter formula
             to prevent division by zero errors. Defaults to 1e-32.

@@ -3,12 +3,8 @@ from abc import ABC, abstractmethod
 
 class Parameterization(ABC):
     """A generic class representing a subgrid parameterization. Inherit from
-    this class when defining a new parameterization."""
-
-    @abstractmethod
-    def __init__(self):
-        ""
-        pass
+    this class, :math:`UVParameterization`, or :math:`QParameterization` to
+    define a new parameterization."""
 
     @abstractmethod
     def __call__(self, m):
@@ -36,16 +32,18 @@ class Parameterization(ABC):
     @abstractmethod
     def parameterization_type(self):
         """Whether the parameterization applies to velocity (in which case this
-        property should return `"uv_parameterization"`) or potential vorticity
-        (in which case this property should return `"q_parameterization"`). If
-        you inherit from UVParameterization or QParameterization, this will be
+        property should return :code:`"uv_parameterization"`) or potential
+        vorticity (in which case this property should return
+        :code:`"q_parameterization"`). If you inherit from
+        :code:`UVParameterization` or :code:`QParameterization`, this will be
         defined automatically.
 
         Returns
         -------
         parameterization_type : string
-            Either `"uv_parameterization"` or `"q_parameterization"`, depending
-            on how the output should be interpreted.
+            Either :code:`"uv_parameterization"` or
+            :code:`"q_parameterization"`, depending on how the output should be
+            interpreted.
         """
         pass
 
@@ -119,18 +117,22 @@ class WeightedParameterization(Parameterization):
         return f"{self.weight} * {self.param}"
 
 class UVParameterization(Parameterization):
-    """A generic class representing a subgrid parameterization in terms of velocity."""
+    """A generic class representing a subgrid parameterization in terms of
+    velocity. Inherit from this to define a new velocity parameterization."""
 
     @property
     def parameterization_type(self):
+        ""
         return 'uv_parameterization'
 
 class QParameterization(Parameterization):
     """A generic class representing a subgrid parameterization in terms of
-    potential vorticity."""
+    potential vorticity. Inherit from this to define a new potential vorticity
+    parameterization."""
 
     @property
     def parameterization_type(self):
+        ""
         return 'q_parameterization'
 
 class Smagorinsky(UVParameterization):

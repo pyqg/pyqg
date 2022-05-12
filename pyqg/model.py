@@ -81,18 +81,20 @@ class Model(PseudoSpectralKernel):
         Vertical pressure modes (unitless)
     radii :  real array
         Deformation radii  (units: model length)
-    q_parameterization : function
-        Optional function which takes the model as input and returns a `numpy`
-        array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
-        forward. This can be used to implement subgrid forcing
+    q_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a :code:`numpy` array of shape
+        :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
+        stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
-    uv_parameterization : function
-        Optional function which takes the model as input and returns a tuple of
-        two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
-        the zonal and meridional velocity derivatives (respectively) at each
-        timestep. This can also be used to implemented subgrid forcing
-        parameterizations, but expressed in terms of velocity rather than
-        potential vorticity.
+    uv_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a tuple of two :code:`numpy` arrays,
+        each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
+        meridional velocity derivatives (respectively) at each timestep (by
+        adding their curl to :math:`\partial_t q`).  This can also be used
+        to implemented subgrid forcing parameterizations, but expressed in
+        terms of velocity rather than potential vorticity.
     """
 
     def __init__(
@@ -171,20 +173,23 @@ class Model(PseudoSpectralKernel):
             Number of threads to use. Should not exceed the number of cores on
             your machine.
         q_parameterization : function or pyqg.Parameterization
-            Optional function which takes the model as input and returns a `numpy`
-            array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
-            forward. This can be used to implement subgrid forcing
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a :code:`numpy` array of shape
+            :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
+            stepping forward.  This can be used to implement subgrid forcing
             parameterizations.
         uv_parameterization : function or pyqg.Parameterization
-            Optional function which takes the model as input and returns a tuple of
-            two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
-            the zonal and meridional velocity derivatives (respectively) at each
-            timestep. This can also be used to implemented subgrid forcing
-            parameterizations, but expressed in terms of velocity rather than
-            potential vorticity.
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a tuple of two :code:`numpy` arrays,
+            each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
+            meridional velocity derivatives (respectively) at each timestep (by
+            adding their curl to :math:`\partial_t q`).  This can also be used
+            to implemented subgrid forcing parameterizations, but expressed in
+            terms of velocity rather than potential vorticity.
         parameterization : pyqg.Parameterization
-            An explicit pyqg.Parameterization object representing either a q or
-            uv parameterization (whose type will be inferred)
+            An explicit :code:`Parameterization` object representing either a
+            velocity or potential vorticity parameterization, whose type will
+            be inferred.
         """
 
         if ny is None:
@@ -448,6 +453,13 @@ class Model(PseudoSpectralKernel):
             default spectral truncation :code:`coarsening_function`. Defaults
             to the numerical filter already used in the low-res model for
             small-scale dissipation.
+
+        Returns
+        -------
+        forcing : array or list of arrays
+            The subgrid forcing associated with the given quantities and
+            coarsening scheme. If there is only one quantity, this is a single
+            array, and otherwise a list of them.
         """
 
         assert self.nx == self.ny, "subgrid forcing function assumes nx==ny"
@@ -936,3 +948,17 @@ class Model(PseudoSpectralKernel):
         """
         from .xarray_output import model_to_dataset
         return model_to_dataset(self)
+
+    @property
+    def parameterization(self):
+        """Return the model's parameterization if present (either in terms of
+        PV or velocity, warning if there are both).
+
+        Returns
+        -------
+        parameterization : pyqg.Parameterization or function
+        """
+        if self.q_parameterization and self.uv_parameterization:
+            warnings.warn("Model has multiple parameterizations, "\
+                          "but only returning PV")
+        return self.q_parameterization or self.uv_parameterization

@@ -112,6 +112,9 @@ class QGModel(qg_diagnostics.QGDiagnostics):
 
     @property
     def _config(self):
+        # This property returns a dictionary of keyword arguments that can be
+        # used to initialize a new model with the exact same settings. Most of
+        # these arguments can be inferred automatically, but H1 is stored in Hi.
         config = super()._config
         config['H1'] = self.Hi[0]
         return config

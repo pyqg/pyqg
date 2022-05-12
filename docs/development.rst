@@ -45,6 +45,8 @@ improvements.
 .. _issues: https://github.com/pyqg/pyqg/issues
 .. _pull requests: https://github.com/pyqg/pyqg/pulls
 
+.. _dev-workflow:
+
 Develpment Workflow
 ===================
 
@@ -147,13 +149,13 @@ automatically.
 However, before creating the release, it's worth checking `testpypi`_ to ensure
 the new version works. You can do that by:
 
-1. Verifying the `most recent test publish`_ succeeded (and is for the most
+#. Verifying the `most recent test publish`_ succeeded (and is for the most
    recent commit)
 
-1. Finding the corresponding pre-release version in pyqg's `TestPyPI history`_
+#. Finding the corresponding pre-release version in pyqg's `TestPyPI history`_
    (should look like `X.Y.Z.devN`)
 
-1. Installing that version locally as follows:
+#. Installing that version locally as follows:
 
 .. code-block:: bash
 

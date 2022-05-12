@@ -83,8 +83,8 @@ bottom layer. The advection of the background PV by the background
 flow is neglected because in each layer, the contribution of this term
 is constant for all locations. 
 
-Equations in the spectral space
--------------------------------
+Equations in spectral space
+---------------------------
 
 The evolution equation in spectral space is
 
@@ -162,6 +162,8 @@ V: The spectrum of energy loss due to small scale dissipation.
 
 We assume that the fifth term is relatively small, and that, in statistical
 steady state, the budget above is dominated by I through IV.
+
+.. _layered-subgrid-contribution:
 
 Contribution from subgrid parameterization
 ------------------------------------------

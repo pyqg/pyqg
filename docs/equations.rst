@@ -13,3 +13,4 @@ the various pyqg models
     equations/notation_linearstability
     equations/notation_equivalent_barotropic
     equations/notation_sqg_model
+    equations/parameterizations

@@ -72,7 +72,10 @@ class CompositeParameterization(Parameterization):
         assert len(set(p.parameterization_type for p in params)) == 1, \
             "all parameterizations must target the same variable (uv or q)"
         self.params = params
-        self.parameterization_type = params[0].parameterization_type
+
+    @property
+    def parameterization_type(self):
+        return self.params[0].parameterization_type
 
     def __call__(self, m):
         return np.sum([f(m) for f in self.params], axis=0)
@@ -86,6 +89,10 @@ class WeightedParameterization(Parameterization):
     def __init__(self, param, weight):
         self.param = param
         self.weight = weight
+
+    @property
+    def parameterization_type(self):
+        return self.param.parameterization_type
 
     def __call__(self, m):
         return np.array(self.param(m)) * self.weight

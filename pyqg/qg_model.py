@@ -237,7 +237,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc))/self.M**2 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            sums_with=['paramspec_APEflux'],
        )
 
         self.add_diagnostic('KEflux',
@@ -246,7 +247,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
               (np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
                np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])))/self.M**2 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            sums_with=['paramspec_KEflux'],
        )
 
         self.add_diagnostic('APEgen',

@@ -118,6 +118,7 @@ class Model(PseudoSpectralKernel):
         g= 9.81,                    # acceleration due to gravity
         q_parameterization=None,    # subgrid parameterization in terms of q
         uv_parameterization=None,   # subgrid parameterization in terms of u,v
+        parameterization=None,      # subgrid parameterization (type will be inferred)
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -168,24 +169,40 @@ class Model(PseudoSpectralKernel):
         ntd : int
             Number of threads to use. Should not exceed the number of cores on
             your machine.
-        q_parameterization : function
+        q_parameterization : function or pyqg.Parameterization
             Optional function which takes the model as input and returns a `numpy`
             array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
             forward. This can be used to implement subgrid forcing
             parameterizations.
-        uv_parameterization : function
+        uv_parameterization : function or pyqg.Parameterization
             Optional function which takes the model as input and returns a tuple of
             two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
             the zonal and meridional velocity derivatives (respectively) at each
             timestep. This can also be used to implemented subgrid forcing
             parameterizations, but expressed in terms of velocity rather than
             potential vorticity.
+        parameterization : pyqg.Parameterization
+            An explicit pyqg.Parameterization object representing either a q or
+            uv parameterization (whose type will be inferred)
         """
 
         if ny is None:
             ny = nx
         if W is None:
             W = L
+
+        # if an explicit parameterization object was passed without a given
+        # type, infer it from its attributes
+        if parameterization is not None:
+            ptype = parameterization.parameterization_type 
+            if ptype == 'uv_parameterization':
+                assert uv_parameterization is None
+                uv_parameterization = parameterization
+            elif ptype == 'q_parameterization':
+                assert q_parameterization is None
+                q_parameterization = parameterization
+            else:
+                raise ValueError(f"unknown parameterization type {ptype}")
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
@@ -688,7 +705,8 @@ class Model(PseudoSpectralKernel):
             description='Spectral contribution of subgrid parameterization (if present)',
             function=lambda self: self._calc_parameterization_spectrum(),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            skip_comparison=True,
         )
 
     def _calc_parameterization_contribution(self):
@@ -718,7 +736,7 @@ class Model(PseudoSpectralKernel):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 
-    def add_diagnostic(self, diag_name, description=None, function=None, units=None, dims=None):
+    def add_diagnostic(self, diag_name, description=None, function=None, units=None, dims=None, **kw):
         # create a new diagnostic dict and add it to the object array
 
         # make sure the function is callable
@@ -735,6 +753,9 @@ class Model(PseudoSpectralKernel):
            'active': True,
            'count': 0,
            'function': function, }
+
+        # add any additional properties
+        self.diagnostics[diag_name].update(**kw)
 
     def describe_diagnostics(self):
         """Print a human-readable summary of the available diagnostics."""

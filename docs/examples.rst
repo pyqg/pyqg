@@ -10,3 +10,4 @@ Examples
     examples/sqg
     examples/linear_stability
     examples/parameterization
+    examples/comparing_parameterizations

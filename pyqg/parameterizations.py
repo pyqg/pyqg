@@ -69,7 +69,10 @@ class CompositeParameterization(Parameterization):
     Parameterization#__add__."""
 
     def __init__(self, *params):
+        assert len(set(p.parameterization_type for p in params)) == 1, \
+            "all parameterizations must target the same variable (uv or q)"
         self.params = params
+        self.parameterization_type = params[0].parameterization_type
 
     def __call__(self, m):
         return np.sum([f(m) for f in self.params], axis=0)
@@ -113,6 +116,8 @@ class Smagorinsky(Parameterization):
     .. _Smagorinsky 1963: https://doi.org/10.1175/1520-0493(1963)091%3C0099:GCEWTP%3E2.3.CO;2
     """
 
+    parameterization_type = 'uv_parameterization'
+
     def __init__(self, constant=0.1):
         r"""
         Parameters
@@ -134,9 +139,11 @@ class Smagorinsky(Parameterization):
             different parameterization which assumes a Smagorinsky dissipation
             model). Defaults to false.
         """
-        Sxx = m.ifft(m.uh * m.ik)
-        Syy = m.ifft(m.vh * m.il)
-        Sxy = 0.5 * m.ifft(m.uh * m.il + m.vh * m.ik)
+        uh = m.fft(m.u)
+        vh = m.fft(m.v)
+        Sxx = m.ifft(uh * m.ik)
+        Syy = m.ifft(vh * m.il)
+        Sxy = 0.5 * m.ifft(uh * m.il + vh * m.ik)
         nu = (self.constant * m.dx)**2 * np.sqrt(2 * (Sxx**2 + Syy**2 + 2 * Sxy**2))
         if just_viscosity:
             return nu
@@ -147,6 +154,9 @@ class Smagorinsky(Parameterization):
         dv = 2 * (m.ifft(nu_Sxyh * m.ik) + m.ifft(nu_Syyh * m.il))
         return du, dv
 
+    def __repr__(self):
+        return f"Smagorinsky(Cs={self.constant})"
+
 class BackscatterBiharmonic(Parameterization):
     r"""PV parameterization based on `Jansen and Held 2014`_ and
     `Jansen et al.  2015`_ (adapted by Pavel Perezhogin). Assumes that a
@@ -156,6 +166,8 @@ class BackscatterBiharmonic(Parameterization):
     .. _Jansen and Held 2014: https://doi.org/10.1016/j.ocemod.2014.06.002
     .. _Jansen et al. 2015: https://doi.org/10.1016/j.ocemod.2015.05.007
     """
+
+    parameterization_type = 'q_parameterization'
 
     def __init__(self, smag_constant=0.1, back_constant=0.9, eps=1e-32):
         r"""
@@ -179,9 +191,10 @@ class BackscatterBiharmonic(Parameterization):
         self.eps = eps
 
     def __call__(self, m):
+        lap = m.ik**2 + m.il**2
         psi = m.ifft(m.ph)
-        lap_lap_psi = m.ifft(m.wv2**2 * m.ph)
-        dissipation = m.ifft(m.wv2 * m.fft(lap_lap_psi * self.smagorinsky(m,
+        lap_lap_psi = m.ifft(lap**2 * m.ph)
+        dissipation = -m.ifft(lap * m.fft(lap_lap_psi * m.dx**2 * self.smagorinsky(m,
             just_viscosity=True)))
         backscatter = -self.back_constant * lap_lap_psi * (
             (np.sum(m.Hi * np.mean(psi * dissipation, axis=(-1,-2)))) /
@@ -189,12 +202,18 @@ class BackscatterBiharmonic(Parameterization):
         dq = dissipation + backscatter
         return dq
 
+    def __repr__(self):
+        return f"BackscatterBiharmonic(Cs={self.smagorinsky.constant}, "\
+                                     f"Cb={self.back_constant})"
+
 class ZannaBolton2020(Parameterization):
     r"""Velocity parameterization derived from equation discovery by `Zanna and
     Bolton 2020`_ (Eq. 6).
 
     .. _Zanna and Bolton 2020: https://doi.org/10.1029/2020GL088376
     """
+
+    parameterization_type = 'uv_parameterization'
 
     def __init__(self, constant=-46761284):
         r"""
@@ -231,3 +250,6 @@ class ZannaBolton2020(Parameterization):
         du = kappa * m.ifft(m.ik*(sum_sqs - rv_shear) + m.il*rv_stretch)
         dv = kappa * m.ifft(m.il*(sum_sqs + rv_shear) + m.ik*rv_stretch)
         return du, dv
+
+    def __repr__(self):
+        return f"ZannaBolton2020(κ={self.constant:.2e})"

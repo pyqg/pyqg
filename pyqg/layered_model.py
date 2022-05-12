@@ -289,7 +289,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
-                dims=('l','k')
+                dims=('l','k'),
+                sums_with=['paramspec_KEflux'],
         )
         
         self.add_diagnostic('APEflux_div',
@@ -297,7 +298,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
-                dims=('l','k')
+                dims=('l','k'),
+                sums_with=['paramspec_APEflux'],
         )
         
 

@@ -157,8 +157,9 @@ def diagnostic_differences(m1, m2, reduction='rmse', instantaneous=False):
 
     # Compute the minimum common wavenumber in case we're comparing two
     # models with different resolutions
-    kr1, _ = calc_ispec(m1, m1.get_diagnostic('KEspec')[0])
-    kr2, _ = calc_ispec(m2, m2.get_diagnostic('KEspec')[0])
+
+    kr1, _ = calc_ispec(m1, m1.diagnostics['KEspec']['function'](m1)[0])
+    kr2, _ = calc_ispec(m2, m2.diagnostics['KEspec']['function'](m2)[0])
     min_kr_length = min(len(kr1), len(kr2))
 
     # Helper to get a normalized version of diagnostics
@@ -184,7 +185,7 @@ def diagnostic_differences(m1, m2, reduction='rmse', instantaneous=False):
 
         # Potentially convert to isotropic spectrum, keeping only the
         # wavenumbers common to both models
-        if attrs['units'][-2:] == ('l','k'):
+        if attrs['dims'][-2:] == ('l','k'):
             kr, diag = calc_ispec(model, diag)
             diag = diag[:min_kr_length]
 
@@ -206,7 +207,13 @@ def diagnostic_differences(m1, m2, reduction='rmse', instantaneous=False):
 
         # If we have multiple layers in this diagnostic, we want to consider
         # them separately with different keys
-        layers = range(m1.nz) if attrs['units'][0] == 'lev' else [None]
+        if attrs['dims'][0] == 'lev':
+            layers = range(m1.nz)
+        elif attrs['dims'][0] == 'lev_mid':
+            layers = range(m1.nz - 1)
+        else:
+            layers = [None]
+
         for layer in layers:
             diag1 = get_normalized_diagnostic(m1, diag_name, layer)
             diag2 = get_normalized_diagnostic(m2, diag_name, layer)

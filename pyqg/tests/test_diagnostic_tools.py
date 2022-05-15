@@ -52,6 +52,43 @@ def test_calc_ispec_units(rtol=1e-2):
                     err_msg=f"ispec should have correct integral for {a}{z+1}"
                 )
 
+def test_calc_ispec_sum(): 
+
+    for nx in [16, 64, 256]:
+        ny = nx
+        m = pyqg.QGModel(nx = nx, ny = ny) 
+        p = np.random.rand(ny, nx)
+
+        # Get energy field and its spectrum
+        E = np.abs(p)**2 # Energy in real space
+        Eh_numpy = np.abs(np.fft.fft2(p))**2 # Energy spectrum in full plane
+        Eh_model = np.abs(m.fft(p.reshape(1, nx, ny))[0])**2 # Energy spectrum in model (half) plane
+
+        # Do the same in calc_ispec to avoid double counting 0th wavenumber and the largest wavenumber
+        Eh_model_2 = Eh_model.copy()
+        Eh_model_2[...,0] /= 2
+        Eh_model_2[...,-1] /= 2
+
+        # Get variance (or average energy)
+        E_total = E.mean()
+
+        # Check that the half and full planes both satisfy Parseval's theorem
+        np.testing.assert_allclose(E_total, Eh_numpy.sum()/m.M**2)
+        np.testing.assert_allclose(E_total, Eh_model_2.sum()/m.M**2*2) # Note the factor of 2 here
+
+        ## Test calc_ispec()
+        # Check that Parseval's theorem is roughly satisfied with averaging and truncation
+        kr, Ehr = calc_ispec(m, Eh_model, truncate=True, averaging=True)
+        E_total_radial = np.cumsum(Ehr * (kr[1]-kr[0]))[-1]
+        assert E_total_radial/Eh_numpy.sum() > 0.5 and E_total_radial/Eh_numpy.sum() < 2,\
+            f"Parseval's theorem is not roughly satisfied by calc_ispec"
+
+        # Check that Parseval's theorem is exactly satisfied without averaging or truncation
+        kr, Ehr = calc_ispec(m, Eh_model, truncate=False, averaging=False)
+        E_total_radial = np.cumsum(Ehr * (kr[1]-kr[0]))[-1]
+        np.testing.assert_allclose(E_total_radial, Eh_numpy.sum())
+
 if __name__ == "__main__":
     test_calc_ispec_peak()
     test_calc_ispec_units()
+    test_calc_ispec_sum()

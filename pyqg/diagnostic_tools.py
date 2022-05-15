@@ -93,7 +93,7 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
     else:
         kmax = np.sqrt(ll_max**2 + kk_max**2)
     
-    kmin = np.minimum(model.dk, model.dl)
+    kmin = 0
 
     dkr = np.sqrt(model.dk**2 + model.dl**2) * nfactor
 
@@ -106,13 +106,13 @@ def calc_ispec(model, _var_dens, averaging = True, truncate=True, nd_wavenumber=
         if i == kr.size-1:
             fkr = (model.wv>=kr[i]) & (model.wv<=kr[i]+dkr)
         else:
-            fkr = (model.wv>=kr[i]) & (model.wv<kr[i]+dkr)
+            fkr = (model.wv>=kr[i]) & (model.wv<kr[i+1])
         if averaging:
             phr[i] = var_dens[fkr].mean() * (kr[i]+dkr/2) * pi / (model.dk * model.dl)
         else:
             phr[i] = var_dens[fkr].sum() / dkr
 
-        #phr[i] *= 2 # include full circle
+        phr[i] *= 2 # include full circle
     
     # convert left border of the bin to center
     kr = kr + dkr/2

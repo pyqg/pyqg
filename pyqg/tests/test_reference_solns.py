@@ -60,10 +60,10 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
         # need to average these diagnostics
         avg_diagnostic_results = {
-             'entspec': 1.5015983257921716e-06,
-              'APEflux': 0.00017889483037254459,
-              'KEflux':  0.00037067750708912918,
-              'APEgenspec': 0.00025837684260178754,
+             'entspec': 1.5015983257921716e-06 / m.M**2,
+              'APEflux': 0.00017889483037254459  / m.M**2,
+              'KEflux':  0.00037067750708912918 / m.M**2,
+              'APEgenspec': 0.00025837684260178754 / m.M**2,
               'KEspec': 2 * (8581.3114357188006 + 163.75201433878425) / (m.M**2)
         }
 
@@ -82,13 +82,16 @@ class ReferenceSolutionsTester(unittest.TestCase):
         # now do assertions
         for name, des in iteritems(diagnostic_results):
             res = m.get_diagnostic(name)
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name}")
         for name, des in iteritems(sum_diagnostic_results):
             res = m.get_diagnostic(name).sum()
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name} sum")
         for name, des in iteritems(avg_diagnostic_results):
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
-            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol)
+            np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
+                    err_msg=f"mismatch in {name} spec sum")
 
 
     def test_bt(self):
@@ -136,7 +139,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         """ Tests against some statistics of a reference sqg solution """
 
         m = pyqg.SQGModel(L=2.*np.pi,nx=64, tmax = 5.,
-                beta = 0., H = 1., rek = 0., dt = 0.0025,
+                beta = 0., H = 1., dt = 0.0025,
                 twrite=1000)
 
         p = np.exp(-(2.*(m.x-1.75*np.pi/2))**2.-(2.*(m.y-np.pi))**2) +\
@@ -149,7 +152,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         qi = m.ifft(qih)
         m.set_q(qi)
 
-        rtol = 1.e-5
+        rtol = 1.e-4
         atol = 1.e-14
 
         np.testing.assert_allclose(m.q, qi, atol)

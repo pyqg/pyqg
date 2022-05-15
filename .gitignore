@@ -65,7 +65,10 @@ target/
 # notebooks
 **/.ipynb_checkpoints/*
 
-# .swp/.swo files from text editors
+docs/examples/particles*.gif
+
+# .swp files from vim
 *.sw[a-z]
 
-docs/examples/particles*.gif
+# remove DS_Store file (for Mac systems)
+**.DS_Store

@@ -135,6 +135,11 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
+def local_scheme(version):
+    """Skip the local version (eg. +xyz of 0.6.1.dev4+gdf99fe2)
+    to be able to upload to Test PyPI"""
+    return ""
+
 ext_module = Extension(
     "pyqg.kernel",
     ["pyqg/kernel.pyx"],
@@ -152,7 +157,8 @@ setup(name=DISTNAME,
       license=LICENSE,
       packages=['pyqg'],
       install_requires=install_requires,
-      use_scm_version=True,
+      setup_requires=["setuptools_scm"],
+      use_scm_version={"local_scheme": local_scheme},
       python_requires='>=3.6',
       ext_modules = cythonize(ext_module),
       include_dirs = [np.get_include()],

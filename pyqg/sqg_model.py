@@ -10,7 +10,7 @@ class SQGModel(model.Model):
         self,
         beta=0.,                    # gradient of coriolis parameter
         Nb = 1.,                    # Buoyancy frequency
-        rd=0.,                      # deformation radius
+        f_0 = 1.,                   # coriolis parameter
         H = 1.,                     # depth of layer
         U=0.,                       # max vel. of base-state
         **kwargs
@@ -25,14 +25,13 @@ class SQGModel(model.Model):
         Nb : number
             Buoyancy frequency. Units: seconds :sup:`-1`.
         U : number
-            Background zonal flow. Units: meters.
+            Background zonal flow. Units: meters seconds :sup:`-1`.
         """
 
         # physical
         self.beta = beta
         self.Nb = Nb
-        #self.rek = rek
-        self.rd = rd
+        self.f_0 = f_0
         self.H = H
         self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
@@ -63,8 +62,8 @@ class SQGModel(model.Model):
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
-        # The sqg model is diagonal. The inversion is simply qh = -kappa**2 ph
-        self.a = np.asarray(self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
+        # The sqg inversion is ph = f / (kappa * N) qh (see documentation) 
+        self.a = np.asarray(self.f_0/self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass

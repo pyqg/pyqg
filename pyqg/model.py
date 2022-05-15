@@ -26,7 +26,7 @@ class Model(PseudoSpectralKernel):
     nx, ny : int
         Number of real space grid points in the `x`, `y` directions (cython)
     nk, nl : int
-        Number of spectal space grid points in the `k`, `l` directions (cython)
+        Number of spectral space grid points in the `k`, `l` directions (cython)
     nz : int
         Number of vertical levels (cython)
     kk, ll : real array
@@ -654,14 +654,14 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('Ensspec',
             description='enstrophy spectrum',
             function= (lambda self: np.abs(self.qh)**2/self.M**2),
-            units='',
+            units='s^-2',
             dims=('lev','l','k')         
         )
 
         self.add_diagnostic('KEspec',
             description='kinetic energy spectrum',
             function= (lambda self: self.wv2*np.abs(self.ph)**2/self.M**2),
-            units='',
+            units='m^2 s^-2',
             dims=('lev','l','k')  
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
@@ -669,41 +669,84 @@ class Model(PseudoSpectralKernel):
         self.add_diagnostic('EKEdiss',
             description='total energy dissipation by bottom drag',
             function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
-            units='',
+            units='m^2 s^-3',
             dims=('time',)
+        )
+
+        self.add_diagnostic('KEfrictionspec',
+            description='total energy dissipation spectrum by bottom drag',
+            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
+            units='m^2 s^-3',
+            dims=('l','k')
         )
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
             function= (lambda self: 0.5*(self.v**2 + self.u**2).mean(axis=-1).mean(axis=-1)),
-            units='',
+            units='m^2 s^-2',
             dims=('lev',)
         )
 
-        def parameterization_spectrum(m):
-            spectrum = np.zeros_like(m.wv2)
-
-            if m.uv_parameterization is not None:
-                ik = np.asarray(m._ik).reshape((1, -1)).repeat(m.wv2.shape[0], axis=0)
-                il = np.asarray(m._il).reshape((-1, 1)).repeat(m.wv2.shape[-1], axis=-1)
-                dqh1 = (-il * m.duh[0] + ik * m.dvh[0])
-                dqh2 = (-il * m.duh[1] + ik * m.dvh[1])
-                if m.q_parameterization is not None:
-                    dqh1 += m.dqh[0]
-                    dqh2 += m.dqh[1]
-                spectrum += m._calc_parameterization_spectrum(dqh1, dqh2)
-
-            elif m.q_parameterization is not None:
-                spectrum += m._calc_parameterization_spectrum(*m.dqh)
-
+        def dissipation_spectrum(m):
+            spectrum = np.zeros_like(m.qh)
+            ones = np.ones_like(m.filtr)
+            if m.ablevel==0:
+                # forward euler
+                dt1 = m.dt
+                dt2 = 0.0
+                dt3 = 0.0
+            elif m.ablevel==1:
+                # AB2 at step 2
+                dt1 = 1.5*m.dt
+                dt2 = -0.5*m.dt
+                dt3 = 0.0
+            else:
+                # AB3 from step 3 on
+                dt1 = 23./12.*m.dt
+                dt2 = -16./12.*m.dt
+                dt3 = 5./12.*m.dt
+            for k in range(m.nz):
+                spectrum[k] = (m.filtr - ones) * (
+                    m.qh[k] + dt1*m.dqhdt[k] + dt2*m.dqhdt_p[k] + dt3*m.dqhdt_pp[k])
             return spectrum
+
+        self.add_diagnostic('Dissspec',
+            description='Spectral contribution of filter dissipation to total energy',
+            function=(lambda self: -np.tensordot(self.Hi, 
+                np.conj(self.ph)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt/self.M**2),
+            units='m^2 s^-3',
+            dims=('l','k')
+        )
+
+        self.add_diagnostic('ENSDissspec',
+            description='Spectral contribution of filter dissipation to barotropic enstrophy',
+            function=(lambda self: np.tensordot(self.Hi, 
+                np.conj(self.qh)*dissipation_spectrum(self), axes=(0, 0)).real/self.H/self.dt/self.M**2),
+            units='s^-3',
+            dims=('l','k')
+        )
 
         self.add_diagnostic('paramspec',
             description='Spectral contribution of subgrid parameterization (if present)',
-            function=parameterization_spectrum,
-            units='',
+            function=lambda self: self._calc_parameterization_spectrum(),
+            units='m^2 s^-3',
             dims=('l','k')
         )
+
+    def _calc_parameterization_contribution(self):
+        dqh = np.zeros_like(self.qh)
+        if self.uv_parameterization is not None:
+            ik = np.asarray(self._ik).reshape((1, -1)).repeat(self.wv2.shape[0], axis=0)
+            il = np.asarray(self._il).reshape((-1, 1)).repeat(self.wv2.shape[-1], axis=-1)
+            dqh += -il * self.duh + ik * self.dvh
+        if self.q_parameterization is not None:
+            dqh += self.dqh
+        return dqh
+
+    def _calc_parameterization_spectrum(self):
+        dqh = self._calc_parameterization_contribution()
+        height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
+        return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0)) / self.M**2
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""
@@ -712,21 +755,6 @@ class Model(PseudoSpectralKernel):
     def _initialize_model_diagnostics(self):
         """Should be implemented by subclass."""
         pass
-
-    def _calc_parameterization_spectrum(self, dqh1=None, dqh2=None):
-        if dqh1 is None: dqh1 = self.dqh[0]
-        if dqh2 is None: dqh2 = self.dqh[1]
-        del1 = self.del1
-        del2 = self.del2
-        F1 = self.F1
-        F2 = self.F2
-        wv2 = self.wv2
-        ph = self.ph
-        return np.real(
-            (del1 / (wv2 + F1 + F2) * (-(wv2 + F2) * dqh1 - F1 * dqh2) * np.conj(ph[0])) +
-            (del2 / (wv2 + F1 + F2) * (-F2 * dqh1 - (wv2 + F1) * dqh2) * np.conj(ph[1])) +
-            (del1 * F1 / (wv2 + F1 + F2) * (dqh2 - dqh1) * np.conj(ph[0] - ph[1]))
-        )
 
     def _set_active_diagnostics(self, diagnostics_list):
         for d in self.diagnostics:

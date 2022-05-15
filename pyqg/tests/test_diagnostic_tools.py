@@ -24,7 +24,7 @@ def test_calc_ispec_peak():
     sinewave_freq_idx = np.argmin(np.abs(iso_wavenumbers - frequency))
     assert spectrum_peak_idx == sinewave_freq_idx
 
-def test_calc_ispec_units(rtol=1e-2):
+def test_calc_ispec_units(rtol=1e-5):
     fixtures_path = f"{os.path.dirname(os.path.realpath(__file__))}/fixtures"
 
     with open(f"{fixtures_path}/LayeredModel_params.pkl", 'rb') as f:
@@ -46,7 +46,7 @@ def test_calc_ispec_units(rtol=1e-2):
                 k, ispec = calc_ispec(m, power, averaging=False)
                 dk = k[1]-k[0]
                 np.testing.assert_allclose(
-                    signal2d.var()/2,
+                    signal2d.var(),
                     ispec.sum()*dk,
                     rtol,
                     err_msg=f"ispec should have correct integral for {a}{z+1}"
@@ -85,7 +85,7 @@ def test_calc_ispec_sum():
 
         # Check that Parseval's theorem is exactly satisfied without averaging or truncation
         kr, Ehr = calc_ispec(m, Eh_model, truncate=False, averaging=False)
-        E_total_radial = np.cumsum(Ehr * (kr[1]-kr[0]))[-1]
+        E_total_radial = Ehr.sum() * (kr[1]-kr[0])
         np.testing.assert_allclose(E_total_radial, Eh_numpy.sum())
 
 if __name__ == "__main__":

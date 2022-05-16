@@ -1,8 +1,13 @@
 What's New
 ==========
 
-v0.5.1 (unreleased)
+v0.6.0 (16 May. 2022)
 -------------------
+- Generalize definition of parameterization spectrum diagnostic
+- Add enstrophy budget diagnostics
+- Normalize and unitize all diagnostics
+- Fix issues with calculating isotropic spectra
+- Other refactors and bug fixes
 
 v0.5.0 (23 Mar. 2022)
 ---------------------

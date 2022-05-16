@@ -65,6 +65,8 @@ target/
 # notebooks
 **/.ipynb_checkpoints/*
 
+docs/examples/particles*.gif
+
 # .swp files from vim
 *.sw[a-z]
 

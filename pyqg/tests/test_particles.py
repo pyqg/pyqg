@@ -32,6 +32,29 @@ class ParticleTester(unittest.TestCase):
     def setUp(self):
         pass
 
+    @pytest.mark.skipif(missing_scipy, reason="requires scipy")
+    def test_model_interface(self):
+        model = pyqg.QGModel()
+        model.add_particles()
+
+        x1_old = model.particles[0].x
+        y1_old = model.particles[0].y
+        x2_old = model.particles[1].x
+        y2_old = model.particles[1].y
+
+        model._step_forward()
+
+        x1_new = model.particles[0].x
+        y1_new = model.particles[0].y
+        x2_new = model.particles[1].x
+        y2_new = model.particles[1].y
+
+        np.testing.assert_raises(AssertionError, np.testing.assert_equal, x1_old, x1_new)
+        np.testing.assert_raises(AssertionError, np.testing.assert_equal, x2_old, x2_new)
+        np.testing.assert_raises(AssertionError, np.testing.assert_equal, y1_old, y1_new)
+        np.testing.assert_raises(AssertionError, np.testing.assert_equal, y2_old, y2_new)
+
+
     def test_integration(self, rtol=1e-14, atol=1e-10):
         """Check whether timestepping of particles produces the expected results."""
 

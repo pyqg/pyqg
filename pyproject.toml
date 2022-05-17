@@ -6,5 +6,5 @@ requires = [
     "wheel",
     "cython",
     "pyfftw",
-    "oldest-supported-numpy"
+    "numpy"
 ]

@@ -35,6 +35,7 @@ def test_zb2020(model):
     du, dv = zb20(model)
 
 def test_addition_and_scaling(model, rtol=1e-11):
+    back = pyqg.BackscatterBiharmonic()
     smag = pyqg.Smagorinsky()
     zb20 = pyqg.ZannaBolton2020()
     comb = 0.5*smag + 0.75*zb20
@@ -43,6 +44,10 @@ def test_addition_and_scaling(model, rtol=1e-11):
             rtol=rtol)
     np.testing.assert_allclose(dv, 0.5*smag(model)[1] + 0.75*zb20(model)[1],
             rtol=rtol)
+
+    # can't add uv and q parameterizations
+    with pytest.raises(AssertionError):
+        back + smag
 
 if __name__ == "__main__":
     unittest.main()

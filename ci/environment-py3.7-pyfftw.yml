@@ -10,6 +10,7 @@ dependencies:
   - pyfftw
   - pytest
   - future
+  - delegate-property
   - pip:
     - codecov
     - pytest-cov

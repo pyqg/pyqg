@@ -43,15 +43,13 @@ class BTModel(model.Model):
         self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
 
-        self.nz = 1
-
         # deformation wavenumber
         if rd:
             self.kd2 = rd**-2
         else:
             self.kd2 = 0.
 
-        super().__init__(**kwargs)
+        super().__init__(nz=1, **kwargs)
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))

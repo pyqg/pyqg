@@ -2,3 +2,4 @@ cython>=0.20
 numpy>=1.20
 pyfftw
 importlib_metadata
+delegate-property

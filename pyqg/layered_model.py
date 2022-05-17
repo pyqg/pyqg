@@ -118,8 +118,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         if H is None: H = [500] + [1750 for _ in range(nz-1)]
         if rho is None: rho = np.arange(nz) * 0.3 + 1025
 
-        self.Ubg = np.array(U)
-        self.Vbg = np.array(V)
+        self._U = U
+        self._V = V
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
@@ -169,6 +169,9 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
+
+        self.Ubg = np.array(self._U)
+        self.Vbg = np.array(self._V)
 
         self.H = self.Hi.sum()
 

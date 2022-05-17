@@ -3,6 +3,7 @@ from numpy import pi
 import logging
 import warnings
 import inspect
+from delegate import delegate
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
@@ -19,7 +20,26 @@ try:
 except ImportError:
     pass
 
-class Model(PseudoSpectralKernel):
+kernel_attrs = [
+    'nx', 'ny', 'nz', 'nl', 'nk', 'a', 'kk', 'll', 
+    'q', 'qh', 'ph', 'u', 'v',
+    'Ubg', 'Qy', 'ufull', 'vfull',
+    'uh', 'vh', 'rek', 't', 'tc', 'dt',
+    'uv_parameterization', 'q_parameterization',
+     'fft', 'ifft', 'filtr', 'ablevel',
+    'dqdt', 'dqhdt', 'dqhdt_p', 'dqhdt_pp', 'dqh', 'duh', 'dvh',
+    'uq', 'vq',
+    '_invert',
+    '_forward_timestep',
+    '_do_advection',
+    '_do_friction',
+    '_do_q_subgrid_parameterization',
+    '_do_uv_subgrid_parameterization',
+    '_ik', '_il',
+]
+
+@delegate(*kernel_attrs, to='kernel')
+class Model:
     """A generic pseudo-spectral inversion model.
 
     Attributes
@@ -100,6 +120,7 @@ class Model(PseudoSpectralKernel):
 
     def __init__(
         self,
+        kernel=PseudoSpectralKernel,
         # grid size parameters
         nz=1,
         nx=64,                     # grid resolution
@@ -213,9 +234,11 @@ class Model(PseudoSpectralKernel):
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
-        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
-                has_q_param=int(q_parameterization is not None),
-                has_uv_param=int(uv_parameterization is not None))
+        self.kernel = kernel(nz, ny, nx,
+                q_parameterization,
+                uv_parameterization,
+                ntd,
+        )
 
         self.L = L
         self.W = W
@@ -240,10 +263,6 @@ class Model(PseudoSpectralKernel):
         if f:
             self.f = f
             self.f2 = f**2
-
-        # optional subgrid parameterizations
-        self.q_parameterization = q_parameterization
-        self.uv_parameterization = uv_parameterization
 
         # TODO: make this less complicated!
         # Really we just need to initialize the grid here. It's not necessary

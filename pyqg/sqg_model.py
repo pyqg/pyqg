@@ -37,9 +37,7 @@ class SQGModel(model.Model):
         self.U = U
         #self.filterfac = filterfac
 
-        self.nz = 1
-
-        super().__init__(**kwargs)
+        super().__init__(nz=1, **kwargs)
 
         # initial conditions: (PV anomalies)
         self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))

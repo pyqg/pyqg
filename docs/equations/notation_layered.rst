@@ -246,6 +246,16 @@ The enstrophy dissipation is concentrated at the smallest scales
 resolved in the model and, in statistical steady state, we expect the
 budget above to be dominated by the balance between I and II.
 
+Contribution from subgrid parameterization
+------------------------------------------
+
+From the above enstrophy budget, we also write the spectral contribution of parameterization towards enstrophy
+
+.. math::
+
+    \left(\frac{\partial Z(k, l)}{\partial t}\right)^{\text{sub}} =
+        -\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{q}_n^*\hat{\dot{q}}^{\text{sub}}_n\right].
+
 Special case: two-layer model
 =============================
 

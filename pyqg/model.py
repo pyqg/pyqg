@@ -6,6 +6,7 @@ import inspect
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
+from .parameterizations import Parameterization
 try:
     import mkl
     np.use_fastnumpy = True
@@ -200,7 +201,7 @@ class Model(PseudoSpectralKernel):
         # if an explicit parameterization object was passed without a given
         # type, infer it from its attributes
         if parameterization is not None:
-            ptype = parameterization.parameterization_type 
+            ptype = getattr(parameterization, "parameterization_type", None)
             if ptype == 'uv_parameterization':
                 assert uv_parameterization is None
                 uv_parameterization = parameterization

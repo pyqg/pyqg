@@ -301,6 +301,9 @@ class PyqgModelTester(unittest.TestCase):
         assert m.q_parameterization == back
         assert m.uv_parameterization == smag
 
+        with pytest.raises(ValueError):
+            pyqg.QGModel(parameterization='boop')
+
         with pytest.raises(AssertionError):
             pyqg.QGModel(uv_parameterization=smag, parameterization=smag)
 

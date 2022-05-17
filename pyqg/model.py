@@ -3,11 +3,12 @@ from numpy import pi
 import logging
 import warnings
 import inspect
-from delegate import delegate
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from .parameterizations import Parameterization
+from .delegate import delegate
+
 try:
     import mkl
     np.use_fastnumpy = True

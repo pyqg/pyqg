@@ -2,9 +2,11 @@ import numpy as np
 from numpy import pi
 import logging
 import warnings
+import inspect
 
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
+from .parameterizations import Parameterization
 try:
     import mkl
     np.use_fastnumpy = True
@@ -80,18 +82,20 @@ class Model(PseudoSpectralKernel):
         Vertical pressure modes (unitless)
     radii :  real array
         Deformation radii  (units: model length)
-    q_parameterization : function
-        Optional function which takes the model as input and returns a `numpy`
-        array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
-        forward. This can be used to implement subgrid forcing
+    q_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a :code:`numpy` array of shape
+        :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
+        stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
-    uv_parameterization : function
-        Optional function which takes the model as input and returns a tuple of
-        two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
-        the zonal and meridional velocity derivatives (respectively) at each
-        timestep. This can also be used to implemented subgrid forcing
-        parameterizations, but expressed in terms of velocity rather than
-        potential vorticity.
+    uv_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a tuple of two :code:`numpy` arrays,
+        each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
+        meridional velocity derivatives (respectively) at each timestep (by
+        adding their curl to :math:`\partial_t q`).  This can also be used
+        to implemented subgrid forcing parameterizations, but expressed in
+        terms of velocity rather than potential vorticity.
     """
 
     def __init__(
@@ -118,6 +122,7 @@ class Model(PseudoSpectralKernel):
         g= 9.81,                    # acceleration due to gravity
         q_parameterization=None,    # subgrid parameterization in terms of q
         uv_parameterization=None,   # subgrid parameterization in terms of u,v
+        parameterization=None,      # subgrid parameterization (type will be inferred)
         # diagnostics parameters
         diagnostics_list='all',     # which diagnostics to output
         # fft parameters
@@ -168,24 +173,43 @@ class Model(PseudoSpectralKernel):
         ntd : int
             Number of threads to use. Should not exceed the number of cores on
             your machine.
-        q_parameterization : function
-            Optional function which takes the model as input and returns a `numpy`
-            array of shape (`nz`, `ny`, `nx`) to be added to dq/dt before stepping
-            forward. This can be used to implement subgrid forcing
+        q_parameterization : function or pyqg.Parameterization
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a :code:`numpy` array of shape
+            :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
+            stepping forward.  This can be used to implement subgrid forcing
             parameterizations.
-        uv_parameterization : function
-            Optional function which takes the model as input and returns a tuple of
-            two `numpy` arrays, each of shape (`nz`, `ny`, `nx`), to be added to
-            the zonal and meridional velocity derivatives (respectively) at each
-            timestep. This can also be used to implemented subgrid forcing
-            parameterizations, but expressed in terms of velocity rather than
-            potential vorticity.
+        uv_parameterization : function or pyqg.Parameterization
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a tuple of two :code:`numpy` arrays,
+            each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
+            meridional velocity derivatives (respectively) at each timestep (by
+            adding their curl to :math:`\partial_t q`).  This can also be used
+            to implemented subgrid forcing parameterizations, but expressed in
+            terms of velocity rather than potential vorticity.
+        parameterization : pyqg.Parameterization
+            An explicit :code:`Parameterization` object representing either a
+            velocity or potential vorticity parameterization, whose type will
+            be inferred.
         """
 
         if ny is None:
             ny = nx
         if W is None:
             W = L
+
+        # if an explicit parameterization object was passed without a given
+        # type, infer it from its attributes
+        if parameterization is not None:
+            ptype = getattr(parameterization, "parameterization_type", None)
+            if ptype == 'uv_parameterization':
+                assert uv_parameterization is None
+                uv_parameterization = parameterization
+            elif ptype == 'q_parameterization':
+                assert q_parameterization is None
+                q_parameterization = parameterization
+            else:
+                raise ValueError(f"unknown parameterization type {ptype}")
 
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
@@ -232,7 +256,6 @@ class Model(PseudoSpectralKernel):
         self._initialize_time()
         self._initialize_inversion_matrix()
         self._initialize_diagnostics(diagnostics_list)
-
 
     def run_with_snapshots(self, tsnapstart=0., tsnapint=432000.):
         """Run the model forward, yielding to user code at specified intervals.
@@ -371,6 +394,129 @@ class Model(PseudoSpectralKernel):
 
         return omega, phi
 
+    @property
+    def _config(self):
+        r"""Returns a copy of the set of parameters that can be used to
+        initialize the model in the same way (required for computing subgrid
+        forcing automatically).
+
+        Note that this may need to be overridden in subclasses if parameter
+        names do not match attributes.
+        """
+        res = {}
+        sig1 = inspect.signature(self.__class__.__init__)
+        sig2 = inspect.signature(Model.__init__)
+        for sig in [sig1, sig2]:
+            for param in sig.parameters:
+                if hasattr(self, param):
+                    res[param] = getattr(self, param)
+        return res
+
+    def _reinitialized(self, **kw):
+        r"""Return a new model with the same parameters, except for overrides
+        given in keyword arguments.
+
+        Returns
+        -------
+        model : Model
+            Newly initialized model with same or overridden parameters.
+        """
+        config = self._config
+        config.update(kw)
+        return self.__class__(**config)
+
+    def subgrid_forcing(self,
+            lower_resolution=None,
+            quantities='q',
+            coarsening_function=None,
+            spectral_filter=lambda m: m.filtr):
+        r"""Computes the subgrid forcing of a given :code:`quantity` due to
+        advection, assuming a specific filtering and coarsening scheme down to
+        a :code:`lower_resolution`.
+
+        Parameters
+        ----------
+        lower_resolution : int
+            The resolution to which we are reducing the model. Defaults to 1/4
+            of (and must be strictly smaller than) the current resolution. Must
+            be an even number.
+        quantities : string or iterable
+            The quantities for which we are computing subgrid forcing (either
+            as a string if a single quantity, or as an iterable of strings if
+            multiple). Must all be attributes of the model with shape
+            :code:`(nz, ny, nx)`.
+        coarsening_function : function
+            The function used to coarsen high-resolution variables when
+            computing forcing. Defaults to spectral truncation followed by an
+            application of the low-res model's numerical filter.
+        spectral_filter : function
+            The function used to filter variables during coarsening with the
+            default spectral truncation :code:`coarsening_function`. Defaults
+            to the numerical filter already used in the low-res model for
+            small-scale dissipation.
+
+        Returns
+        -------
+        forcing : array or list of arrays
+            The subgrid forcing associated with the given quantities and
+            coarsening scheme. If there is only one quantity, this is a single
+            array, and otherwise a list of them.
+        """
+
+        assert self.nx == self.ny, "subgrid forcing function assumes nx==ny"
+
+        if lower_resolution is None:
+            lower_resolution = self.nx // 4
+
+        assert lower_resolution < self.nx, "lower_resolution must be lower"
+        assert lower_resolution % 2 == 0, "lower_resolution must be even"
+
+        return_one = False
+
+        if isinstance(quantities, str):
+            quantities = [quantities]
+            return_one = True
+
+        for q in quantities:
+            assert hasattr(self, q), f"unrecognized property {q}"
+            assert getattr(self, q).shape == self.q.shape, f"{q} has wrong shape"
+
+        # Initialize a lower-res model with the same parameters
+        m1 = self
+        m2 = self._reinitialized(nx=lower_resolution, ny=lower_resolution)
+
+        if coarsening_function is None:
+            def coarsening_function(var):
+                # Convert to spectral (if needed)
+                if var.shape != m1.qh.shape: var = m1.fft(var)
+                # Truncate high-frequency indices
+                keep = m2.qh.shape[1]//2
+                trunc = np.hstack((var[:,:keep,:keep+1], var[:,-keep:,:keep+1]))
+                # Apply filter and normalize FFT
+                filtered = trunc * spectral_filter(m2) * (m1.nx / m2.nx)**2
+                # Convert to real
+                return m2.ifft(filtered)
+
+        # Set its state to the coarsened version
+        m2.q = coarsening_function(m1.qh)
+        m2._invert()
+        m2._calc_derived_fields()
+
+        forcings = []
+
+        for quantity in quantities:
+            # Get the corresponding field
+            x1 = getattr(m1, quantity)
+            x2 = getattr(m2, quantity)
+            # Compute the difference in advected quantities
+            forcing = coarsening_function(m1._advect(x1)) - m2.ifft(m2._advect(x2))
+            forcings.append(forcing)
+
+        if return_one:
+            forcings = forcings[0]
+
+        return forcings
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):
@@ -506,9 +652,13 @@ class Model(PseudoSpectralKernel):
 
     # compute advection in grid space (returns qdot in fourier space)
     # *** don't remove! needed for diagnostics (but not forward model) ***
-    def _advect(self, q, u, v):
+    def _advect(self, q, u=None, v=None):
         """Given real inputs q, u, v, returns the advective tendency for
         q in spectral space."""
+        if u is None:
+            u = self.u
+        if v is None:
+            v = self.v
         uq = u*q
         vq = v*q
         # this is a hack, since fft now requires input to have shape (nz,ny,nx)
@@ -689,7 +839,8 @@ class Model(PseudoSpectralKernel):
             description='Spectral contribution of subgrid parameterization (if present)',
             function=lambda self: self._calc_parameterization_spectrum(),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            skip_comparison=True,
         )
 
     def _calc_parameterization_contribution(self):
@@ -719,7 +870,7 @@ class Model(PseudoSpectralKernel):
         for d in self.diagnostics:
             self.diagnostics[d]['active'] == (d in diagnostics_list)
 
-    def add_diagnostic(self, diag_name, description=None, function=None, units=None, dims=None):
+    def add_diagnostic(self, diag_name, description=None, function=None, units=None, dims=None, **kw):
         # create a new diagnostic dict and add it to the object array
 
         # make sure the function is callable
@@ -736,6 +887,9 @@ class Model(PseudoSpectralKernel):
            'active': True,
            'count': 0,
            'function': function, }
+
+        # add any additional properties
+        self.diagnostics[diag_name].update(**kw)
 
     def describe_diagnostics(self):
         """Print a human-readable summary of the available diagnostics."""
@@ -795,3 +949,17 @@ class Model(PseudoSpectralKernel):
         """
         from .xarray_output import model_to_dataset
         return model_to_dataset(self)
+
+    @property
+    def parameterization(self):
+        """Return the model's parameterization if present (either in terms of
+        PV or velocity, warning if there are both).
+
+        Returns
+        -------
+        parameterization : pyqg.Parameterization or function
+        """
+        if self.q_parameterization and self.uv_parameterization:
+            warnings.warn("Model has multiple parameterizations, "\
+                          "but only returning PV")
+        return self.q_parameterization or self.uv_parameterization

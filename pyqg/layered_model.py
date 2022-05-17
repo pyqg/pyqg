@@ -133,6 +133,14 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
+    @property
+    def _config(self):
+        # This property returns a dictionary of keyword arguments that can be
+        # used to initialize a new model with the exact same settings.  Most of
+        # these arguments can be inferred automatically, but H is stored as Hi.
+        config = super()._config
+        config['H'] = self.Hi
+        return config
 
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
@@ -289,7 +297,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.Jpxi).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
-                dims=('l','k')
+                dims=('l','k'),
+                sums_with=['paramspec_KEflux'],
         )
         
         self.add_diagnostic('APEflux_div',
@@ -297,7 +306,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
                     function =(lambda self: (self.Hi[:,np.newaxis,np.newaxis]*
                                (self.ph.conj()*self.JSp).real).sum(axis=0)/self.H/self.M**2),
                 units='m^2 s^-3',
-                dims=('l','k')
+                dims=('l','k'),
+                sums_with=['paramspec_APEflux'],
         )
         
 

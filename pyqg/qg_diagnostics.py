@@ -19,7 +19,8 @@ class QGDiagnostics(model.Model):
                         self.S, self.a, self._calc_parameterization_contribution()))
                 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            skip_comparison=True,
         )
 
         self.add_diagnostic('paramspec_KEflux',
@@ -29,7 +30,8 @@ class QGDiagnostics(model.Model):
                         self.a, self._calc_parameterization_contribution()))
                 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            skip_comparison=True,
         )
 
         self.add_diagnostic('ENSflux',

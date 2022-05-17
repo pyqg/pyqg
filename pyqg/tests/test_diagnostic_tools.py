@@ -1,9 +1,38 @@
 import numpy as np
+import os
+import pickle
 import pyqg
 import pytest
 import os
 import pickle
-from pyqg.diagnostic_tools import calc_ispec
+from pyqg.diagnostic_tools import *
+
+def test_diagnostic_differences():
+    # Load a set of pre-run fixture models from
+    # examples/diagnostic_normalization.ipynb (running from scratch would take
+    # a bit too long for a test)
+    fixtures_path = f"{os.path.dirname(os.path.realpath(__file__))}/fixtures"
+
+    with open(f"{fixtures_path}/LayeredModel_params.pkl", 'rb') as f:
+        # Common set of parameters for each model
+        params = pickle.load(f)
+
+    m1 = pyqg.LayeredModel(nx=96, **params)
+    m2 = pyqg.LayeredModel(nx=64, **params)
+    m1.q = np.load(f"{fixtures_path}/LayeredModel_nx96_q.npy")
+    m2.q = np.load(f"{fixtures_path}/LayeredModel_nx64_q.npy")
+    for m in [m1, m2]:
+        m._invert()
+        m._calc_derived_fields()
+
+    diffs = diagnostic_differences(m1, m2, instantaneous=True)
+
+    sims_hi = diagnostic_similarities(m1, m1, m2, instantaneous=True)
+    sims_lo = diagnostic_similarities(m2, m1, m2, instantaneous=True)
+
+    for k in diffs.keys():
+        assert sims_hi[k] == 1.0
+        assert sims_lo[k] == 0.0
 
 def test_calc_ispec_peak():
     # Create a radial sine wave spiraling out from the center of the model's
@@ -89,6 +118,7 @@ def test_calc_ispec_sum():
         np.testing.assert_allclose(E_total_radial, Eh_numpy.sum())
 
 if __name__ == "__main__":
+    test_diagnostic_differences()
     test_calc_ispec_peak()
     test_calc_ispec_units()
     test_calc_ispec_sum()

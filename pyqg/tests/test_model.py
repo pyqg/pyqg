@@ -286,6 +286,31 @@ class PyqgModelTester(unittest.TestCase):
             with pytest.raises(AttributeError): m.dvh
 
 
+    def test_parameterization_object_initialization(self):
+        back = pyqg.BackscatterBiharmonic()
+        smag = pyqg.Smagorinsky()
+
+        m = pyqg.QGModel(parameterization=smag)
+        assert m.uv_parameterization == smag
+
+        m = pyqg.QGModel(parameterization=back)
+        assert m.q_parameterization == back
+
+        m = pyqg.QGModel(uv_parameterization=smag,
+                         q_parameterization=back)
+        assert m.q_parameterization == back
+        assert m.uv_parameterization == smag
+
+        with pytest.raises(ValueError):
+            pyqg.QGModel(parameterization='boop')
+
+        with pytest.raises(AssertionError):
+            pyqg.QGModel(uv_parameterization=smag, parameterization=smag)
+
+        with pytest.raises(AssertionError):
+            pyqg.QGModel(q_parameterization=back, parameterization=back)
+
+
     def test_timestepping(self, rtol=1e-15):
         """Make sure timstepping works properly."""
 

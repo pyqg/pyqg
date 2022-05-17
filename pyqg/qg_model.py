@@ -97,6 +97,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
 
+        if 'nz' in kwargs:
+            del kwargs['nz']
 
         super().__init__(nz=2, **kwargs)
 
@@ -106,9 +108,16 @@ class QGModel(qg_diagnostics.QGDiagnostics):
                 np.ones((self.ny,1)) * np.random.rand(1,self.nx) ),
                 np.zeros_like(self.x) )
 
-
-
     ### PRIVATE METHODS - not meant to be called by user ###
+
+    @property
+    def _config(self):
+        # This property returns a dictionary of keyword arguments that can be
+        # used to initialize a new model with the exact same settings. Most of
+        # these arguments can be inferred automatically, but H1 is stored in Hi.
+        config = super()._config
+        config['H1'] = self.Hi[0]
+        return config
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""
@@ -237,7 +246,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
               self.rd**-2 * self.del1*self.del2 *
               np.real((self.ph[0]-self.ph[1])*np.conj(self.Jptpc))/self.M**2 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            sums_with=['paramspec_APEflux'],
        )
 
         self.add_diagnostic('KEflux',
@@ -246,7 +256,8 @@ class QGModel(qg_diagnostics.QGDiagnostics):
               (np.real(self.del1*self.ph[0]*np.conj(self.Jpxi[0])) +
                np.real(self.del2*self.ph[1]*np.conj(self.Jpxi[1])))/self.M**2 ),
             units='m^2 s^-3',
-            dims=('l','k')
+            dims=('l','k'),
+            sums_with=['paramspec_KEflux'],
        )
 
         self.add_diagnostic('APEgen',

@@ -45,3 +45,17 @@ Diagnostic Tools
 
 .. automodule:: pyqg.diagnostic_tools
     :members:  
+
+.. _parameterizations-api:
+
+Parameterizations
+=================
+
+.. autoclass:: pyqg.Parameterization
+    :member-order: bysource
+    :special-members: __call__, parameterization_type, __add__, __mul__
+
+.. automodule:: pyqg.parameterizations
+    :members:
+    :member-order: bysource
+    :exclude-members: Parameterization, CompositeParameterization, WeightedParameterization

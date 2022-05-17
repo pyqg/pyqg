@@ -120,20 +120,14 @@ class UVParameterization(Parameterization):
     """A generic class representing a subgrid parameterization in terms of
     velocity. Inherit from this to define a new velocity parameterization."""
 
-    @property
-    def parameterization_type(self):
-        ""
-        return 'uv_parameterization'
+    parameterization_type = 'uv_parameterization'
 
 class QParameterization(Parameterization):
     """A generic class representing a subgrid parameterization in terms of
     potential vorticity. Inherit from this to define a new potential vorticity
     parameterization."""
 
-    @property
-    def parameterization_type(self):
-        ""
-        return 'q_parameterization'
+    parameterization_type = 'q_parameterization'
 
 class Smagorinsky(UVParameterization):
     r"""Velocity parameterization from `Smagorinsky 1963`_.

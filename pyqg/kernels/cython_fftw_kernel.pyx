@@ -8,6 +8,7 @@ import warnings
 import cython
 cimport numpy as np
 from cython.parallel import prange, threadid
+from .kernel import Kernel
 
 # see if we got a compile time flag
 include '.compile_time_use_pyfftw.pxi'
@@ -29,7 +30,7 @@ DTYPE_com = np.complex128
 ctypedef np.float64_t DTYPE_real_t
 ctypedef np.complex128_t DTYPE_com_t
 
-cdef class CythonFFTWKernel:
+cdef class CythonFFTWKernel(Kernel):
     # array shapes
     cdef public int nx, ny, nz
     cdef public int nk, nl

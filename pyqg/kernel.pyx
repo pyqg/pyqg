@@ -123,7 +123,7 @@ cdef class PseudoSpectralKernel:
     def __init__(self, int nz, int ny, int nx,
             object q_parameterization=None,
             object uv_parameterization=None,
-            int fftw_num_threads=1,
+            int fftw_num_threads=1, # should not exceed the number of cores
         ):
         self.nz = nz
         self.ny = ny

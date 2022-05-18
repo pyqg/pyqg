@@ -85,9 +85,6 @@ class Model:
         (units: model time)
     tsnapint : float
         Time interval for snapshots (units: model time)
-    ntd : int
-        Number of threads to use. Should not exceed the number of cores on
-        your machine.
     pmodes : real array
         Vertical pressure modes (unitless)
     radii :  real array
@@ -111,6 +108,7 @@ class Model:
     def __init__(
         self,
         kernel=PseudoSpectralKernel,
+        kernel_kwargs={},
         # grid size parameters
         nz=1,
         nx=64,                     # grid resolution
@@ -140,7 +138,6 @@ class Model:
         # removed because fftw is now manditory
         #use_fftw = False,               # fftw flag
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
-        ntd = 1,                       # number of threads to use in fftw computations
         log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
                                        #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
@@ -181,9 +178,6 @@ class Model:
             occur every timestep)
         tsnapint : number
             Time interval for snapshots. Units: seconds.
-        ntd : int
-            Number of threads to use. Should not exceed the number of cores on
-            your machine.
         q_parameterization : function or pyqg.Parameterization
             Optional :code:`Parameterization` object or function which takes
             the model as input and returns a :code:`numpy` array of shape
@@ -225,9 +219,9 @@ class Model:
         # TODO: be more clear about what attributes are cython and what
         # attributes are python
         self.kernel = kernel(nz, ny, nx,
-                q_parameterization,
-                uv_parameterization,
-                ntd,
+            q_parameterization,
+            uv_parameterization,
+            **kernel_kwargs
         )
 
         self.L = L
@@ -242,7 +236,6 @@ class Model:
         self.logfile = logfile
         self.log_level = log_level
         self.useAB2 = useAB2
-        self.ntd = ntd
 
         # friction
         self.rek = rek

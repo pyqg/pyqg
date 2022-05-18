@@ -836,9 +836,17 @@ class Model(PseudoSpectralKernel):
         )
 
         self.add_diagnostic('paramspec',
-            description='Spectral contribution of subgrid parameterization (if present)',
+            description='Spectral contribution of subgrid parameterization to energy (if present)',
             function=lambda self: self._calc_parameterization_spectrum(),
             units='m^2 s^-3',
+            dims=('l','k'),
+            skip_comparison=True,
+        )
+
+        self.add_diagnostic('ENSparamspec',
+            description='Spectral contribution of subgrid parameterization to enstrophy',
+            function=lambda self: self._calc_parameterization_enstrophy_spectrum(),
+            units='s^-3',
             dims=('l','k'),
             skip_comparison=True,
         )
@@ -857,6 +865,11 @@ class Model(PseudoSpectralKernel):
         dqh = self._calc_parameterization_contribution()
         height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
         return -np.real((height_ratios * np.conj(self.ph) * dqh).sum(axis=0)) / self.M**2
+
+    def _calc_parameterization_enstrophy_spectrum(self):
+        dqh = self._calc_parameterization_contribution()
+        height_ratios = (self.Hi / self.H)[:,np.newaxis,np.newaxis]
+        return np.real((height_ratios * np.conj(self.qh) * dqh).sum(axis=0)) / self.M**2
 
     def _calc_derived_fields(self):
         """Should be implemented by subclass."""

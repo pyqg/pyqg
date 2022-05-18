@@ -265,10 +265,12 @@ class ZannaBolton2020(UVParameterization):
 
     def __call__(self, m):
         # Compute ZB2020 basis functions
-        vx = m.ifft(m.vh * m.ik)
-        vy = m.ifft(m.vh * m.il)
-        ux = m.ifft(m.uh * m.ik)
-        uy = m.ifft(m.uh * m.il)
+        uh = m.fft(m.u)
+        vh = m.fft(m.v)
+        vx = m.ifft(vh * m.ik)
+        vy = m.ifft(vh * m.il)
+        ux = m.ifft(uh * m.ik)
+        uy = m.ifft(uh * m.il)
         rel_vort = vx - uy
         shearing = vx + uy
         stretching = ux - vy

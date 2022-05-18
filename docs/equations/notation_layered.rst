@@ -254,7 +254,7 @@ From the above enstrophy budget, we also write the spectral contribution of para
 .. math::
 
     \left(\frac{\partial Z(k, l)}{\partial t}\right)^{\text{sub}} =
-        -\frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{q}_n^*\hat{\dot{q}}^{\text{sub}}_n\right].
+        \frac{1}{H}\sum_{n=1}^N H_n\mathbb{R}\left[\hat{q}_n^*\hat{\dot{q}}^{\text{sub}}_n\right].
 
 Special case: two-layer model
 =============================

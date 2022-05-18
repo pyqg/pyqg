@@ -7,7 +7,7 @@ import inspect
 from .errors import DiagnosticNotFilledError
 from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from .parameterizations import Parameterization
-from .delegate import delegate
+from .vendor.delegate import delegate
 
 try:
     import mkl

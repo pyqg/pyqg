@@ -46,6 +46,7 @@ expected_diags = [
     'KEfrictionspec',
     'ENSDissspec',
     'ENSfrictionspec',
+    'ENSparamspec',
 ]
 
 expected_attrs = [

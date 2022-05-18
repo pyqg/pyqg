@@ -29,7 +29,7 @@ DTYPE_com = np.complex128
 ctypedef np.float64_t DTYPE_real_t
 ctypedef np.complex128_t DTYPE_com_t
 
-cdef class PseudoSpectralKernel:
+cdef class CythonFFTWKernel:
     # array shapes
     cdef public int nx, ny, nz
     cdef public int nk, nl

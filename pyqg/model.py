@@ -5,9 +5,9 @@ import warnings
 import inspect
 
 from .errors import DiagnosticNotFilledError
-from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from .parameterizations import Parameterization
 from .vendor.delegate import delegate
+from . import kernels
 
 try:
     import mkl
@@ -107,7 +107,7 @@ class Model:
 
     def __init__(
         self,
-        kernel=PseudoSpectralKernel,
+        kernel=kernels.CythonFFTWKernel,
         kernel_kwargs={},
         # grid size parameters
         nz=1,

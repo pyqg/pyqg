@@ -65,7 +65,7 @@ install_requires = [
 ]
 
 # This hack tells cython whether pyfftw is present
-use_pyfftw_file = 'pyqg/.compile_time_use_pyfftw.pxi'
+use_pyfftw_file = 'pyqg/kernels/.compile_time_use_pyfftw.pxi'
 with open(use_pyfftw_file, 'wb') as f:
     try:
         import pyfftw
@@ -141,8 +141,8 @@ def local_scheme(version):
     return ""
 
 ext_module = Extension(
-    "pyqg.kernel",
-    ["pyqg/kernel.pyx"],
+    "pyqg.kernels.cython_fftw_kernel",
+    ["pyqg/kernels/cython_fftw_kernel.pyx"],
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args,
 )

@@ -22,21 +22,10 @@ except ImportError:
     pass
 
 kernel_attrs = [
-    'nx', 'ny', 'nz', 'nl', 'nk', 'a', 'kk', 'll', 
-    'q', 'qh', 'ph', 'u', 'v',
-    'Ubg', 'Qy', 'ufull', 'vfull',
-    'uh', 'vh', 'rek', 't', 'tc', 'dt',
-    'uv_parameterization', 'q_parameterization',
-     'fft', 'ifft', 'filtr', 'ablevel',
-    'dqdt', 'dqhdt', 'dqhdt_p', 'dqhdt_pp', 'dqh', 'duh', 'dvh',
-    'uq', 'vq',
-    '_invert',
-    '_forward_timestep',
-    '_do_advection',
-    '_do_friction',
-    '_do_q_subgrid_parameterization',
-    '_do_uv_subgrid_parameterization',
-    '_ik', '_il',
+    'nx', 'ny', 'nz', 'nl', 'nk', 'a', 'kk', 'll', 'q', 'qh', 'ph', 'u', 'v',
+    'Ubg', 'Qy', 'ufull', 'vfull', 'rek', 't', 'tc', 'dt',
+    'uv_parameterization', 'q_parameterization', 'fft', 'ifft', 'filtr',
+    'ablevel', 'dqhdt', 'dqhdt_p', 'dqhdt_pp', 'dqh', 'duh', 'dvh',
 ]
 
 @delegate(*kernel_attrs, to='kernel')
@@ -454,6 +443,24 @@ class Model:
 
         # the basic steps are
         self._print_status()
+    
+    def _invert(self):
+        self.kernel.invert()
+
+    def _do_advection(self):
+        self.kernel.do_advection()
+
+    def _do_friction(self):
+        self.kernel.do_friction()
+
+    def _do_q_subgrid_parameterization(self):
+        self.kernel.do_q_subgrid_parameterization()
+
+    def _do_uv_subgrid_parameterization(self):
+        self.kernel.do_uv_subgrid_parameterization()
+
+    def _forward_timestep(self):
+        self.kernel.forward_timestep()
 
     def _initialize_time(self):
         """Set up timestep stuff"""
@@ -750,9 +757,7 @@ class Model:
     def _calc_parameterization_contribution(self):
         dqh = np.zeros_like(self.qh)
         if self.uv_parameterization is not None:
-            ik = np.asarray(self._ik).reshape((1, -1)).repeat(self.wv2.shape[0], axis=0)
-            il = np.asarray(self._il).reshape((-1, 1)).repeat(self.wv2.shape[-1], axis=-1)
-            dqh += -il * self.duh + ik * self.dvh
+            dqh += -self.il * self.duh + self.ik * self.dvh
         if self.q_parameterization is not None:
             dqh += self.dqh
         return dqh

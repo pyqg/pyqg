@@ -40,40 +40,44 @@ class Model:
 
     Attributes
     ----------
+    kernel : object
+        Kernel for running computations (inversion, advection, etc). Some
+        attributes are stored on the kernel, but are still accessible through
+        the model.
     nx, ny : int
-        Number of real space grid points in the `x`, `y` directions (cython)
+        Number of real space grid points in the `x`, `y` directions (kernel)
     nk, nl : int
-        Number of spectral space grid points in the `k`, `l` directions (cython)
+        Number of spectral space grid points in the `k`, `l` directions (kernel)
     nz : int
-        Number of vertical levels (cython)
+        Number of vertical levels (kernel)
     kk, ll : real array
-        Zonal and meridional wavenumbers (`nk`) (cython)
+        Zonal and meridional wavenumbers (`nk`) (kernel)
     a : real array
-        inversion matrix (`nk`, `nk`, `nl`, `nk`) (cython)
+        inversion matrix (`nk`, `nk`, `nl`, `nk`) (kernel)
     q : real array
-        Potential vorticity in real space (`nz`, `ny`, `nx`) (cython)
+        Potential vorticity in real space (`nz`, `ny`, `nx`) (kernel)
     qh : complex array
-        Potential vorticity in spectral space (`nk`, `nl`, `nk`) (cython)
+        Potential vorticity in spectral space (`nk`, `nl`, `nk`) (kernel)
     ph : complex array
-        Streamfunction in spectral space (`nk`, `nl`, `nk`) (cython)
+        Streamfunction in spectral space (`nk`, `nl`, `nk`) (kernel)
     u, v : real array
-        Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
+        Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (kernel)
     Ubg : real array
-        Background zonal velocity (`nk`) (cython)
+        Background zonal velocity (`nk`) (kernel)
     Qy : real array
-        Background potential vorticity gradient (`nk`) (cython)
+        Background potential vorticity gradient (`nk`) (kernel)
     ufull, vfull : real arrays
-        Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
+        Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (kernel)
     uh, vh : complex arrays
-        Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (cython)
+        Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (kernel)
     rek : float
-        Linear drag in lower layer (cython)
+        Linear drag in lower layer (kernel)
     t : float
-        Model time (cython)
+        Model time (kernel)
     tc : int
-        Model timestep (cython)
+        Model timestep (kernel)
     dt : float
-        Numerical timestep (cython)
+        Numerical timestep (kernel)
     L, W : float
         Domain length in x and y directions
     filterfac : float
@@ -95,13 +99,13 @@ class Model:
         Vertical pressure modes (unitless)
     radii :  real array
         Deformation radii  (units: model length)
-    q_parameterization : function or pyqg.Parameterization
+    q_parameterization : function or pyqg.Parameterization (kernel)
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a :code:`numpy` array of shape
         :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
         stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
-    uv_parameterization : function or pyqg.Parameterization
+    uv_parameterization : function or pyqg.Parameterization (kernel)
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a tuple of two :code:`numpy` arrays,
         each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
@@ -155,6 +159,15 @@ class Model:
 
         Parameters
         ----------
+        kernel : class
+            Which kernel to use for computations (e.g. FFTs, inversion,
+            advection). Defaults to pyqg.kernels.CythonFFTWKernel.
+        kernel_kwargs : dictionary
+            Set of arguments to pass to the kernel when initializing it.
+            Defaults to {}.  For CythonFFTWKernel, this can be a dictionary
+            mapping "fftw_num_threads" to an integer representing the number of
+            threads to use (which should not exceed the number of cores on your
+            machine).
         nx : int
             Number of grid points in the x direction.
         ny : int

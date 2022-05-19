@@ -133,15 +133,6 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
-    @property
-    def _config(self):
-        # This property returns a dictionary of keyword arguments that can be
-        # used to initialize a new model with the exact same settings.  Most of
-        # these arguments can be inferred automatically, but H is stored as Hi.
-        config = super()._config
-        config['H'] = self.Hi
-        return config
-
     def _initialize_stretching_matrix(self):
         """ Set up the stretching matrix """
 

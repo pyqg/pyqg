@@ -97,9 +97,6 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
 
-        if 'nz' in kwargs:
-            del kwargs['nz']
-
         super().__init__(nz=2, **kwargs)
 
         # initial conditions: (PV anomalies)
@@ -109,15 +106,6 @@ class QGModel(qg_diagnostics.QGDiagnostics):
                 np.zeros_like(self.x) )
 
     ### PRIVATE METHODS - not meant to be called by user ###
-
-    @property
-    def _config(self):
-        # This property returns a dictionary of keyword arguments that can be
-        # used to initialize a new model with the exact same settings. Most of
-        # these arguments can be inferred automatically, but H1 is stored in Hi.
-        config = super()._config
-        config['H1'] = self.Hi[0]
-        return config
 
     def _initialize_background(self):
         """Set up background state (zonal flow and PV gradients)."""

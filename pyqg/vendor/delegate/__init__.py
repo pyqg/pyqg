@@ -37,9 +37,6 @@ def delegate(*args, **named_args):
                 if name in args: delattr(getattr(self, dest), name)
                 else: del self.__dict__[name]
 
-            def __init__(self, *wrapped_args, **wrapped_opts):
-                super().__init__(*wrapped_args, **wrapped_opts)
-
         Wrapped.__doc__ = cls.__doc__ or \
             f"{cls.__class__} wrapped to delegate {args} to its {dest} property"
         Wrapped.__repr__ = cls.__repr__

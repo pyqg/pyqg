@@ -394,6 +394,13 @@ class Model(PseudoSpectralKernel):
 
         return omega, phi
 
+    def subgrid_forcing(self, **kwargs):
+        raise ValueError(
+            "This method was found to be buggy and removed for now. "
+            "It will be re-added in a future release. "
+            "See https://github.com/pyqg/pyqg/pull/308 for details. "
+        )
+
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _step_forward(self):

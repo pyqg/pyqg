@@ -117,46 +117,19 @@ and :code:`paramspec_APEflux`, respectively. When comparing the KE and APE
 fluxes of parameterized and unparameterized models, it may make sense to do so
 after adding these terms to the raw :code:`KEflux` and :code:`APEflux` values.
 
-Learning and evaluating subgrid forcing parameterizations
----------------------------------------------------------
+Evaluating subgrid parameterizations
+------------------------------------
 
 As many parameterizations attempt to account for missing physics due to low
-resolution, we provide several helper methods for learning and evaluating them.
+resolution, we provide several helper methods for evaluating them.
 
-The :py:func:`pyqg.Model.subgrid_forcing()` method can be invoked on a
-high-resolution model to compute the difference in tendencies of arbitrary
-variables before and after filtering and coarse-graining:
-
-.. code-block:: python
-
-    model = pyqg.QGModel(nx=256)
-    q_forcing = []
-    u_forcing = []
-    v_forcing = []
-    model_states = []
-
-    for _ in model.run_with_snapshots(tsnapint=1000*model.dt):
-        # See API docs for more options
-        Sq, Su, Sv = model.subgrid_forcing(
-            lower_resolution=64,
-            quantities=['q', 'u', 'v']
-        )
-        q_forcing.append(Sq)
-        u_forcing.append(Su)
-        v_forcing.append(Sv)
-        model_states.append(model.q.copy())
-
-Such offline data can then be used to train or test some kind of model that
-maps model states to estimates of subgrid forcing.
-
-Additionally, we provide helper methods for evaluating parameterizations
-online. For example, assume we have run a high-resolution model and both
-parameterized and unparameterized low-resolution models. We provide helper
-methods to compare the root mean squared difference in their resulting
-diagnostics (properly adding, e.g., :code:`KEflux` and
-:code:`paramspec_KEflux`), and even compute similarity metrics describing how
-much closer each of the parameterized model's diagnostics are to those of the
-high-resolution model as compared to those of the low-resolution model:
+Assume we have run a high-resolution model and both parameterized and
+unparameterized low-resolution models. We provide helper methods to compare the
+root mean squared difference in their resulting diagnostics (properly adding,
+e.g., :code:`KEflux` and :code:`paramspec_KEflux`), and even compute similarity
+metrics describing how much closer each of the parameterized model's
+diagnostics are to those of the high-resolution model as compared to those of
+the low-resolution model:
 
 .. code-block:: python
 

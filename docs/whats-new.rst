@@ -1,6 +1,10 @@
 What's New
 ==========
 
+v0.7.1 (19 May 2022)
+--------------------
+- Temporarily removes subgrid forcing method
+
 v0.7.0 (16 May 2022)
 --------------------
 - Allow parameterizations as first-class objects

@@ -6,7 +6,7 @@ import inspect
 
 from .errors import DiagnosticNotFilledError
 from .parameterizations import Parameterization
-from .vendor.delegate import delegate
+from .delegate import delegate
 from . import kernels
 
 try:
@@ -21,14 +21,20 @@ try:
 except ImportError:
     pass
 
-kernel_attrs = [
+public_kernel_attrs = [
     'nx', 'ny', 'nz', 'nl', 'nk', 'a', 'kk', 'll', 'q', 'qh', 'ph', 'u', 'v',
     'Ubg', 'Qy', 'ufull', 'vfull', 'rek', 't', 'tc', 'dt',
     'uv_parameterization', 'q_parameterization', 'fft', 'ifft', 'filtr',
     'ablevel', 'dqhdt', 'dqhdt_p', 'dqhdt_pp', 'dqh', 'duh', 'dvh',
 ]
 
-@delegate(*kernel_attrs, to='kernel')
+private_kernel_attrs = [
+    'invert', 'do_advection', 'do_friction', 'do_q_subgrid_parameterization',
+    'do_uv_subgrid_parameterization', 'forward_timestep',
+]
+
+@delegate(*public_kernel_attrs, to='kernel')
+@delegate(*private_kernel_attrs, to='kernel', prefix='_')
 class Model:
     """A generic pseudo-spectral inversion model.
 
@@ -437,24 +443,6 @@ class Model:
         # the basic steps are
         self._print_status()
     
-    def _invert(self):
-        self.kernel.invert()
-
-    def _do_advection(self):
-        self.kernel.do_advection()
-
-    def _do_friction(self):
-        self.kernel.do_friction()
-
-    def _do_q_subgrid_parameterization(self):
-        self.kernel.do_q_subgrid_parameterization()
-
-    def _do_uv_subgrid_parameterization(self):
-        self.kernel.do_uv_subgrid_parameterization()
-
-    def _forward_timestep(self):
-        self.kernel.forward_timestep()
-
     def _initialize_time(self):
         """Set up timestep stuff"""
         #self.t=0        # actual time

@@ -117,7 +117,7 @@ class Model:
 
     def __init__(
         self,
-        kernel=kernels.CythonFFTWKernel,
+        kernel='cython_fftw',
         kernel_kwargs={},
         # grid size parameters
         nz=1,
@@ -161,10 +161,11 @@ class Model:
         ----------
         kernel : class
             Which kernel to use for computations (e.g. FFTs, inversion,
-            advection). Defaults to pyqg.kernels.CythonFFTWKernel.
+            advection). Defaults to "cython_fftw" which initializes a
+            pyqg.kernels.CythonFFTWKernel.
         kernel_kwargs : dictionary
-            Set of arguments to pass to the kernel when initializing it.
-            Defaults to {}.  For CythonFFTWKernel, this can be a dictionary
+            Optional set of arguments to pass to the kernel when initializing
+            it.  Defaults to {}.  For "cython_fftw", this can be a dictionary
             mapping "fftw_num_threads" to an integer representing the number of
             threads to use (which should not exceed the number of cores on your
             machine).
@@ -235,8 +236,11 @@ class Model:
             else:
                 raise ValueError(f"unknown parameterization type {ptype}")
 
-        # TODO: be more clear about what attributes are cython and what
-        # attributes are python
+        if kernel == 'cython_fftw':
+            kernel = kernels.CythonFFTWKernel
+        elif isinstance(kernel, str):
+            raise ValueError(f"unknown kernel {kernel}")
+
         self.kernel = kernel(nz, ny, nx,
             q_parameterization,
             uv_parameterization,

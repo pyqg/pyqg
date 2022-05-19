@@ -8,8 +8,6 @@ def delegate(*args, **named_args):
 
     _prefix = named_args.get('prefix', '')
 
-    print(_dest, _prefix)
-
     def wraps(cls, *wrapped_args, **wrapped_opts):
         """Wrap the target class up in something that modifies."""
         class Wrapped(cls):

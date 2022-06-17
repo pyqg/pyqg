@@ -313,11 +313,11 @@ def SFS(q, u, v, m, FGR):
     return SFSu, SFSv 
 
 class ADM(QParameterization):
-    def __init__(self, FGR=2, order=5, skip=1):
+    def __init__(self, FGR=2, order=5, skip=1, MSE=0.0):
         self.FGR = FGR
         self.order = order
         self.skip = skip
-    
+        self.MSE = MSE
     def __call__(self, m):
         if m.tc % self.skip == 0:
             qd = deconvolve(m.q, m, self.FGR, self.order)
@@ -335,6 +335,11 @@ class ADM(QParameterization):
             ddy = lambda q: real(il * spec(q))
 
             dq = ddx(SFSu) + ddy(SFSv)
+
+            var_z = np.var(dq, axis=(1,2))[:,np.newaxis,np.newaxis]
+            noise = np.sqrt(self.MSE * var_z) * np.random.randn(*dq.shape)
+            dq = dq + noise
+            
             self.dq = dq
         else:
             try:

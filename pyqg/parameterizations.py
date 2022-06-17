@@ -313,29 +313,39 @@ def SFS(q, u, v, m, FGR):
     return SFSu, SFSv 
 
 class ADM(QParameterization):
-    def __init__(self, FGR=2, order=5):
+    def __init__(self, FGR=2, order=5, skip=1):
         self.FGR = FGR
-        self.order = order   
+        self.order = order
+        self.skip = skip
     
     def __call__(self, m):
-        qd = deconvolve(m.q, m, self.FGR, self.order)
-        ud = deconvolve(m.u, m, self.FGR, self.order)
-        vd = deconvolve(m.v, m, self.FGR, self.order)
+        if m.tc % self.skip == 0:
+            qd = deconvolve(m.q, m, self.FGR, self.order)
+            ud = deconvolve(m.u, m, self.FGR, self.order)
+            vd = deconvolve(m.v, m, self.FGR, self.order)
+            
+            SFSu, SFSv = SFS(qd, ud, vd, m, self.FGR)
+            
+            ik = m.k * 1j
+            il = m.l * 1j
+            
+            real = lambda q: q if q.shape == m.q.shape else m.ifft(q)
+            spec = lambda q: q if q.shape != m.q.shape else m.fft(q)
+            ddx = lambda q: real(ik * spec(q))
+            ddy = lambda q: real(il * spec(q))
+
+            dq = ddx(SFSu) + ddy(SFSv)
+            self.dq = dq
+        else:
+            try:
+                dq = self.dq
+            except:
+                dq = m.q * 0
         
-        SFSu, SFSv = SFS(qd, ud, vd, m, self.FGR)
-        
-        ik = m.k * 1j
-        il = m.l * 1j
-        
-        real = lambda q: q if q.shape == m.q.shape else m.ifft(q)
-        spec = lambda q: q if q.shape != m.q.shape else m.fft(q)
-        ddx = lambda q: real(ik * spec(q))
-        ddy = lambda q: real(il * spec(q))
-        
-        return ddx(SFSu) + ddy(SFSv)
+        return dq
 
     def __repr__(self):
-        return f'ADM, FGR={self.FGR}, order={self.order}'
+        return f'ADM, FGR={self.FGR}, skip={self.skip}'
 
 class Reynolds_stress(QParameterization):
     def __init__(self, FGR=2, Csim=12):

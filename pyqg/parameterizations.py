@@ -286,3 +286,93 @@ class ZannaBolton2020(UVParameterization):
 
     def __repr__(self):
         return f"ZannaBolton2020(κ={self.constant:.2e})"
+
+def Gaussian_Filter(w, m, FGR):
+    w_fft = m.fft(w)
+    Delta = m.dx * FGR
+    k2 = m.k**2 + m.l**2
+    G = np.exp(-k2*Delta**2/24)
+    return m.ifft(G * w_fft)
+
+def deconvolve(w, m, FGR, order):
+    wd = w
+    r = w
+    for j in range(order):
+        r = r - Gaussian_Filter(r, m, FGR)
+        wd = wd + r
+    return wd
+
+def SFS(q, u, v, m, FGR):
+    qf = Gaussian_Filter(q, m, FGR)
+    uf = Gaussian_Filter(u, m, FGR)
+    vf = Gaussian_Filter(v, m, FGR)
+    quf = Gaussian_Filter(q*u, m, FGR)
+    qvf = Gaussian_Filter(q*v, m, FGR)
+    SFSu = qf*uf - quf
+    SFSv = qf*vf - qvf
+    return SFSu, SFSv 
+
+class ADM(QParameterization):
+    def __init__(self, FGR=2, order=5, skip=1, MSE=0.0):
+        self.FGR = FGR
+        self.order = order
+        self.skip = skip
+        self.MSE = MSE
+    def __call__(self, m):
+        if m.tc % self.skip == 0:
+            qd = deconvolve(m.q, m, self.FGR, self.order)
+            ud = deconvolve(m.u, m, self.FGR, self.order)
+            vd = deconvolve(m.v, m, self.FGR, self.order)
+            
+            SFSu, SFSv = SFS(qd, ud, vd, m, self.FGR)
+            
+            ik = m.k * 1j
+            il = m.l * 1j
+            
+            real = lambda q: q if q.shape == m.q.shape else m.ifft(q)
+            spec = lambda q: q if q.shape != m.q.shape else m.fft(q)
+            ddx = lambda q: real(ik * spec(q))
+            ddy = lambda q: real(il * spec(q))
+
+            dq = ddx(SFSu) + ddy(SFSv)
+
+            var_z = np.var(dq, axis=(1,2))[:,np.newaxis,np.newaxis]
+            noise = np.sqrt(self.MSE * var_z) * np.random.randn(*dq.shape)
+            dq = dq + noise
+            
+            self.dq = dq
+        else:
+            try:
+                dq = self.dq
+            except:
+                dq = m.q * 0
+        
+        return dq
+
+    def __repr__(self):
+        return f'ADM, FGR={self.FGR}, skip={self.skip}'
+
+class Reynolds_stress(QParameterization):
+    def __init__(self, FGR=2, Csim=12):
+        self.FGR = FGR
+        self.Csim = Csim 
+    
+    def __call__(self, m):
+        qr = m.q - Gaussian_Filter(m.q, m, self.FGR)
+        ur = m.u - Gaussian_Filter(m.u, m, self.FGR)
+        vr = m.v - Gaussian_Filter(m.v, m, self.FGR)
+        
+        SFSu, SFSv = SFS(qr, ur, vr, m, self.FGR)
+        
+        ik = m.k * 1j
+        il = m.l * 1j
+        
+        real = lambda q: q if q.shape == m.q.shape else m.ifft(q)
+        spec = lambda q: q if q.shape != m.q.shape else m.fft(q)
+        ddx = lambda q: real(ik * spec(q))
+        ddy = lambda q: real(il * spec(q))
+        
+        return self.Csim*(ddx(SFSu) + ddy(SFSv))
+
+    def __repr__(self):
+        return f'Reynolds, FGR={self.FGR}, Csim={self.Csim}'

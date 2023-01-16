@@ -290,19 +290,41 @@ class ZannaBolton2020(UVParameterization):
 
 
 class HybridSymbolicRLPGZ2022(QParameterization):
+    r"""Data-driven parameterization from `Ross et al. 2022`_ (Eq. 20) obtained
+    by interleaving genetic programming and linear regression on residuals with
+    human-in-the-loop guidance. The functional form of this parameterization is:
+
+    .. math:: & (w_1\nabla^2 + w_2\nabla^4 + w_3\nabla^6)(\overline{\mathbf{u}} \cdot \nabla)\overline{q} \\ &+ (w_4\nabla^4 + w_5\nabla^6)\overline{q} \\ &+ (\overline{\mathbf{u}} \cdot \nabla)^2\nabla^2(w_6 \overline{v}_x + w_7 \overline{u}_y)
+
+    where the weights :math:`w_i` were fit empirically on samples from
+    two-layer :code:`QGModel` instances (with default parameters).
+
+    Note that this parameterization only runs for two-layer models, and will
+    error in other cases.
+
+    .. _Ross et al. 2022: https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022MS003258
     """
-    https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2022MS003258
-    """
-    weights = np.array([
-        [ 1.4077349573135765e+07,  1.9300721349777748e+15,
-          2.3311494532833229e+22,  1.1828024430000000e+09,
-          1.1410567621344224e+17, -6.7029178551956909e+10,
-          8.9901990193476257e+10],
-        [ 5.196460289865505e+06,  7.031351150824246e+14,
-          1.130130768679029e+11,  8.654265196250000e+08,
-          7.496556547888773e+16, -8.300923156070618e+11,
-          9.790139405295905e+11]
-    ]).T[:,:,np.newaxis,np.newaxis]
+
+    def __init__(self, weights=None):
+        r"""
+        Parameters
+        ----------
+        weights : 2x7 array
+            Weights to multiply each term in the functional form of the
+            parameterization at each layer. Defaults to empirically fit values.
+        """
+        if weights is None:
+            weights = np.array([
+                [ 1.4077349573135765e+07,  1.9300721349777748e+15,
+                  2.3311494532833229e+22,  1.1828024430000000e+09,
+                  1.1410567621344224e+17, -6.7029178551956909e+10,
+                  8.9901990193476257e+10],
+                [ 5.196460289865505e+06,  7.031351150824246e+14,
+                  1.130130768679029e+11,  8.654265196250000e+08,
+                  7.496556547888773e+16, -8.300923156070618e+11,
+                  9.790139405295905e+11]
+            ])
+        self.weights = weights.T[:,:,np.newaxis,np.newaxis]
 
     def __call__(self, m):
         if not len(m.q) == 2:

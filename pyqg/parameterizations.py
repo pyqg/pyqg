@@ -344,7 +344,7 @@ class HybridSymbolicRLPGZ2022(QParameterization):
     def __repr__(self):
         return f"HybridSymbolicRLPGZ2022"
 
-parameterizations = [
+parameterization_types = [
     Smagorinsky,
     BackscatterBiharmonic,
     ZannaBolton2020,

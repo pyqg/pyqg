@@ -23,7 +23,7 @@ def model(request):
     return model
 
 def test_parameterizations(model):
-    for parameterization_type in pyqg.parameterizations:
+    for parameterization_type in pyqg.parameterization_types:
         if parameterization_type == pyqg.HybridSymbolicRLPGZ2022 and model != QG:
             continue
         parameterization = parameterization_type()

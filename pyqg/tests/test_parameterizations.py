@@ -22,17 +22,12 @@ def model(request):
     model._step_forward()
     return model
 
-def test_smagorinsky(model):
-    smag = pyqg.Smagorinsky()
-    du, dv = smag(model)
-
-def test_backscatter_biharmonic(model):
-    back = pyqg.BackscatterBiharmonic()
-    dq = back(model)
-
-def test_zb2020(model):
-    zb20 = pyqg.ZannaBolton2020()
-    du, dv = zb20(model)
+def test_parameterizations(model):
+    for parameterization_type in pyqg.parameterization_types:
+        if parameterization_type == pyqg.HybridSymbolicRLPGZ2022 and model != QG:
+            continue
+        parameterization = parameterization_type()
+        predicted_forcing = parameterization(model)
 
 def test_addition_and_scaling(model, rtol=1e-11):
     back = pyqg.BackscatterBiharmonic()

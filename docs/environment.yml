@@ -4,6 +4,7 @@ dependencies:
   - numpy
   - scipy
   - cython
+  - xarray
   - pytest
   - future
   - sphinx

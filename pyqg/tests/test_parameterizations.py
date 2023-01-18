@@ -49,5 +49,9 @@ def test_addition_and_scaling(model, rtol=1e-11):
     with pytest.raises(AssertionError):
         back + smag
 
+def test_ring(model):
+    ring = pyqg.RingForcing()
+    dq = ring(model)
+
 if __name__ == "__main__":
     unittest.main()

@@ -296,13 +296,12 @@ class RingForcing(QParameterization):
     forcing decorrelated in time by inverse Fourier transforming
     white noise in the wavenumber domain
 
-    .. math:: \hat{w}(t,k^y,k^x) = 
-    \begin{cases}
-    a(t,k^y,k^x) + ib(t,k^y,k^x)\,,& \text{if}\ (R_d+\delta_R)^{-1}<\sqrt{{k^x}^2 + {k^y}^2}<(R_d-\delta_R)^{-1}\\
-    0\,,& \text{otherwise}
-    \end{cases}
+    .. math:: \hat{w}(t,k^y,k^x) = a(t,k^y,k^x) + ib(t,k^y,k^x)
 
-    where :math:`k^x, k^y` are the zonal and meridional 
+    in the wavenumber band between 
+    :math:`k_{in}<\sqrt{{k^x}^2 + {k^y}^2}<k_{out}`
+    and is zero outside of this band.
+    :math:`k^x, k^y` are the zonal and meridional 
     wavenumbers and :math:`a, b` are Gaussian random variables.
     
     After taking the inverse Fourier transform, the horizontal 

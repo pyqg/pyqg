@@ -290,7 +290,8 @@ class ZannaBolton2020(UVParameterization):
 
 class RingForcing(QParameterization):
     r"""Stochastically force PV in spectral space on a ring
-    associated with a band of given wavenumbers from `Uchida 2023`_.
+    associated with a band of given wavenumbers from 
+    `Uchida et al. (2023)`_.
 
     This parametrization introduces a vertically uniform stochastic
     forcing decorrelated in time by inverse Fourier transforming
@@ -312,7 +313,7 @@ class RingForcing(QParameterization):
     The magnitude of the noise can be adjusted by the input variable
     `mag_noise_forc`.
 
-    .. _Uchida 2023: https://doi.org/10.31223/X5C063
+    .. _Uchida et al. (2023): https://doi.org/10.31223/X5C063
     """
 
     def __init__(self, k_in_forc=0, k_out_forc=0, mag_noise_forc=0, layers='all'):

@@ -123,7 +123,7 @@ cdef class PseudoSpectralKernel:
         self.ny = ny
         self.nx = nx
         self.nl = ny
-        self.nk = nx/2 + 1
+        self.nk = nx//2 + 1
         self.a = np.zeros((self.nz, self.nz, self.nl, self.nk), DTYPE_com)
         self.kk = np.zeros((self.nk), DTYPE_real)
         self._ik = np.zeros((self.nk), DTYPE_com)

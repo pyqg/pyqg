@@ -64,16 +64,6 @@ install_requires = [
     'pyfftw'
 ]
 
-# This hack tells cython whether pyfftw is present
-use_pyfftw_file = 'pyqg/.compile_time_use_pyfftw.pxi'
-with open(use_pyfftw_file, 'wb') as f:
-    try:
-        import pyfftw
-        f.write(b'DEF PYQG_USE_PYFFTW = 1')
-    except ImportError:
-        f.write(b'DEF PYQG_USE_PYFFTW = 0')
-        warnings.warn('Could not import pyfftw. Model may be slower.')
-
 # check for openmp following
 # http://stackoverflow.com/questions/16549893/programatically-testing-for-openmp-support-from-a-python-setup-script
 # see http://openmp.org/wp/openmp-compilers/

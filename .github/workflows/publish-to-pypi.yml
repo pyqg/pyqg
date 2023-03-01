@@ -1,33 +1,108 @@
 name: Publish to PyPI
-
 on:
-  # Publish to PyPI when we create a release
-  release: 
-    types: [created]
-
-  # Allow manual trigger
-  workflow_dispatch:
-
+  release:
+    types: [published]
+permissions:
+  contents: read
 jobs:
-  build:
+  sdist:
+    name: 'Build sdist'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v3
       with:
-        fetch-depth: 0
-    - uses: actions/setup-python@v2
+        persist-credentials: false
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      id: setup-python
       with:
-        python-version: 3.9
-    - name: Install
+        python-version: '3.11'
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install setuptools build wheel twine
-    - name: Build
+        python -m pip install --upgrade build
+    - name: Build sdist
+      run: python -m build --sdist
+    - name: Store artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: sdist
+        path: dist/pyqg-*.tar.gz
+        if-no-files-found: error
+  wheel:
+    name: 'Build wheels (${{ matrix.os }})'
+    runs-on: ${{ matrix.os }}
+    needs: sdist
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - name: Download sdist
+      uses: actions/download-artifact@v3
+      with:
+        name: sdist
+        path: dist/
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    - name: Install cibuildwheel
       run: |
-        python -m build --sdist --outdir dist/
-    - name: Publish
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade 'cibuildwheel>=2.5.0'
+    - name: Build wheels
+      run: python -m cibuildwheel --output-dir wheelhouse dist/pyqg-*.tar.gz
+      shell: bash
+      env:
+        CIBW_BUILD: 'cp*'
+        CIBW_ARCHS_LINUX: 'auto64'
+        CIBW_ARCHS_WINDOWS: 'auto64'
+        CIBW_ARCHS_MACOS: 'universal2'
+    - name: Store artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheel
+        path: wheelhouse/pyqg-*.whl
+        if-no-files-found: error
+  publish:
+    name: 'Publish to PyPI'
+    runs-on: ubuntu-latest
+    needs: wheel
+    steps:
+    - name: Download sdist
+      uses: actions/download-artifact@v3
+      with:
+        name: sdist
+        path: dist/
+    - name: Download wheels
+      uses: actions/download-artifact@v3
+      with:
+        name: wheel
+        path: dist/
+    - name: Upload to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
-        verbose: true
+        print_hash: true
+  attach:
+    name: 'Attach to GitHub release'
+    runs-on: ubuntu-latest
+    needs: wheel
+    permissions:
+      contents: write
+    steps:
+    - name: Download sdist
+      uses: actions/download-artifact@v3
+      with:
+        name: sdist
+        path: dist/
+    - name: Download wheels
+      uses: actions/download-artifact@v3
+      with:
+        name: wheel
+        path: dist/
+    - name: Attach to release
+      run: gh release upload '${{ github.ref_name }}' dist/pyqg-*.tar.gz dist/pyqg-*.whl --repo '${{ github.repository }}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

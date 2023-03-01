@@ -6,9 +6,8 @@
 import numpy as np
 import numpy.fft as npfft
 import warnings
-import cython
 cimport numpy as np
-from cython.parallel import prange, threadid
+from cython.parallel import prange
 
 try:
     import pyfftw

@@ -101,8 +101,6 @@ cdef class PseudoSpectralKernel:
 
     # threading
     cdef int num_threads
-    # number of elements per work group in the y / l direction
-    cdef int chunksize
 
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
@@ -203,8 +201,6 @@ cdef class PseudoSpectralKernel:
 
         # for threading
         self.num_threads = fftw_num_threads
-        self.chunksize = self.nl/self.num_threads
-
         IF PYQG_USE_PYFFTW:
             # set up FFT plans
             # Note that the Backwards Real transform for the case
@@ -322,7 +318,6 @@ cdef class PseudoSpectralKernel:
         # set ph to zero
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.ph[k,j,i] = (0. + 0.*1j)
@@ -331,7 +326,6 @@ cdef class PseudoSpectralKernel:
         for k2 in range(self.nz):
             for k1 in range(self.nz):
                 for j in prange(self.nl, nogil=True, schedule='static',
-                          chunksize=self.chunksize,
                           num_threads=self.num_threads):
                     for i in range(self.nk):
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
@@ -340,7 +334,6 @@ cdef class PseudoSpectralKernel:
         # calculate spectral velocities
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.uh[k,j,i] = -self._il[j] * self.ph[k,j,i]
@@ -371,7 +364,6 @@ cdef class PseudoSpectralKernel:
         # multiply to get advective flux in space
         for k in range(self.nz):
             for j in prange(self.ny, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nx):
                     self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
@@ -385,7 +377,6 @@ cdef class PseudoSpectralKernel:
         # spectral divergence
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     # overwrite the tendency, since the forcing gets called after
@@ -411,7 +402,6 @@ cdef class PseudoSpectralKernel:
         self.fft_dv_to_dvh()
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (
@@ -435,7 +425,6 @@ cdef class PseudoSpectralKernel:
         self.fft_dq_to_dqh()
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
@@ -450,7 +439,6 @@ cdef class PseudoSpectralKernel:
         cdef Py_ssize_t j, i
         if self.rek:
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (
@@ -496,7 +484,6 @@ cdef class PseudoSpectralKernel:
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     qh_new[k,j,i] = self.filtr[j,i] * (
@@ -516,7 +503,6 @@ cdef class PseudoSpectralKernel:
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.qh[k,j,i] = qh_new[k,j,i]

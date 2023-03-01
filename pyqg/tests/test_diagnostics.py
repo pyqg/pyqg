@@ -1,4 +1,3 @@
-from future.utils import iteritems
 import pytest
 import numpy as np
 import pyqg

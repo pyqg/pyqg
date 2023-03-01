@@ -1,8 +1,8 @@
-#cython: profile=True
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: nonecheck=False
-#from __future__ import division
+#cython: language_level=3
+#distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_15_API_VERSION
 import numpy as np
 import warnings
 import cython

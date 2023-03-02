@@ -279,10 +279,7 @@ cdef class PseudoSpectralKernel:
         """Allocate a space-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.ny, self.nx)
         if pyfftw is not None:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_real)
-            out.flat[:] = 0.
-            return out
+            return pyfftw.zeros_aligned(shape, dtype=DTYPE_real)
         else:
             return np.zeros(shape, dtype=DTYPE_real)
 
@@ -290,10 +287,7 @@ cdef class PseudoSpectralKernel:
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.nl, self.nk)
         if pyfftw is not None:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_com)
-            out.flat[:] = 0.+0.j
-            return out
+            return pyfftw.zeros_aligned(shape, dtype=DTYPE_com)
         else:
             return np.zeros(shape, dtype=DTYPE_com)
 

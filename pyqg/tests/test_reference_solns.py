@@ -110,7 +110,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         pih = ( ph/np.sqrt(KEaux) )
         qih = -m.wv2*pih
         qi = m.ifft(qih)
-        m.set_q(qi)
+        m.q = qi
 
         rtol = 1.e-5
         atol = 1.e-14
@@ -150,7 +150,7 @@ class ReferenceSolutionsTester(unittest.TestCase):
         ph = ( ph/np.sqrt(KEaux) )
         qih = m.wv*ph
         qi = m.ifft(qih)
-        m.set_q(qi)
+        m.q = qi
 
         rtol = 1.e-4
         atol = 1.e-14

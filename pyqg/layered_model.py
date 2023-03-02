@@ -127,7 +127,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
 
         self.vertical_modes()
 
-        self.set_q(1e-7*np.vstack([
+        self.q = (1e-7*np.vstack([
             np.random.randn(self.nx,self.ny)[np.newaxis,]
             for _ in range(nz)]))
 

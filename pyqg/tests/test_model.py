@@ -315,7 +315,7 @@ class PyqgModelTester(unittest.TestCase):
         """Make sure timstepping works properly."""
 
         # set initial conditions to zero
-        self.m.set_q(np.zeros_like(self.m.q))
+        self.m.q = np.zeros_like(self.m.q)
 
         # create a random tendency
         dqhdt = np.random.rand(*self.m.dqhdt.shape) + 1j*np.random.rand(*self.m.dqhdt.shape)

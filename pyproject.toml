@@ -47,6 +47,7 @@ Documentation = "https://pyqg.readthedocs.io"
 "Issue Tracker" = "https://github.com/pyqg/pyqg/issues"
 
 [tool.setuptools_scm]
+local_scheme = "no-local-version"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

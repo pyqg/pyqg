@@ -3,7 +3,7 @@ Surface Quasi-Geostrophic (SQG) Model
 =====================================
 
 Here will will use pyqg to reproduce the results of the paper: I. M.
-Held, R. T. Pierrehumbert, S. T. Garner and K. L. Swanson (1985).
+Held, R. T. Pierrehumbert, S. T. Garner and K. L. Swanson (1995).
 Surface quasi-geostrophic dynamics. Journal of Fluid Mechanics, 282, pp
 1-20 [doi:: http://dx.doi.org/10.1017/S0022112095000012)
 
@@ -70,7 +70,7 @@ pedagogical reasons.
     # create the model object
     year = 1.
     m = sqg_model.SQGModel(L=2.*pi,nx=512, tmax = 26.005,
-            beta = 0., Nb = 1., H = 1., f_0 = 0., dt = 0.005,
+            beta = 0., Nb = 1., H = 1., f_0 = 1., dt = 0.005,
                          taveint=1, twrite=400, ntd=4)
     # in this example we used ntd=4, four threads
     # if your machine has more (or fewer) cores available, you could try changing it
@@ -90,7 +90,7 @@ The initial condition is an elliptical vortex,
 .. math::
 
 
-   b = 0.01 \exp( - (x^2 + (4y)^2)/(L/y)^2
+   b = 0.01 \exp( - (x^2 + (4y)^2)/(L/6)^2
 
 where :math:`L` is the length scale of the vortex in the :math:`x`
 direction. The amplitude is 0.01, which sets the strength and speed of

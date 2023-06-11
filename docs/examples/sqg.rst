@@ -90,7 +90,7 @@ The initial condition is an elliptical vortex,
 .. math::
 
 
-   b = 0.01 \exp( - (x^2 + (4y)^2)/(L/y)^2
+   b = 0.01 \exp( - (x^2 + (4y)^2)/(L/6)^2
 
 where :math:`L` is the length scale of the vortex in the :math:`x`
 direction. The amplitude is 0.01, which sets the strength and speed of

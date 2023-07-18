@@ -1,22 +1,20 @@
-#cython: profile=True
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: nonecheck=False
-#from __future__ import division
+#cython: language_level=3
+#distutils: define_macros=NPY_NO_DEPRECATED_API=NPY_1_15_API_VERSION
 import numpy as np
+import numpy.fft as npfft
 import warnings
-import cython
 cimport numpy as np
-from cython.parallel import prange, threadid
+from cython.parallel import prange
 
-# see if we got a compile time flag
-include '.compile_time_use_pyfftw.pxi'
-IF PYQG_USE_PYFFTW:
+try:
     import pyfftw
     pyfftw.interfaces.cache.enable()
-ELSE:
-    import numpy.fft as npfft
+except ImportError:
     warnings.warn('No pyfftw detected. Using numpy.fft')
+    pyfftw = None
 
 # We now need to fix a datatype for our arrays. I've used the variable
 # DTYPE for this, which is assigned to the usual NumPy runtime
@@ -101,8 +99,6 @@ cdef class PseudoSpectralKernel:
 
     # threading
     cdef int num_threads
-    # number of elements per work group in the y / l direction
-    cdef int chunksize
 
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
@@ -123,7 +119,7 @@ cdef class PseudoSpectralKernel:
         self.ny = ny
         self.nx = nx
         self.nl = ny
-        self.nk = nx/2 + 1
+        self.nk = nx//2 + 1
         self.a = np.zeros((self.nz, self.nz, self.nl, self.nk), DTYPE_com)
         self.kk = np.zeros((self.nk), DTYPE_real)
         self._ik = np.zeros((self.nk), DTYPE_com)
@@ -203,9 +199,7 @@ cdef class PseudoSpectralKernel:
 
         # for threading
         self.num_threads = fftw_num_threads
-        self.chunksize = self.nl/self.num_threads
-
-        IF PYQG_USE_PYFFTW:
+        if pyfftw is not None:
             # set up FFT plans
             # Note that the Backwards Real transform for the case
             # in which the dimensionality of the transform is greater than 1
@@ -240,52 +234,61 @@ cdef class PseudoSpectralKernel:
                              direction='FFTW_FORWARD', axes=(-2,-1))
             self._dummy_ifft = pyfftw.FFTW(difftin, difftout, threads=fftw_num_threads,
                              direction='FFTW_BACKWARD', axes=(-2,-1))
+        else:
+            # Fall back to NumPy FFT
+            self.fft_q_to_qh = self.__npfft_q_to_qh
+            self.ifft_qh_to_q = self.__npifft_qh_to_q
+            self.ifft_uh_to_u = self.__npifft_uh_to_u
+            self.ifft_vh_to_v = self.__npifft_vh_to_v
+            if has_uv_param:
+                self.fft_du_to_duh = self.__npfft_du_to_duh
+                self.fft_dv_to_dvh = self.__npfft_dv_to_dvh
+            if has_q_param:
+                self.fft_dq_to_dqh = self.__npfft_dq_to_dqh
+            self.fft_uq_to_uqh = self.__npfft_uq_to_uqh
+            self.fft_vq_to_vqh = self.__npfft_vq_to_vqh
+            self._dummy_fft = self.__np_dummy_fft
+            self._dummy_ifft = self.__np_dummy_ifft
 
-    # otherwise define those functions using numpy
-    IF PYQG_USE_PYFFTW==0:
-        def fft_q_to_qh(self):
-            self.qh = npfft.rfftn(self.q, axes=(-2,-1))
-        def ifft_qh_to_q(self):
-            self.q = npfft.irfftn(self.qh, axes=(-2,-1))
-        def ifft_uh_to_u(self):
-            self.u = npfft.irfftn(self.uh, axes=(-2,-1))
-        def ifft_vh_to_v(self):
-            self.v = npfft.irfftn(self.vh, axes=(-2,-1))
-        def fft_du_to_duh(self):
-            self.duh = npfft.rfftn(self.du, axes=(-2,-1))
-        def fft_dv_to_dvh(self):
-            self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
-        def fft_dq_to_dqh(self):
-            self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
-        def fft_uq_to_uqh(self):
-            self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
-        def fft_vq_to_vqh(self):
-            self.vqh = npfft.rfftn(self.vq, axes=(-2,-1))
-        def _dummy_fft(self):
-            self._dummy_fft_out = npfft.rfftn(self._dummy_fft_in, axes=(-2,-1))
-        def _dummy_ifft(self):
-            self._dummy_ifft_out = npfft.irfftn(self._dummy_ifft_in, axes=(-2,-1))
+
+    # NumPy FFT fallback functions
+    def __npfft_q_to_qh(self):
+        self.qh = npfft.rfftn(self.q, axes=(-2,-1))
+    def __npifft_qh_to_q(self):
+        self.q = npfft.irfftn(self.qh, axes=(-2,-1))
+    def __npifft_uh_to_u(self):
+        self.u = npfft.irfftn(self.uh, axes=(-2,-1))
+    def __npifft_vh_to_v(self):
+        self.v = npfft.irfftn(self.vh, axes=(-2,-1))
+    def __npfft_du_to_duh(self):
+        self.duh = npfft.rfftn(self.du, axes=(-2,-1))
+    def __npfft_dv_to_dvh(self):
+        self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
+    def __npfft_dq_to_dqh(self):
+        self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
+    def __npfft_uq_to_uqh(self):
+        self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
+    def __npfft_vq_to_vqh(self):
+        self.vqh = npfft.rfftn(self.vq, axes=(-2,-1))
+    def __np_dummy_fft(self):
+        self._dummy_fft_out = npfft.rfftn(self._dummy_fft_in, axes=(-2,-1))
+    def __np_dummy_ifft(self):
+        self._dummy_ifft_out = npfft.irfftn(self._dummy_ifft_in, axes=(-2,-1))
 
     def _empty_real(self):
         """Allocate a space-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.ny, self.nx)
-        IF PYQG_USE_PYFFTW:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_real)
-            out.flat[:] = 0.
-            return out
-        ELSE:
+        if pyfftw is not None:
+            return pyfftw.zeros_aligned(shape, dtype=DTYPE_real)
+        else:
             return np.zeros(shape, dtype=DTYPE_real)
 
     def _empty_com(self):
         """Allocate a Fourier-grid-sized variable for use with fftw transformations."""
         shape = (self.nz, self.nl, self.nk)
-        IF PYQG_USE_PYFFTW:
-            out = pyfftw.n_byte_align_empty(shape,
-                                 pyfftw.simd_alignment, dtype=DTYPE_com)
-            out.flat[:] = 0.+0.j
-            return out
-        ELSE:
+        if pyfftw is not None:
+            return pyfftw.zeros_aligned(shape, dtype=DTYPE_com)
+        else:
             return np.zeros(shape, dtype=DTYPE_com)
 
     def fft(self, np.ndarray[DTYPE_real_t, ndim=3] v):
@@ -322,7 +325,6 @@ cdef class PseudoSpectralKernel:
         # set ph to zero
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.ph[k,j,i] = (0. + 0.*1j)
@@ -331,7 +333,6 @@ cdef class PseudoSpectralKernel:
         for k2 in range(self.nz):
             for k1 in range(self.nz):
                 for j in prange(self.nl, nogil=True, schedule='static',
-                          chunksize=self.chunksize,
                           num_threads=self.num_threads):
                     for i in range(self.nk):
                         self.ph[k2,j,i] = ( self.ph[k2,j,i] +
@@ -340,7 +341,6 @@ cdef class PseudoSpectralKernel:
         # calculate spectral velocities
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.uh[k,j,i] = -self._il[j] * self.ph[k,j,i]
@@ -371,7 +371,6 @@ cdef class PseudoSpectralKernel:
         # multiply to get advective flux in space
         for k in range(self.nz):
             for j in prange(self.ny, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nx):
                     self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
@@ -385,7 +384,6 @@ cdef class PseudoSpectralKernel:
         # spectral divergence
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     # overwrite the tendency, since the forcing gets called after
@@ -411,7 +409,6 @@ cdef class PseudoSpectralKernel:
         self.fft_dv_to_dvh()
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (
@@ -435,7 +432,6 @@ cdef class PseudoSpectralKernel:
         self.fft_dq_to_dqh()
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
@@ -450,7 +446,6 @@ cdef class PseudoSpectralKernel:
         cdef Py_ssize_t j, i
         if self.rek:
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.dqhdt[k,j,i] = (
@@ -496,7 +491,6 @@ cdef class PseudoSpectralKernel:
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     qh_new[k,j,i] = self.filtr[j,i] * (
@@ -516,7 +510,6 @@ cdef class PseudoSpectralKernel:
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
-                      chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     self.qh[k,j,i] = qh_new[k,j,i]

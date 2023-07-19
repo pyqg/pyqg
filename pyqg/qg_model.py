@@ -86,13 +86,13 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         U2 : number
             Lower layer flow. Units: meters seconds :sup:`-1`
         """
+        self.delta = delta
+        self.Hi = np.array([ H1, H1/delta])
 
         # physical
         self.beta = beta
         #self.rek = rek
         self.rd = rd
-        self.delta = delta
-        self.Hi = np.array([ H1, H1/delta])
         self.U1 = U1
         self.U2 = U2
         #self.filterfac = filterfac

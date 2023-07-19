@@ -56,7 +56,6 @@ expected_attrs = [
     'filterfac',
     'nk',
     'nl',
-    'ntd',
     'nx',
     'ny',
     'nz',
@@ -112,13 +111,15 @@ def BT():
     '''Initialize Barotropic model'''
     return pyqg.BTModel(L=2.*np.pi, nx=256, beta=0., H=1., rek=0., 
                         rd=None, tmax=year/2, twrite=1000, tavestart=year/3,
-                        dt=year/8, taveint=1, ntd=4)
+                        dt=year/8, taveint=1,
+                        kernel_kwargs=dict(fftw_num_threads=4))
     
 def SQG():
     '''Initialize Surface Quasi-Geostrophic Model'''
     return pyqg.SQGModel(L=2.*np.pi, nx=512, tmax=year/2, beta=0.,
-                         Nb=1., H=1., f_0 = 1., dt=year/8,
-                         taveint=1, twrite=1000, ntd=4, tavestart=year/3)
+                         Nb=1., H=1., f_0 = 1., dt=year/8, taveint=1,
+                         twrite=1000, kernel_kwargs=dict(fftw_num_threads=4),
+                         tavestart=year/3)
     
 @pytest.fixture(params=[QG, Layered, BT, SQG])
 def all_models(request):

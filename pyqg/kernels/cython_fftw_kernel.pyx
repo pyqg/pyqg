@@ -29,7 +29,7 @@ DTYPE_com = np.complex128
 ctypedef np.float64_t DTYPE_real_t
 ctypedef np.complex128_t DTYPE_com_t
 
-cdef class PseudoSpectralKernel:
+cdef class CythonFFTWKernel:
     # array shapes
     cdef public int nx, ny, nz
     cdef public int nk, nl
@@ -117,8 +117,14 @@ cdef class PseudoSpectralKernel:
     cdef object _dummy_fft
     cdef object _dummy_ifft
 
-    def __init__(self, int nz, int ny, int nx, int fftw_num_threads=1,
-            int has_q_param=0, int has_uv_param=0):
+    cdef public object q_parameterization
+    cdef public object uv_parameterization
+
+    def __init__(self, int nz, int ny, int nx,
+            object q_parameterization=None,
+            object uv_parameterization=None,
+            int fftw_num_threads=1, # should not exceed the number of cores
+        ):
         self.nz = nz
         self.ny = ny
         self.nx = nx
@@ -160,8 +166,11 @@ cdef class PseudoSpectralKernel:
         vqh = self._empty_com()
         self.vqh = vqh
 
+        self.q_parameterization = q_parameterization
+        self.uv_parameterization = uv_parameterization
+
         # variables for subgrid parameterizations
-        if has_uv_param:
+        if uv_parameterization is not None:
             du = self._empty_real()
             dv = self._empty_real()
             duh = self._empty_com()
@@ -171,7 +180,7 @@ cdef class PseudoSpectralKernel:
             self.duh = duh
             self.dvh = dvh
 
-        if has_q_param:
+        if q_parameterization is not None:
             dq = self._empty_real()
             dqh = self._empty_com()
             self.dq = dq
@@ -220,14 +229,14 @@ cdef class PseudoSpectralKernel:
                              direction='FFTW_BACKWARD', axes=(-2,-1))
             self.ifft_vh_to_v = pyfftw.FFTW(vh, v, threads=fftw_num_threads,
                              direction='FFTW_BACKWARD', axes=(-2,-1))
-            if has_uv_param:
+            if uv_parameterization is not None:
                 self.fft_du_to_duh = pyfftw.FFTW(du, duh, threads=fftw_num_threads,
                                                  direction='FFTW_FORWARD',
                                                  axes=(-2, -1))
                 self.fft_dv_to_dvh = pyfftw.FFTW(dv, dvh, threads=fftw_num_threads,
                                                  direction='FFTW_FORWARD',
                                                  axes=(-2, -1))
-            if has_q_param:
+            if q_parameterization is not None:
                 self.fft_dq_to_dqh = pyfftw.FFTW(dq, dqh, threads=fftw_num_threads,
                                                  direction='FFTW_FORWARD',
                                                  axes=(-2, -1))
@@ -309,10 +318,10 @@ cdef class PseudoSpectralKernel:
         return np.asarray(self._dummy_ifft_out).copy()
 
 
-    def _invert(self):
-        self.__invert()
+    def invert(self):
+        self._invert()
 
-    cdef void __invert(self) nogil:
+    cdef void _invert(self) nogil:
         ### algorithm
         # invert ph = a * qh
         # uh, vh = -_il * ph, _ik * ph
@@ -354,10 +363,10 @@ cdef class PseudoSpectralKernel:
 
         return
 
-    def _do_advection(self):
-        self.__do_advection()
+    def do_advection(self):
+        self._do_advection()
 
-    cdef void __do_advection(self) nogil:
+    cdef void _do_advection(self) nogil:
         ### algorithm
         # uq, vq = (u+Ubg)*q, (v+Vbg)*q
         # uqh, vqh, = fft(uq), fft(vq)
@@ -394,10 +403,10 @@ cdef class PseudoSpectralKernel:
                                     self._ikQy[k,i] * self.ph[k,j,i] )
         return
 
-    def _do_uv_subgrid_parameterization(self):
-        self.__do_uv_subgrid_parameterization()
+    def do_uv_subgrid_parameterization(self):
+        self._do_uv_subgrid_parameterization()
 
-    cdef __do_uv_subgrid_parameterization(self):
+    cdef _do_uv_subgrid_parameterization(self):
         """Add the uv subgrid parameterization"""
         cdef Py_ssize_t k, j, i
         du, dv = self.uv_parameterization(self)
@@ -421,10 +430,10 @@ cdef class PseudoSpectralKernel:
                                         )
         return
 
-    def _do_q_subgrid_parameterization(self):
-        self.__do_q_subgrid_parameterization()
+    def do_q_subgrid_parameterization(self):
+        self._do_q_subgrid_parameterization()
 
-    cdef __do_q_subgrid_parameterization(self):
+    cdef _do_q_subgrid_parameterization(self):
         """Add the q subgrid parameterization"""
         cdef Py_ssize_t k, j, i
         dq = self.q_parameterization(self)
@@ -441,10 +450,10 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
         return
 
-    def _do_friction(self):
-        self.__do_friction()
+    def do_friction(self):
+        self._do_friction()
 
-    cdef void __do_friction(self) nogil:
+    cdef void _do_friction(self) nogil:
         """Apply Ekman friction to lower layer tendency"""
         cdef Py_ssize_t k = self.nz-1
         cdef Py_ssize_t j, i
@@ -460,11 +469,11 @@ cdef class PseudoSpectralKernel:
                              self.ph[k,j,i]) )
         return
 
-    def _forward_timestep(self):
+    def forward_timestep(self):
         """Step forward based on tendencies"""
-        self.__forward_timestep()
+        self._forward_timestep()
 
-    cdef void __forward_timestep(self) nogil:
+    cdef void _forward_timestep(self) nogil:
 
         #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
         cdef DTYPE_real_t dt1

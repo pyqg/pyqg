@@ -5,8 +5,10 @@ import warnings
 import inspect
 
 from .errors import DiagnosticNotFilledError
-from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
 from .parameterizations import Parameterization
+from .delegate import delegate
+from . import kernels
+
 try:
     import mkl
     np.use_fastnumpy = True
@@ -19,45 +21,63 @@ try:
 except ImportError:
     pass
 
-class Model(PseudoSpectralKernel):
+public_kernel_attrs = [
+    'nx', 'ny', 'nz', 'nl', 'nk', 'a', 'kk', 'll', 'q', 'qh', 'ph', 'u', 'v',
+    'Ubg', 'Qy', 'ufull', 'vfull', 'rek', 't', 'tc', 'dt',
+    'uv_parameterization', 'q_parameterization', 'fft', 'ifft', 'filtr',
+    'ablevel', 'dqhdt', 'dqhdt_p', 'dqhdt_pp', 'dqh', 'duh', 'dvh',
+]
+
+private_kernel_attrs = [
+    'invert', 'do_advection', 'do_friction', 'do_q_subgrid_parameterization',
+    'do_uv_subgrid_parameterization', 'forward_timestep',
+]
+
+@delegate(*public_kernel_attrs, to='kernel')
+@delegate(*private_kernel_attrs, to='kernel', prefix='_')
+class Model:
     """A generic pseudo-spectral inversion model.
 
     Attributes
     ----------
+    kernel : object
+        Kernel for running computations (inversion, advection, etc). Some
+        attributes are stored on the kernel, but are still accessible through
+        the model.
     nx, ny : int
-        Number of real space grid points in the `x`, `y` directions (cython)
+        Number of real space grid points in the `x`, `y` directions (kernel)
     nk, nl : int
-        Number of spectral space grid points in the `k`, `l` directions (cython)
+        Number of spectral space grid points in the `k`, `l` directions (kernel)
     nz : int
-        Number of vertical levels (cython)
+        Number of vertical levels (kernel)
     kk, ll : real array
-        Zonal and meridional wavenumbers (`nk`) (cython)
+        Zonal and meridional wavenumbers (`nk`) (kernel)
     a : real array
-        inversion matrix (`nk`, `nk`, `nl`, `nk`) (cython)
+        inversion matrix (`nk`, `nk`, `nl`, `nk`) (kernel)
     q : real array
-        Potential vorticity in real space (`nz`, `ny`, `nx`) (cython)
+        Potential vorticity in real space (`nz`, `ny`, `nx`) (kernel)
     qh : complex array
-        Potential vorticity in spectral space (`nk`, `nl`, `nk`) (cython)
+        Potential vorticity in spectral space (`nk`, `nl`, `nk`) (kernel)
     ph : complex array
-        Streamfunction in spectral space (`nk`, `nl`, `nk`) (cython)
+        Streamfunction in spectral space (`nk`, `nl`, `nk`) (kernel)
     u, v : real array
-        Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (cython)
+        Zonal and meridional velocity anomalies in real space (`nz`, `ny`, `nx`) (kernel)
     Ubg : real array
-        Background zonal velocity (`nk`) (cython)
+        Background zonal velocity (`nk`) (kernel)
     Qy : real array
-        Background potential vorticity gradient (`nk`) (cython)
+        Background potential vorticity gradient (`nk`) (kernel)
     ufull, vfull : real arrays
-        Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (cython)
+        Zonal and meridional full velocities in real space (`nz`, `ny`, `nx`) (kernel)
     uh, vh : complex arrays
-        Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (cython)
+        Velocity anomaly components in spectral space (`nk`, `nl`, `nk`) (kernel)
     rek : float
-        Linear drag in lower layer (cython)
+        Linear drag in lower layer (kernel)
     t : float
-        Model time (cython)
+        Model time (kernel)
     tc : int
-        Model timestep (cython)
+        Model timestep (kernel)
     dt : float
-        Numerical timestep (cython)
+        Numerical timestep (kernel)
     L, W : float
         Domain length in x and y directions
     filterfac : float
@@ -75,20 +95,17 @@ class Model(PseudoSpectralKernel):
         (units: model time)
     tsnapint : float
         Time interval for snapshots (units: model time)
-    ntd : int
-        Number of threads to use. Should not exceed the number of cores on
-        your machine.
     pmodes : real array
         Vertical pressure modes (unitless)
     radii :  real array
         Deformation radii  (units: model length)
-    q_parameterization : function or pyqg.Parameterization
+    q_parameterization : function or pyqg.Parameterization (kernel)
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a :code:`numpy` array of shape
         :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
         stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
-    uv_parameterization : function or pyqg.Parameterization
+    uv_parameterization : function or pyqg.Parameterization (kernel)
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a tuple of two :code:`numpy` arrays,
         each of shape  :code:`(nz, ny, nx)`, to be added to the zonal and
@@ -100,6 +117,8 @@ class Model(PseudoSpectralKernel):
 
     def __init__(
         self,
+        kernel='cython_fftw',
+        kernel_kwargs={},
         # grid size parameters
         nz=1,
         nx=64,                     # grid resolution
@@ -129,7 +148,6 @@ class Model(PseudoSpectralKernel):
         # removed because fftw is now manditory
         #use_fftw = False,               # fftw flag
         #teststyle = False,            # use fftw with "estimate" planner to get reproducibility
-        ntd = 1,                       # number of threads to use in fftw computations
         log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
                                        #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
@@ -141,6 +159,16 @@ class Model(PseudoSpectralKernel):
 
         Parameters
         ----------
+        kernel : class
+            Which kernel to use for computations (e.g. FFTs, inversion,
+            advection). Defaults to "cython_fftw" which initializes a
+            pyqg.kernels.CythonFFTWKernel.
+        kernel_kwargs : dictionary
+            Optional set of arguments to pass to the kernel when initializing
+            it.  Defaults to {}.  For "cython_fftw", this can be a dictionary
+            mapping "fftw_num_threads" to an integer representing the number of
+            threads to use (which should not exceed the number of cores on your
+            machine).
         nx : int
             Number of grid points in the x direction.
         ny : int
@@ -170,9 +198,6 @@ class Model(PseudoSpectralKernel):
             occur every timestep)
         tsnapint : number
             Time interval for snapshots. Units: seconds.
-        ntd : int
-            Number of threads to use. Should not exceed the number of cores on
-            your machine.
         q_parameterization : function or pyqg.Parameterization
             Optional :code:`Parameterization` object or function which takes
             the model as input and returns a :code:`numpy` array of shape
@@ -211,11 +236,16 @@ class Model(PseudoSpectralKernel):
             else:
                 raise ValueError(f"unknown parameterization type {ptype}")
 
-        # TODO: be more clear about what attributes are cython and what
-        # attributes are python
-        PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
-                has_q_param=int(q_parameterization is not None),
-                has_uv_param=int(uv_parameterization is not None))
+        if kernel == 'cython_fftw':
+            kernel = kernels.CythonFFTWKernel
+        elif isinstance(kernel, str):
+            raise ValueError(f"unknown kernel {kernel}")
+
+        self.kernel = kernel(nz, ny, nx,
+            q_parameterization,
+            uv_parameterization,
+            **kernel_kwargs
+        )
 
         self.L = L
         self.W = W
@@ -229,7 +259,6 @@ class Model(PseudoSpectralKernel):
         self.logfile = logfile
         self.log_level = log_level
         self.useAB2 = useAB2
-        self.ntd = ntd
 
         # friction
         self.rek = rek
@@ -240,10 +269,6 @@ class Model(PseudoSpectralKernel):
         if f:
             self.f = f
             self.f2 = f**2
-
-        # optional subgrid parameterizations
-        self.q_parameterization = q_parameterization
-        self.uv_parameterization = uv_parameterization
 
         # TODO: make this less complicated!
         # Really we just need to initialize the grid here. It's not necessary
@@ -434,7 +459,7 @@ class Model(PseudoSpectralKernel):
 
         # the basic steps are
         self._print_status()
-
+    
     def _initialize_time(self):
         """Set up timestep stuff"""
         #self.t=0        # actual time
@@ -738,9 +763,7 @@ class Model(PseudoSpectralKernel):
     def _calc_parameterization_contribution(self):
         dqh = np.zeros_like(self.qh)
         if self.uv_parameterization is not None:
-            ik = np.asarray(self._ik).reshape((1, -1)).repeat(self.wv2.shape[0], axis=0)
-            il = np.asarray(self._il).reshape((-1, 1)).repeat(self.wv2.shape[-1], axis=-1)
-            dqh += -il * self.duh + ik * self.dvh
+            dqh += -self.il * self.duh + self.ik * self.dvh
         if self.q_parameterization is not None:
             dqh += self.dqh
         return dqh

@@ -592,6 +592,9 @@ cdef class PseudoSpectralKernel:
     property dqhdt:
         def __get__(self):
             return np.asarray(self.dqhdt)
+        def __set__(self, np.ndarray[DTYPE_com_t, ndim=3] b):
+            cdef  DTYPE_com_t [:, :, :] b_view = b
+            self.dqhdt[:] = b_view
     property dqhdt_p:
         def __get__(self):
             return np.asarray(self.dqhdt_p)

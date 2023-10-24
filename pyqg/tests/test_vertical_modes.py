@@ -18,7 +18,7 @@ class VerticalModesTester(unittest.TestCase):
 
         self.atol=1.e-16
 
-        self.m.set_q(np.random.randn(self.m.nz,self.m.ny,self.m.nx))
+        self.m.q = np.random.randn(self.m.nz,self.m.ny,self.m.nx)
 
         self.m.vertical_modes()
 

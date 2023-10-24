@@ -180,7 +180,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         q1 : array-like
             Lower layer PV anomaly in spatial coordinates.
         """
-        self.set_q(np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]]))
+        self.q = np.vstack([q1[np.newaxis,:,:], q2[np.newaxis,:,:]])
         #self.q[0] = q1
         #self.q[1] = q2
 

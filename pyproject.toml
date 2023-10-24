@@ -1,10 +1,57 @@
 [build-system]
 requires = [
-    "importlib_metadata",
-    "setuptools>=45",
+    "setuptools>=61.0.0",
     "setuptools_scm[toml]>=6.2",
-    "wheel",
     "cython",
     "pyfftw",
-    "numpy"
+    "oldest-supported-numpy",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyqg"
+description = "python quasigeostrophic model"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+  {name = "pyqg team"},
+]
+dependencies = [
+    "numpy",
+    "pyfftw",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Cython",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Atmospheric Science"
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/pyqg/pyqg"
+Documentation = "https://pyqg.readthedocs.io"
+"Source Code" = "https://github.com/pyqg/pyqg"
+"Issue Tracker" = "https://github.com/pyqg/pyqg/issues"
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["pyqg/tests"]
+addopts = [
+  "--import-mode=importlib",
 ]

@@ -1,4 +1,14 @@
 cython>=0.20
-numpy>=1.20
+numpy>=2.24
 pyfftw
 importlib_metadata
+Cython==3.0.12
+packaging==24.2
+pandas==2.2.3
+pyFFTW==0.15.0
+python-dateutil==2.9.0.post0
+pytz==2025.2
+setuptools==78.1.0
+six==1.17.0
+tzdata==2025.2
+xarray==2025.3.1

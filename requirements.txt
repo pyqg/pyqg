@@ -1,5 +1,5 @@
 cython>=0.20
-numpy>=2.24
+numpy>=2.2.4
 pyfftw
 future==1.0.0
 importlib_metadata

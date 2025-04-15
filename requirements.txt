@@ -17,3 +17,5 @@ six==1.17.0
 tomli==2.2.1
 tzdata==2025.2
 xarray==2025.3.1
+ipython
+ipykernel

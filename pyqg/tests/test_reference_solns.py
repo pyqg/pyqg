@@ -1,4 +1,3 @@
-from future.utils import iteritems
 import unittest
 import numpy as np
 import pyqg
@@ -69,26 +68,26 @@ class ReferenceSolutionsTester(unittest.TestCase):
 
 
         # first print all output
-        for name, des in iteritems(diagnostic_results):
+        for name, des in diagnostic_results.items():
             res = m.get_diagnostic(name)
             print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
-        for name, des in iteritems(sum_diagnostic_results):
+        for name, des in sum_diagnostic_results.items():
             res = m.get_diagnostic(name).sum()
             print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
-        for name, des in iteritems(avg_diagnostic_results):
+        for name, des in avg_diagnostic_results.items():
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
             print('%10s: %1.15e \n%10s  %1.15e (desired)' % (name, res, '', des))
 
         # now do assertions
-        for name, des in iteritems(diagnostic_results):
+        for name, des in diagnostic_results.items():
             res = m.get_diagnostic(name)
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
                     err_msg=f"mismatch in {name}")
-        for name, des in iteritems(sum_diagnostic_results):
+        for name, des in sum_diagnostic_results.items():
             res = m.get_diagnostic(name).sum()
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
                     err_msg=f"mismatch in {name} sum")
-        for name, des in iteritems(avg_diagnostic_results):
+        for name, des in avg_diagnostic_results.items():
             res = diag.spec_sum(np.abs(m.get_diagnostic(name))).sum()
             np.testing.assert_allclose(res, des, rtol=rtol, atol=atol,
                     err_msg=f"mismatch in {name} spec sum")

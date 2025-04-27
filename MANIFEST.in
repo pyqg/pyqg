@@ -1,3 +1,7 @@
+include README.md MANIFEST.in LICENSE setup.py pyproject.toml
 recursive-include pyqg *.pyx
-recursive-exclude pyqg *.cinclude versioneer.py
-include pyqg/_version.py
+prune docs
+prune examples
+prune benchmark
+prune .github
+exclude index.ipynb requirements.txt .gitignore codecov.yml readthedocs.yml

@@ -837,6 +837,11 @@ class Model(PseudoSpectralKernel):
             DeprecationWarning)
         self.q = q
 
+    def set_b(self, b):
+        warnings.warn("Method deprecated.  This should be removed.  FJP ",
+            DeprecationWarning)
+        self.b = b
+
     def to_dataset(self):
         """Convert outputs from model to an xarray dataset
         

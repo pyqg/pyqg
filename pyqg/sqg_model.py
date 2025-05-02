@@ -4,71 +4,83 @@ from . import model
 
 
 class SQGModel(model.Model):
-    """Surface quasigeostrophic model."""
+    r"""Surface  quasigeostrophic model.
 
-    def __init__(
-        self,
-        beta=0.,                    # gradient of coriolis parameter
-        Nb = 1.,                    # Buoyancy frequency
-        f_0 = 1.,                   # coriolis parameter
-        H = 1.,                     # depth of layer
-        U=0.,                       # max vel. of base-state
-        **kwargs
-        ):
+    The surface quasigeostrophic evolution equations is
+
+    .. math::
+
+       \partial_t b + J(\psi, b) = \text{ssd}
+
+    The buoyancy anomaly is in physical and Fourier space
+
+    .. math::
+
+       b = \partial_z \psi
+
+       bh = -K*Nb/f_0*ph
+
+    """
+
+    def __init__(self, Nb=1., f_0=1., U=0., **kwargs):
         """
         Parameters
         ----------
 
-        beta : number
-            Gradient of coriolis parameter. Units: meters :sup:`-1`
-            seconds :sup:`-1`
-        Nb : number
+        Nb : number, optional
             Buoyancy frequency. Units: seconds :sup:`-1`.
-        U : number
-            Background zonal flow. Units: meters seconds :sup:`-1`.
+        f_0 : number, optional
+            Coriolis frequency. Units: seconds :sup:`-1`.
+        U : number, optional
+            Upper layer flow. Units: meters seconds :sup:`-1`.
         """
 
-        # physical
-        self.beta = beta
         self.Nb = Nb
         self.f_0 = f_0
-        self.H = H
-        self.Hi = np.array(H)[np.newaxis,...]
         self.U = U
-        #self.filterfac = filterfac
 
         self.nz = 1
 
         super().__init__(**kwargs)
 
-        # initial conditions: (PV anomalies)
-        self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
+        # initial conditions: (buoyancy anomalies)
+        # FJP: what amplitude do we pick here?
+        # FJP: do we specify a background U?  We should
+        self.set_b(1e-3*np.random.rand(1,self.ny,self.nx))
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
     def _initialize_background(self):
-        """Set up background state (zonal flow and PV gradients)."""
+        """Set up background state (zonal flow and buoyancy gradient)."""
 
-        # the meridional PV gradients in each layer
-        self.Qy = np.asarray(self.beta)[np.newaxis, ...]
+        # the meridional buoyancy gradient
+        self.By = np.asarray(self.Nb)[np.newaxis, ...]
 
         # background vel.
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikQy = self.Qy * 1j * self.k
+        self.ikBy = self.By * 1j * self.k
 
-        self.ilQx = 0.
+        self.ilBx = 0.
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
-        # The sqg inversion is ph = f / (kappa * N) qh (see documentation) 
+        # The sqg inversion is ph = f / (N * kappa) qh (see documentation) 
         self.a = np.asarray(self.f_0/self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass
 
     def set_U(self, U):
+        """Set background zonal flow.
+
+        Parameters
+        ----------
+
+        U : number
+            Flow. Units: meters seconds :sup:`-1`.
+        """
         """Set background zonal flow"""
         self.Ubg = np.asarray(U)[np.newaxis,...]
 
@@ -90,7 +102,8 @@ class SQGModel(model.Model):
 
     # calculate eddy turn over time
     # (perhaps should change to fraction of year...)
-    def _calc_eddy_time(self):
-        """ estimate the eddy turn-over time in days """
-        ens = .5*self.H * spec_var(self, self.wv2*self.ph)
-        return 2.*pi*np.sqrt( self.H / ens ) / year
+    #def _calc_eddy_time(self):
+    #    """ estimate the eddy turn-over time in days """
+    #    ens = .5*self.H * spec_var(self, self.wv2*self.ph)
+    #    return 2.*pi*np.sqrt( self.H / ens ) / year
+    # FJP: what is the analogue of this for SQG?  Should not need to know H.

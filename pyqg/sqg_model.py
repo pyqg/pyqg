@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import pi
 from . import model
 
 
@@ -41,6 +40,8 @@ class SQGModel(model.Model):
 
         self.nz = 1
 
+        self.SQG = True
+
         super().__init__(**kwargs)
 
         # initial conditions: (buoyancy anomalies)
@@ -67,6 +68,7 @@ class SQGModel(model.Model):
     def _initialize_inversion_matrix(self):
         """ the inversion """
         # The sqg inversion is ph = f / (N * kappa) qh (see documentation) 
+        # FJP: need to change qh to bh
         self.a = np.asarray(self.f_0/self.Nb*np.sqrt(self.wv2i))[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
@@ -105,5 +107,5 @@ class SQGModel(model.Model):
     #def _calc_eddy_time(self):
     #    """ estimate the eddy turn-over time in days """
     #    ens = .5*self.H * spec_var(self, self.wv2*self.ph)
-    #    return 2.*pi*np.sqrt( self.H / ens ) / year
+    #    return 2.*np.pi*np.sqrt( self.H / ens ) / year
     # FJP: what is the analogue of this for SQG?  Should not need to know H.

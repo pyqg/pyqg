@@ -38,6 +38,10 @@ class Model(PseudoSpectralKernel):
         Potential vorticity in real space (`nz`, `ny`, `nx`) (cython)
     qh : complex array
         Potential vorticity in spectral space (`nk`, `nl`, `nk`) (cython)
+    b : real array
+        Buoyancy in real space (`nz`, `ny`, `nx`) (cython)
+    bh : complex array
+        Buoyancy in spectral space (`nk`, `nl`, `nk`) (cython)
     ph : complex array
         Streamfunction in spectral space (`nk`, `nl`, `nk`) (cython)
     u, v : real array
@@ -88,6 +92,12 @@ class Model(PseudoSpectralKernel):
         :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
         stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
+    b_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a :code:`numpy` array of shape
+        :code:`(nz, ny, nx)` to be added to :math:`\partial_t b` before
+        stepping forward.  This can be used to implement subgrid forcing
+        parameterizations.
     uv_parameterization : function or pyqg.Parameterization
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a tuple of two :code:`numpy` arrays,
@@ -96,6 +106,7 @@ class Model(PseudoSpectralKernel):
         adding their curl to :math:`\partial_t q`).  This can also be used
         to implemented subgrid forcing parameterizations, but expressed in
         terms of velocity rather than potential vorticity.
+    SQG : Is it an SQG model or not.
     """
 
     def __init__(
@@ -119,8 +130,9 @@ class Model(PseudoSpectralKernel):
         # constants
         f = None,                   # coriolis parameter (not necessary for two-layer model
                                     #  if deformation radius is provided)
-        g= 9.81,                    # acceleration due to gravity
+        g = 9.81,                    # acceleration due to gravity
         q_parameterization=None,    # subgrid parameterization in terms of q
+        b_parameterization=None,    # subgrid parameterization in terms of b
         uv_parameterization=None,   # subgrid parameterization in terms of u,v
         parameterization=None,      # subgrid parameterization (type will be inferred)
         # diagnostics parameters
@@ -133,6 +145,7 @@ class Model(PseudoSpectralKernel):
         log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
                                        #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
+        SQG = False
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -179,6 +192,12 @@ class Model(PseudoSpectralKernel):
             :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
             stepping forward.  This can be used to implement subgrid forcing
             parameterizations.
+        b_parameterization : function or pyqg.Parameterization
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a :code:`numpy` array of shape
+            :code:`(nz, ny, nx)` to be added to :math:`\partial_t b` before
+            stepping forward.  This can be used to implement subgrid forcing
+            parameterizations.
         uv_parameterization : function or pyqg.Parameterization
             Optional :code:`Parameterization` object or function which takes
             the model as input and returns a tuple of two :code:`numpy` arrays,
@@ -208,6 +227,9 @@ class Model(PseudoSpectralKernel):
             elif ptype == 'q_parameterization':
                 assert q_parameterization is None
                 q_parameterization = parameterization
+            elif ptype == 'b_parameterization':
+                assert b_parameterization is None
+                b_parameterization = parameterization
             else:
                 raise ValueError(f"unknown parameterization type {ptype}")
 
@@ -215,6 +237,7 @@ class Model(PseudoSpectralKernel):
         # attributes are python
         PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                 has_q_param=int(q_parameterization is not None),
+                has_b_param=int(b_parameterization is not None),
                 has_uv_param=int(uv_parameterization is not None))
 
         self.L = L
@@ -242,7 +265,8 @@ class Model(PseudoSpectralKernel):
             self.f2 = f**2
 
         # optional subgrid parameterizations
-        self.q_parameterization = q_parameterization
+        self.q_parameterization  = q_parameterization
+        self.b_parameterization  = b_parameterization
         self.uv_parameterization = uv_parameterization
 
         # TODO: make this less complicated!
@@ -424,6 +448,10 @@ class Model(PseudoSpectralKernel):
         if self.q_parameterization is not None:
             self._do_q_subgrid_parameterization()
             # apply potential vorticity subgrid forcing term, if present
+
+        if self.b_parameterization is not None:
+            self._do_b_subgrid_parameterization()
+            # apply buoyancy subgrid forcing term, if present
 
         self._calc_diagnostics()
         # do what has to be done with diagnostics

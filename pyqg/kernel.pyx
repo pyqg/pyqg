@@ -675,6 +675,15 @@ cdef class PseudoSpectralKernel:
     property dqhdt_pp:
         def __get__(self):
             return np.asarray(self.dqhdt_pp)
+    property dbhdt:
+        def __get__(self):
+            return np.asarray(self.dbhdt)
+    property dbhdt_p:
+        def __get__(self):
+            return np.asarray(self.dbhdt_p)
+    property dbhdt_pp:
+        def __get__(self):
+            return np.asarray(self.dbhdt_pp)
     property ph:
         def __get__(self):
             return np.asarray(self.ph)

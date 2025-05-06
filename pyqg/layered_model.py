@@ -123,6 +123,8 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
+        self.SQG = False
+        
         super().__init__(nz=nz, f=f, **kwargs)
 
         self.vertical_modes()

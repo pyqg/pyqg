@@ -51,6 +51,8 @@ class BTModel(model.Model):
         else:
             self.kd2 = 0.
 
+        self.SQG = False
+
         super().__init__(**kwargs)
 
         # initial conditions: (PV anomalies)

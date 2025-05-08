@@ -21,6 +21,7 @@ m_bqg.q = qi
 #4) RingForcing
 #5) create b_parameterization
 
+#FJP: set pi to be whatever we need to be consistent in both.  We can use fft's.  Might make checking easier.
 #6) Time step: use q for most but b for SQG=True.
 #6a) first invert
 #6b) second forward, must add
@@ -37,3 +38,12 @@ print("Script test_sqg.py has terminted.")
 
 # normally use qh, dq, etc but if sqg then use bh, db, etc 
 # create a function, evalaute PV and buoyancy, given p compute q or b.
+
+
+SQG = False
+
+if not SQG:
+    print("Not an SQG model")
+else:
+    print("An SQG model")
+

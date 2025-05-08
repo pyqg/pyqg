@@ -9,6 +9,9 @@ import cython
 cimport numpy as np
 from cython.parallel import prange, threadid
 
+#FJP: added this to print self.SQG
+from libc.stdio cimport printf
+
 # see if we got a compile time flag
 include '.compile_time_use_pyfftw.pxi'
 IF PYQG_USE_PYFFTW:
@@ -23,11 +26,14 @@ ELSE:
 # type info object.
 DTYPE_real = np.float64
 DTYPE_com = np.complex128
+DTYPE_int = np.int64
+
 # "ctypedef" assigns a corresponding compile-time type to DTYPE_t. For
 # every type in the numpy module there's a corresponding compile-time
 # type with a _t-suffix.
 ctypedef np.float64_t DTYPE_real_t
 ctypedef np.complex128_t DTYPE_com_t
+ctypedef np.int64_t DTYPE_int_t
 
 cdef class PseudoSpectralKernel:
     # array shapes
@@ -108,6 +114,9 @@ cdef class PseudoSpectralKernel:
 
     # friction parameter
     cdef public DTYPE_real_t rek
+
+    # SQG parameter
+    cdef public DTYPE_int_t SQG
 
     # time
     # need to have a property to deal with resetting timestep
@@ -238,6 +247,10 @@ cdef class PseudoSpectralKernel:
 
         # friction
         self.rek = 0.0
+
+        # SQG parameter
+        #FJP: do we need this?
+        #self.SQG = 0
 
         # the tendency
         self.dqhdt = self._empty_com()
@@ -391,7 +404,7 @@ cdef class PseudoSpectralKernel:
         # uh, vh = -_il * ph, _ik * ph
         # u, v, = ifft(uh), ifft(vh)
 
-        cdef Py_ssize_t k, k1, k2, j, i
+        cdef Py_ssize_t k, k1, k2, j, i 
         # set ph to zero
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
@@ -401,6 +414,9 @@ cdef class PseudoSpectralKernel:
                     self.ph[k,j,i] = (0. + 0.*1j)
 
         # FJP: need to change this part for SQG
+        #IF self.rek==0:
+        #    printf("%d\n", self.rek)
+        
         # FJP: if SQG then invert bh to find ph, but where to initialize bh?
         # invert qh to find ph
         for k2 in range(self.nz):
@@ -434,7 +450,7 @@ cdef class PseudoSpectralKernel:
 
     cdef void __do_advection(self) nogil:
         ### algorithm
-        # uq, vq = (u+Ubg)*q, (v+Vbg)*q
+        # uq, vq    = (u+Ubg)*q, v*q
         # uqh, vqh, = fft(uq), fft(vq)
         # tend = kj*uqh + _ilQx*ph + lj*vqh + _ilQy*ph
 
@@ -444,6 +460,7 @@ cdef class PseudoSpectralKernel:
         cdef Py_ssize_t k, j, i
 
         # multiply to get advective flux in space
+
         for k in range(self.nz):
             for j in prange(self.ny, nogil=True, schedule='static',
                       chunksize=self.chunksize,
@@ -516,6 +533,23 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
         return
 
+    cdef __do_b_subgrid_parameterization(self):
+        """Add the b subgrid parameterization"""
+        cdef Py_ssize_t k, j, i
+        db = self.b_parameterization(self)
+        cdef DTYPE_real_t [:, :, :] db_view = db
+        # convert to cython memory view
+        self.db[:, :, :] = db_view
+        # convert to spectral space
+        self.fft_db_to_dbh()
+        for k in range(self.nz):
+            for j in prange(self.nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,
+                      num_threads=self.num_threads):
+                for i in range(self.nk):
+                    self.dbhdt[k,j,i] = (self.dbhdt[k,j,i] + self.dbh[k,j,i])
+        return
+
     def _do_friction(self):
         self.__do_friction()
 
@@ -523,6 +557,7 @@ cdef class PseudoSpectralKernel:
         """Apply Ekman friction to lower layer tendency"""
         cdef Py_ssize_t k = self.nz-1
         cdef Py_ssize_t j, i
+        
         if self.rek:
             for j in prange(self.nl, nogil=True, schedule='static',
                       chunksize=self.chunksize,

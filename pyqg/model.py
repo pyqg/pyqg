@@ -145,7 +145,7 @@ class Model(PseudoSpectralKernel):
         log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
                                        #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
-        SQG = False
+        SQG = 0                        # 
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose

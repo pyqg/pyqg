@@ -51,7 +51,7 @@ class BTModel(model.Model):
         else:
             self.kd2 = 0.
 
-        self.SQG = False
+        self.SQG = 0
 
         super().__init__(**kwargs)
 

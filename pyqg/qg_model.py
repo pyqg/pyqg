@@ -97,7 +97,7 @@ class QGModel(qg_diagnostics.QGDiagnostics):
         self.U2 = U2
         #self.filterfac = filterfac
 
-        self.SQG = False
+        self.SQG = 0
         
         super().__init__(nz=2, **kwargs)
 

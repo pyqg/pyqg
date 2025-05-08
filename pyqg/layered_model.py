@@ -123,7 +123,7 @@ class LayeredModel(qg_diagnostics.QGDiagnostics):
         self.Hi = np.array(H)
         self.rhoi = np.array(rho)
 
-        self.SQG = False
+        self.SQG = 0
         
         super().__init__(nz=nz, f=f, **kwargs)
 

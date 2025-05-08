@@ -40,7 +40,7 @@ class SQGModel(model.Model):
 
         self.nz = 1
 
-        self.SQG = True
+        self.SQG = 1
 
         super().__init__(**kwargs)
 

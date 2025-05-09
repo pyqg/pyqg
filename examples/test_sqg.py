@@ -10,9 +10,16 @@ x,y = np.meshgrid(x,y)
 
 bi = (-np.exp(-(x**2 + (4.0*y)**2)/(m_sqg.L/6.0)**2))[np.newaxis,:,:]
 m_sqg.b = bi
+m_sqg._invert()
+m_sqg.ph
+
+#sqg invert is using q, not b.  Change that.
+#m_sqg.q = qi
 
 qi = (-np.exp(-(x**2 + (4.0*y)**2)/(m_bqg.L/6.0)**2))[np.newaxis,:,:]
 m_bqg.q = qi
+m_bqg._invert()
+m_bqg.ph
 
 #1) set b
 

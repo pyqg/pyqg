@@ -21,7 +21,7 @@ class SQGModel(model.Model):
 
     """
 
-    def __init__(self, Nb=1., f_0=1., U=0., **kwargs):
+    def __init__(self, Nb=1., f_0=1., U=0., H=0, **kwargs):
         """
         Parameters
         ----------
@@ -37,10 +37,13 @@ class SQGModel(model.Model):
         self.Nb = Nb
         self.f_0 = f_0
         self.U = U
-
+        
         self.nz = 1
 
         self.SQG = 1
+
+        self.H = H
+        self.Hi = np.array(H)[np.newaxis,...]
 
         super().__init__(**kwargs)
 
@@ -61,7 +64,7 @@ class SQGModel(model.Model):
         self.set_U(self.U)
 
         # complex versions, multiplied by k, speeds up computations to pre-compute
-        self.ikBy = self.By * 1j * self.k
+        self.ikBy = 0*self.By * 1j * self.k
 
         self.ilBx = 0.
 

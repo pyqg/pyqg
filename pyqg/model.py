@@ -658,19 +658,21 @@ class Model(PseudoSpectralKernel):
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
 
-        self.add_diagnostic('EKEdiss',
-            description='total energy dissipation by bottom drag',
-            function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
-            units='m^2 s^-3',
-            dims=('time',)
-        )
+        #FJP: need to remove this for SQG, only for other QG models
+        #self.add_diagnostic('EKEdiss',
+        #    description='total energy dissipation by bottom drag',
+        #    function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
+        #    units='m^2 s^-3',
+        #    dims=('time',)
+        #)
 
-        self.add_diagnostic('KEfrictionspec',
-            description='total energy dissipation spectrum by bottom drag',
-            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
-            units='m^2 s^-3',
-            dims=('l','k')
-        )
+        #FJP: need to remove this for SQG, only for other QG models
+        #self.add_diagnostic('KEfrictionspec',
+        #    description='total energy dissipation spectrum by bottom drag',
+        #    function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
+        #    units='m^2 s^-3',
+        #    dims=('l','k')
+        #)
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',

@@ -424,7 +424,7 @@ cdef class PseudoSpectralKernel:
                         if not self.SQG:
                             self.ph[k2,j,i] += ( self.a[k2,k1,j,i] * self.qh[k1,j,i] )
                         else:
-                             self.ph[k2,j,i] = ( self.a[k2,k1,j,i] * self.bh[k1,j,i] )
+                            self.ph[k2,j,i] += ( self.a[k2,k1,j,i] * self.bh[k1,j,i] )
 
         # calculate spectral velocities
         for k in range(self.nz):
@@ -491,8 +491,7 @@ cdef class PseudoSpectralKernel:
                                         self._ikQy[k,i] * self.ph[k,j,i] )
                     else:
                         self.dbhdt[k,j,i] = -( self._ik[i] * self.ubh[k,j,i] +
-                                        self._il[j] * self.vbh[k,j,i] +
-                                        self._ikBy[k,i] * self.ph[k,j,i] )
+                                        self._il[j] * self.vbh[k,j,i]  )
         return
 
     def _do_uv_subgrid_parameterization(self):
@@ -658,7 +657,7 @@ cdef class PseudoSpectralKernel:
             if not self.SQG:
                 self.ifft_qh_to_q() # this destroys qh, need to assign again
             else:
-                self.ifft_qh_to_q() # this destroys bh, need to assign again
+                self.ifft_bh_to_b() # this destroys bh, need to assign again
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
@@ -727,7 +726,7 @@ cdef class PseudoSpectralKernel:
             return np.asarray(self.By)
         def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] By):
             self.By = By
-            self._ikBy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
+            self._ikBy = 0 * 1j * (np.asarray(self.kk)[np.newaxis, :] *
                                np.asarray(By)[:, np.newaxis])
     property q:
         def __get__(self):

@@ -13,9 +13,8 @@ bi = (-np.exp(-(x**2 + (4.0*y)**2)/(m_sqg.L/6.0)**2))[np.newaxis,:,:]
 m_sqg.b = bi
 m_sqg._invert()
 
-# run the model
+# run the SQG model
 for snapshot in m_sqg.run_with_snapshots(tsnapstart=0., tsnapint=400*m_sqg.dt):
-    print("min b = ", np.min(m_sqg.b[0,:,:]))
     plt.rcParams['image.cmap'] = 'RdBu'
     plt.clf()
     p1 = plt.imshow(m_sqg.b.squeeze())
@@ -30,9 +29,8 @@ qi = (-np.exp(-(x**2 + (4.0*y)**2)/(m_bqg.L/6.0)**2))[np.newaxis,:,:]
 m_bqg.q = qi
 m_bqg._invert()
 
-# run the model
+# run the BTQG model
 for snapshot in m_bqg.run_with_snapshots(tsnapstart=0., tsnapint=400*m_bqg.dt):
-    print("min q = ", np.min(m_bqg.q[0,:,:]))
     plt.rcParams['image.cmap'] = 'RdBu'
     plt.clf()
     p1 = plt.imshow(m_bqg.q.squeeze())

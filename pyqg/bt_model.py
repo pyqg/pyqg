@@ -23,7 +23,7 @@ class BTModel(model.Model):
 
     """
 
-    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(self, beta=0.,  rd=None, H=1., U=0., **kwargs):
         """
         Parameters
         ----------

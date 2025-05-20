@@ -12,7 +12,7 @@ pyFFTW==0.15.0
 pytest>=8.3.5
 python-dateutil==2.9.0.post0
 pytz==2025.2
-setuptools==78.1.0
+setuptools==78.1.1
 six==1.17.0
 tomli==2.2.1
 tzdata==2025.2

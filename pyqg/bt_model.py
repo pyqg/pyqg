@@ -23,7 +23,7 @@ class BTModel(model.Model):
 
     """
 
-    def __init__(self, beta=0.,  rd=0., H=1., U=0., **kwargs):
+    def __init__(self, beta=0.,  rd=None, H=1., U=0., **kwargs):
         """
         Parameters
         ----------
@@ -72,8 +72,11 @@ class BTModel(model.Model):
 
     def _initialize_inversion_matrix(self):
         """ the inversion """
-        # The bt model is diagonal. The inversion is simply qh = -kappa**2 ph
-        self.a = -(self.wv2i+self.kd2)[np.newaxis, np.newaxis, :, :]
+        # The bt model is diagonal. The inversion is simply qh = -(kappa**2 + kd**2)**-1 ph
+        if self.rd:            
+            self.a = -(1./(self.wv2+self.kd2))[np.newaxis, np.newaxis, :, :]
+        else:
+            self.a = -self.wv2i[np.newaxis, np.newaxis, :, :]
 
     def _initialize_forcing(self):
         pass

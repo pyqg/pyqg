@@ -9,9 +9,6 @@ import cython
 cimport numpy as np
 from cython.parallel import prange, threadid
 
-#FJP: added this to print self.SQG
-from libc.stdio cimport printf
-
 # see if we got a compile time flag
 include '.compile_time_use_pyfftw.pxi'
 IF PYQG_USE_PYFFTW:
@@ -247,10 +244,6 @@ cdef class PseudoSpectralKernel:
 
         # friction
         self.rek = 0.0
-
-        # SQG parameter
-        #FJP: do we need this?
-        #self.SQG = 0
 
         # the tendency
         self.dqhdt = self._empty_com()

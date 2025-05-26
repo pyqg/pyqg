@@ -550,6 +550,9 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
         return
 
+    def _do_b_subgrid_parameterization(self):
+        self.__do_b_subgrid_parameterization()
+
     cdef __do_b_subgrid_parameterization(self):
         """Add the b subgrid parameterization"""
         cdef Py_ssize_t k, j, i

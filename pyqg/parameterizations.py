@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 class Parameterization(ABC):
     """A generic class representing a subgrid parameterization. Inherit from
-    this class, :math:`UVParameterization`, or :math:`QParameterization` to
-    define a new parameterization."""
+    this class, :math:`UVParameterization`, or :math:`QParameterization` 
+    or :math:`BParameterization`to define a new parameterization."""
 
     @abstractmethod
     def __call__(self, m):
@@ -24,7 +24,8 @@ class Parameterization(ABC):
             :code:`q_parameterization`, this should be an array of shape
             :code:`(nz, ny, nx)`. For :code:`uv_parameterization`, this should
             be a tuple of two such arrays or a single array of shape :code:`(2,
-            nz, ny, nx)`.
+            nz, ny, nx)`.  For :code:`b_parameterization`, this should be an array of shape
+            :code:`(1, ny, nx)`.
         """
         pass
 
@@ -34,7 +35,8 @@ class Parameterization(ABC):
         """Whether the parameterization applies to velocity (in which case this
         property should return :code:`"uv_parameterization"`) or potential
         vorticity (in which case this property should return
-        :code:`"q_parameterization"`). If you inherit from
+        :code:`"q_parameterization"`) or buoyancy (in which case this property 
+        should return :code:`"b_parameterization"`). If you inherit from
         :code:`UVParameterization` or :code:`QParameterization`, this will be
         defined automatically.
 
@@ -42,8 +44,8 @@ class Parameterization(ABC):
         -------
         parameterization_type : string
             Either :code:`"uv_parameterization"` or
-            :code:`"q_parameterization"`, depending on how the output should be
-            interpreted.
+            :code:`"q_parameterization"` or :code:`"b_parameterization"`, 
+            depending on how the output should be interpreted.
         """
         pass
 
@@ -128,6 +130,13 @@ class QParameterization(Parameterization):
     parameterization."""
 
     parameterization_type = 'q_parameterization'
+
+class BParameterization(Parameterization):
+    """A generic class representing a subgrid parameterization in terms of
+    buoyancy. Inherit from this to define a new buoyancy
+    parameterization."""
+
+    parameterization_type = 'b_parameterization'
 
 class Smagorinsky(UVParameterization):
     r"""Velocity parameterization from `Smagorinsky 1963`_.
@@ -366,7 +375,7 @@ class RingForcing(QParameterization):
                            f"k_out_forc={self.k_out_forc})"
 
 
-class RingForcing_sqg(QParameterization):
+class RingForcingSQG(BParameterization):
     r"""Stochastically force buoyancy in spectral space on a ring
     associated with a band of given wavenumbers from 
     `Uchida et al. (2023)`_.
@@ -394,7 +403,7 @@ class RingForcing_sqg(QParameterization):
     .. _Uchida et al. (2023): https://doi.org/10.31223/X5C063
     """
 
-    def __init__(self, k_in_forc=0, k_out_forc=0, mag_noise_forc=0, layers='all'):
+    def __init__(self, k_in_forc=0, k_out_forc=0, mag_noise_forc=0):
         r"""
         Parameters
         ----------
@@ -411,7 +420,6 @@ class RingForcing_sqg(QParameterization):
         self.k_in_forc      = k_in_forc
         self.k_out_forc     = k_out_forc
         self.mag_noise_forc = mag_noise_forc
-        self.layers         = layers
 
     def __call__(self, m):
 
@@ -424,14 +432,7 @@ class RingForcing_sqg(QParameterization):
 
         Ring_hat = mask*(np.random.randn(nhx,nhy) +1j*np.random.randn(nhx,nhy))
 
-        if self.layers == 'all':
-            Ring = m.ifft( Ring_hat[np.newaxis,:,:] )
-        else:
-            Ring = np.zeros_like(m.u)
-            if self.layers == 'surf':
-                Ring[0] = m.ifft( Ring_hat[np.newaxis,:,:] )[0]
-            elif self.layers == 'bottom':
-                Ring[-1] = m.ifft( Ring_hat[np.newaxis,:,:] )[-1]
+        Ring = m.ifft( Ring_hat[np.newaxis,:,:] )
 
         Ring = Ring - Ring.mean(axis=(-1,-2))[:,np.newaxis,np.newaxis]
         Ring = Ring / np.abs(Ring).mean(axis=(-1,-2))[:,np.newaxis,np.newaxis] 
@@ -440,5 +441,5 @@ class RingForcing_sqg(QParameterization):
         return db
 
     def __repr__(self):
-        return f"RingForcing_sqg(k_in_forc={self.k_in_forc}, "\
+        return f"RingForcingSQG(k_in_forc={self.k_in_forc}, "\
                            f"k_out_forc={self.k_out_forc})"

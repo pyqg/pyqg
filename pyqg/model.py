@@ -5,7 +5,7 @@ import warnings
 import inspect
 
 from .errors import DiagnosticNotFilledError
-from .kernel import PseudoSpectralKernel, tendency_forward_euler, tendency_ab2, tendency_ab3
+from .kernel import PseudoSpectralKernel
 from .parameterizations import Parameterization
 try:
     import mkl
@@ -38,6 +38,10 @@ class Model(PseudoSpectralKernel):
         Potential vorticity in real space (`nz`, `ny`, `nx`) (cython)
     qh : complex array
         Potential vorticity in spectral space (`nk`, `nl`, `nk`) (cython)
+    b : real array
+        Buoyancy in real space (`nz`, `ny`, `nx`) (cython)
+    bh : complex array
+        Buoyancy in spectral space (`nk`, `nl`, `nk`) (cython)
     ph : complex array
         Streamfunction in spectral space (`nk`, `nl`, `nk`) (cython)
     u, v : real array
@@ -88,6 +92,12 @@ class Model(PseudoSpectralKernel):
         :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
         stepping forward.  This can be used to implement subgrid forcing
         parameterizations.
+    b_parameterization : function or pyqg.Parameterization
+        Optional :code:`Parameterization` object or function which takes
+        the model as input and returns a :code:`numpy` array of shape
+        :code:`(nz, ny, nx)` to be added to :math:`\partial_t b` before
+        stepping forward.  This can be used to implement subgrid forcing
+        parameterizations.
     uv_parameterization : function or pyqg.Parameterization
         Optional :code:`Parameterization` object or function which takes
         the model as input and returns a tuple of two :code:`numpy` arrays,
@@ -96,6 +106,7 @@ class Model(PseudoSpectralKernel):
         adding their curl to :math:`\partial_t q`).  This can also be used
         to implemented subgrid forcing parameterizations, but expressed in
         terms of velocity rather than potential vorticity.
+    SQG : Is it an SQG model or not.
     """
 
     def __init__(
@@ -119,8 +130,9 @@ class Model(PseudoSpectralKernel):
         # constants
         f = None,                   # coriolis parameter (not necessary for two-layer model
                                     #  if deformation radius is provided)
-        g= 9.81,                    # acceleration due to gravity
+        g = 9.81,                    # acceleration due to gravity
         q_parameterization=None,    # subgrid parameterization in terms of q
+        b_parameterization=None,    # subgrid parameterization in terms of b
         uv_parameterization=None,   # subgrid parameterization in terms of u,v
         parameterization=None,      # subgrid parameterization (type will be inferred)
         # diagnostics parameters
@@ -133,6 +145,7 @@ class Model(PseudoSpectralKernel):
         log_level = 1,                 # logger level: from 0 for quiet (no log) to 4 for verbose
                                        #     logger (see  https://docs.python.org/2/library/logging.html)
         logfile = None,                # logfile; None prints to screen
+        SQG = 0                        # 
         ):
         """
         .. note:: All of the test cases use ``nx==ny``. Expect bugs if you choose
@@ -179,6 +192,12 @@ class Model(PseudoSpectralKernel):
             :code:`(nz, ny, nx)` to be added to :math:`\partial_t q` before
             stepping forward.  This can be used to implement subgrid forcing
             parameterizations.
+        b_parameterization : function or pyqg.Parameterization
+            Optional :code:`Parameterization` object or function which takes
+            the model as input and returns a :code:`numpy` array of shape
+            :code:`(nz, ny, nx)` to be added to :math:`\partial_t b` before
+            stepping forward.  This can be used to implement subgrid forcing
+            parameterizations.
         uv_parameterization : function or pyqg.Parameterization
             Optional :code:`Parameterization` object or function which takes
             the model as input and returns a tuple of two :code:`numpy` arrays,
@@ -208,6 +227,9 @@ class Model(PseudoSpectralKernel):
             elif ptype == 'q_parameterization':
                 assert q_parameterization is None
                 q_parameterization = parameterization
+            elif ptype == 'b_parameterization':
+                assert b_parameterization is None
+                b_parameterization = parameterization
             else:
                 raise ValueError(f"unknown parameterization type {ptype}")
 
@@ -215,6 +237,7 @@ class Model(PseudoSpectralKernel):
         # attributes are python
         PseudoSpectralKernel.__init__(self, nz, ny, nx, ntd,
                 has_q_param=int(q_parameterization is not None),
+                has_b_param=int(b_parameterization is not None),
                 has_uv_param=int(uv_parameterization is not None))
 
         self.L = L
@@ -242,7 +265,8 @@ class Model(PseudoSpectralKernel):
             self.f2 = f**2
 
         # optional subgrid parameterizations
-        self.q_parameterization = q_parameterization
+        self.q_parameterization  = q_parameterization
+        self.b_parameterization  = b_parameterization
         self.uv_parameterization = uv_parameterization
 
         # TODO: make this less complicated!
@@ -425,6 +449,10 @@ class Model(PseudoSpectralKernel):
             self._do_q_subgrid_parameterization()
             # apply potential vorticity subgrid forcing term, if present
 
+        if self.b_parameterization is not None:
+            self._do_b_subgrid_parameterization()
+            # apply buoyancy subgrid forcing term, if present
+
         self._calc_diagnostics()
         # do what has to be done with diagnostics
 
@@ -579,35 +607,6 @@ class Model(PseudoSpectralKernel):
         if (self.t>=self.dt) and (self.t>=self.tavestart) and (self.tc%self.taveints==0):
             self._increment_diagnostics()
 
-    # def _forward_timestep(self):
-    #     """Step forward based on tendencies"""
-    #
-    #     #self.dqhdt = self.dqhdt_adv + self.dqhdt_forc
-    #
-    #     # Note that Adams-Bashforth is not self-starting
-    #     if self.tc==0:
-    #         # forward Euler at the first step
-    #         qtend = tendency_forward_euler(self.dt, self.dqhdt)
-    #     elif (self.tc==1) or (self.useAB2):
-    #         # AB2 at step 2
-    #         qtend = tendency_ab2(self.dt, self.dqhdt, self.dqhdt_p)
-    #     else:
-    #         # AB3 from step 3 on
-    #         qtend = tendency_ab3(self.dt, self.dqhdt,
-    #                     self.dqhdt_p, self.dqhdt_pp)
-    #
-    #     # add tendency and filter
-    #     self.set_qh(self._filter(self.qh + qtend))
-    #
-    #     # remember previous tendencies
-    #     self.dqhdt_pp[:] = self.dqhdt_p.copy()
-    #     self.dqhdt_p[:] = self.dqhdt.copy()
-    #     #self.dqhdt[:] = 0.
-    #
-    #     # augment timestep and current time
-    #     self.tc += 1
-    #     self.t += self.dt
-
     ### All the diagnostic stuff follows. ###
     def _calc_cfl(self):
         raise NotImplementedError(
@@ -659,19 +658,21 @@ class Model(PseudoSpectralKernel):
         )      # factor of 2 to account for the fact that we have only half of
                #    the Fourier coefficients.
 
-        self.add_diagnostic('EKEdiss',
-            description='total energy dissipation by bottom drag',
-            function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
-            units='m^2 s^-3',
-            dims=('time',)
-        )
+        #FJP: need to remove this for SQG, only for other QG models
+        #self.add_diagnostic('EKEdiss',
+        #    description='total energy dissipation by bottom drag',
+        #    function= (lambda self: self.Hi[-1]/self.H*self.rek*(self.v[-1]**2 + self.u[-1]**2).mean()),
+        #    units='m^2 s^-3',
+        #    dims=('time',)
+        #)
 
-        self.add_diagnostic('KEfrictionspec',
-            description='total energy dissipation spectrum by bottom drag',
-            function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
-            units='m^2 s^-3',
-            dims=('l','k')
-        )
+        #FJP: need to remove this for SQG, only for other QG models
+        #self.add_diagnostic('KEfrictionspec',
+        #    description='total energy dissipation spectrum by bottom drag',
+        #    function= (lambda self: -self.rek*self.Hi[-1]/self.H*self.wv2*np.abs(self.ph[-1])**2/self.M**2),
+        #    units='m^2 s^-3',
+        #    dims=('l','k')
+        #)
 
         self.add_diagnostic('EKE',
             description='mean eddy kinetic energy',
@@ -836,6 +837,11 @@ class Model(PseudoSpectralKernel):
         warnings.warn("Method deprecated. Set model.q directly instead. ",
             DeprecationWarning)
         self.q = q
+
+    def set_b(self, b):
+        warnings.warn("Method deprecated.  This should be removed.  FJP ",
+            DeprecationWarning)
+        self.b = b
 
     def to_dataset(self):
         """Convert outputs from model to an xarray dataset

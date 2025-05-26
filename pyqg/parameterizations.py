@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 class Parameterization(ABC):
     """A generic class representing a subgrid parameterization. Inherit from
-    this class, :math:`UVParameterization`, or :math:`QParameterization` to
-    define a new parameterization."""
+    this class, :math:`UVParameterization`, or :math:`QParameterization` 
+    or :math:`BParameterization`to define a new parameterization."""
 
     @abstractmethod
     def __call__(self, m):
@@ -24,7 +24,8 @@ class Parameterization(ABC):
             :code:`q_parameterization`, this should be an array of shape
             :code:`(nz, ny, nx)`. For :code:`uv_parameterization`, this should
             be a tuple of two such arrays or a single array of shape :code:`(2,
-            nz, ny, nx)`.
+            nz, ny, nx)`.  For :code:`b_parameterization`, this should be an array of shape
+            :code:`(1, ny, nx)`.
         """
         pass
 
@@ -34,7 +35,8 @@ class Parameterization(ABC):
         """Whether the parameterization applies to velocity (in which case this
         property should return :code:`"uv_parameterization"`) or potential
         vorticity (in which case this property should return
-        :code:`"q_parameterization"`). If you inherit from
+        :code:`"q_parameterization"`) or buoyancy (in which case this property 
+        should return :code:`"b_parameterization"`). If you inherit from
         :code:`UVParameterization` or :code:`QParameterization`, this will be
         defined automatically.
 
@@ -42,8 +44,8 @@ class Parameterization(ABC):
         -------
         parameterization_type : string
             Either :code:`"uv_parameterization"` or
-            :code:`"q_parameterization"`, depending on how the output should be
-            interpreted.
+            :code:`"q_parameterization"` or :code:`"b_parameterization"`, 
+            depending on how the output should be interpreted.
         """
         pass
 
@@ -128,6 +130,13 @@ class QParameterization(Parameterization):
     parameterization."""
 
     parameterization_type = 'q_parameterization'
+
+class BParameterization(Parameterization):
+    """A generic class representing a subgrid parameterization in terms of
+    buoyancy. Inherit from this to define a new buoyancy
+    parameterization."""
+
+    parameterization_type = 'b_parameterization'
 
 class Smagorinsky(UVParameterization):
     r"""Velocity parameterization from `Smagorinsky 1963`_.
@@ -365,3 +374,72 @@ class RingForcing(QParameterization):
         return f"RingForcing(k_in_forc={self.k_in_forc}, "\
                            f"k_out_forc={self.k_out_forc})"
 
+
+class RingForcingSQG(BParameterization):
+    r"""Stochastically force buoyancy in spectral space on a ring
+    associated with a band of given wavenumbers from 
+    `Uchida et al. (2023)`_.
+
+    This parametrization introduces a vertically uniform stochastic
+    forcing decorrelated in time by inverse Fourier transforming
+    white noise in the wavenumber domain
+
+    .. math:: \hat{w}(t,k^y,k^x) = a(t,k^y,k^x) + ib(t,k^y,k^x)
+
+    in the wavenumber band between 
+    :math:`k_{in}<\sqrt{{k^x}^2 + {k^y}^2}<k_{out}`
+    and is zero outside of this band.
+    :math:`k^x, k^y` are the zonal and meridional 
+    wavenumbers and :math:`a, b` are Gaussian random variables.
+    
+    After taking the inverse Fourier transform, the horizontal 
+    mean is removed and then divided by the horizontal mean 
+    of the absolute values to have the amplitudes on the 
+    order of unity.
+
+    The magnitude of the noise can be adjusted by the input variable
+    `mag_noise_forc`.
+
+    .. _Uchida et al. (2023): https://doi.org/10.31223/X5C063
+    """
+
+    def __init__(self, k_in_forc=0, k_out_forc=0, mag_noise_forc=0):
+        r"""
+        Parameters
+        ----------
+        k_in_forc : number
+            Inner wave number of the ring
+            Defaults to 0.0.
+        k_out_forc : number
+            Outer wave number of the ring
+            Defaults to 0.0.
+        mag_noise_forc : number
+            Amplitude of the forcing 
+        """
+
+        self.k_in_forc      = k_in_forc
+        self.k_out_forc     = k_out_forc
+        self.mag_noise_forc = mag_noise_forc
+
+    def __call__(self, m):
+
+        nhx,nhy = m.wv.shape
+        wvx = np.sqrt((m.k)**2.+(m.l)**2.)
+        
+        mask = np.ones_like(wvx)
+        mask[wvx<=self.k_in_forc] = 0.
+        mask[wvx>self.k_out_forc] = 0.
+
+        Ring_hat = mask*(np.random.randn(nhx,nhy) +1j*np.random.randn(nhx,nhy))
+
+        Ring = m.ifft( Ring_hat[np.newaxis,:,:] )
+
+        Ring = Ring - Ring.mean(axis=(-1,-2))[:,np.newaxis,np.newaxis]
+        Ring = Ring / np.abs(Ring).mean(axis=(-1,-2))[:,np.newaxis,np.newaxis] 
+
+        db = self.mag_noise_forc*Ring
+        return db
+
+    def __repr__(self):
+        return f"RingForcingSQG(k_in_forc={self.k_in_forc}, "\
+                           f"k_out_forc={self.k_out_forc})"

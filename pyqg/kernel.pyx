@@ -22,12 +22,15 @@ ELSE:
 # DTYPE for this, which is assigned to the usual NumPy runtime
 # type info object.
 DTYPE_real = np.float64
-DTYPE_com = np.complex128
+DTYPE_com  = np.complex128
+DTYPE_int  = np.int64
+
 # "ctypedef" assigns a corresponding compile-time type to DTYPE_t. For
 # every type in the numpy module there's a corresponding compile-time
 # type with a _t-suffix.
-ctypedef np.float64_t DTYPE_real_t
+ctypedef np.float64_t    DTYPE_real_t
 ctypedef np.complex128_t DTYPE_com_t
+ctypedef np.int64_t      DTYPE_int_t
 
 cdef class PseudoSpectralKernel:
     # array shapes
@@ -38,6 +41,9 @@ cdef class PseudoSpectralKernel:
     # pv
     cdef DTYPE_real_t [:, :, :] q
     cdef DTYPE_com_t [:, :, :] qh
+    # buoyancy
+    cdef DTYPE_real_t [:, :, :] b
+    cdef DTYPE_com_t [:, :, :] bh
     # streamfunction
     cdef DTYPE_com_t [:, :, :] ph
     # velocities
@@ -50,10 +56,19 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_real_t [:, :, :] vq
     cdef readonly DTYPE_com_t [:, :, :] uqh
     cdef readonly DTYPE_com_t [:, :, :] vqh
-    # the tendencies
+    # the pv tendencies
     cdef DTYPE_com_t [:, :, :] dqhdt
     cdef DTYPE_com_t [:, :, :] dqhdt_p
     cdef DTYPE_com_t [:, :, :] dqhdt_pp
+    # buoyancy fluxes
+    cdef DTYPE_real_t [:, :, :] ub
+    cdef DTYPE_real_t [:, :, :] vb
+    cdef readonly DTYPE_com_t [:, :, :] ubh
+    cdef readonly DTYPE_com_t [:, :, :] vbh
+    # the buoyancy tendencies
+    cdef DTYPE_com_t [:, :, :] dbhdt
+    cdef DTYPE_com_t [:, :, :] dbhdt_p
+    cdef DTYPE_com_t [:, :, :] dbhdt_pp
 
     # subgrid velocity parameterizations
     cdef DTYPE_real_t [:, :, :] du
@@ -63,6 +78,9 @@ cdef class PseudoSpectralKernel:
     # subgrid potential vorticity parameterizations
     cdef DTYPE_real_t [:, :, :] dq
     cdef DTYPE_com_t [:, :, :] dqh
+    # subgrid buoyancy parameterizations
+    cdef DTYPE_real_t [:, :, :] db
+    cdef DTYPE_com_t [:, :, :] dbh
 
     # dummy variables for diagnostic ffts
     cdef DTYPE_real_t [:, :, :] _dummy_fft_in
@@ -84,6 +102,8 @@ cdef class PseudoSpectralKernel:
     cdef DTYPE_real_t [:] Ubg
     cdef DTYPE_real_t [:] Qy
     cdef readonly DTYPE_com_t [:, :] _ikQy
+    cdef DTYPE_real_t [:] By
+    cdef readonly DTYPE_com_t [:, :] _ikBy
 
     # spectral filter
     # TODO: figure out if this really needs to be public
@@ -91,6 +111,9 @@ cdef class PseudoSpectralKernel:
 
     # friction parameter
     cdef public DTYPE_real_t rek
+
+    # SQG parameter
+    cdef public DTYPE_int_t SQG
 
     # time
     # need to have a property to deal with resetting timestep
@@ -107,18 +130,23 @@ cdef class PseudoSpectralKernel:
     # pyfftw objects (callable)
     cdef object fft_q_to_qh
     cdef object ifft_qh_to_q
+    cdef object fft_b_to_bh
+    cdef object ifft_bh_to_b
     cdef object ifft_uh_to_u
     cdef object fft_du_to_duh
     cdef object fft_dv_to_dvh
     cdef object fft_dq_to_dqh
+    cdef object fft_db_to_dbh
     cdef object ifft_vh_to_v
     cdef object fft_uq_to_uqh
     cdef object fft_vq_to_vqh
+    cdef object fft_ub_to_ubh
+    cdef object fft_vb_to_vbh
     cdef object _dummy_fft
     cdef object _dummy_ifft
 
     def __init__(self, int nz, int ny, int nx, int fftw_num_threads=1,
-            int has_q_param=0, int has_uv_param=0):
+            int has_q_param=0, int has_b_param=0, int has_uv_param=0):
         self.nz = nz
         self.ny = ny
         self.nx = nx
@@ -136,6 +164,11 @@ cdef class PseudoSpectralKernel:
         self.q = q
         qh = self._empty_com()
         self.qh = qh
+
+        b = self._empty_real()
+        self.b = b
+        bh = self._empty_com()
+        self.bh = bh
 
         ph = self._empty_com()
         self.ph = ph
@@ -160,6 +193,16 @@ cdef class PseudoSpectralKernel:
         vqh = self._empty_com()
         self.vqh = vqh
 
+        ub = self._empty_real()
+        self.ub = ub
+        ubh = self._empty_com()
+        self.ubh = ubh
+
+        vb = self._empty_real()
+        self.vb = vb
+        vbh = self._empty_com()
+        self.vbh = vbh
+
         # variables for subgrid parameterizations
         if has_uv_param:
             du = self._empty_real()
@@ -176,6 +219,12 @@ cdef class PseudoSpectralKernel:
             dqh = self._empty_com()
             self.dq = dq
             self.dqh = dqh
+
+        if has_b_param:
+            db = self._empty_real()
+            dbh = self._empty_com()
+            self.db = db
+            self.dbh = dbh
 
         # dummy variables for diagnostic ffts
         dfftin = self._empty_real()
@@ -201,6 +250,10 @@ cdef class PseudoSpectralKernel:
         self.dqhdt_p = self._empty_com()
         self.dqhdt_pp = self._empty_com()
 
+        self.dbhdt = self._empty_com()
+        self.dbhdt_p = self._empty_com()
+        self.dbhdt_pp = self._empty_com()
+
         # for threading
         self.num_threads = fftw_num_threads
         self.chunksize = int(self.nl/self.num_threads)
@@ -215,6 +268,10 @@ cdef class PseudoSpectralKernel:
             self.fft_q_to_qh = pyfftw.FFTW(q, qh, threads=fftw_num_threads,
                              direction='FFTW_FORWARD', axes=(-2,-1))
             self.ifft_qh_to_q = pyfftw.FFTW(qh, q, threads=fftw_num_threads,
+                             direction='FFTW_BACKWARD', axes=(-2,-1))
+            self.fft_b_to_bh = pyfftw.FFTW(b, bh, threads=fftw_num_threads,
+                             direction='FFTW_FORWARD', axes=(-2,-1))
+            self.ifft_bh_to_b = pyfftw.FFTW(bh, b, threads=fftw_num_threads,
                              direction='FFTW_BACKWARD', axes=(-2,-1))
             self.ifft_uh_to_u = pyfftw.FFTW(uh, u, threads=fftw_num_threads,
                              direction='FFTW_BACKWARD', axes=(-2,-1))
@@ -231,10 +288,22 @@ cdef class PseudoSpectralKernel:
                 self.fft_dq_to_dqh = pyfftw.FFTW(dq, dqh, threads=fftw_num_threads,
                                                  direction='FFTW_FORWARD',
                                                  axes=(-2, -1))
+
+            if has_b_param:
+                self.fft_db_to_dbh = pyfftw.FFTW(db, dbh, threads=fftw_num_threads,
+                                                 direction='FFTW_FORWARD',
+                                                 axes=(-2, -1))
+
             self.fft_uq_to_uqh = pyfftw.FFTW(uq, uqh, threads=fftw_num_threads,
                              direction='FFTW_FORWARD', axes=(-2,-1))
             self.fft_vq_to_vqh = pyfftw.FFTW(vq, vqh, threads=fftw_num_threads,
                              direction='FFTW_FORWARD', axes=(-2,-1))
+
+            self.fft_ub_to_ubh = pyfftw.FFTW(ub, ubh, threads=fftw_num_threads,
+                             direction='FFTW_FORWARD', axes=(-2,-1))
+            self.fft_vb_to_vbh = pyfftw.FFTW(vb, vbh, threads=fftw_num_threads,
+                             direction='FFTW_FORWARD', axes=(-2,-1))
+
             # dummy ffts for diagnostics
             self._dummy_fft = pyfftw.FFTW(dfftin, dfftout, threads=fftw_num_threads,
                              direction='FFTW_FORWARD', axes=(-2,-1))
@@ -247,6 +316,10 @@ cdef class PseudoSpectralKernel:
             self.qh = npfft.rfftn(self.q, axes=(-2,-1))
         def ifft_qh_to_q(self):
             self.q = npfft.irfftn(self.qh, axes=(-2,-1))
+        def fft_b_to_bh(self):
+            self.bh = npfft.rfftn(self.b, axes=(-2,-1))
+        def ifft_bh_to_b(self):
+            self.b = npfft.irfftn(self.bh, axes=(-2,-1))
         def ifft_uh_to_u(self):
             self.u = npfft.irfftn(self.uh, axes=(-2,-1))
         def ifft_vh_to_v(self):
@@ -257,10 +330,16 @@ cdef class PseudoSpectralKernel:
             self.dvh = npfft.rfftn(self.dv, axes=(-2,-1))
         def fft_dq_to_dqh(self):
             self.dqh = npfft.rfftn(self.dq, axes=(-2,-1))
+        def fft_db_to_dbh(self):
+            self.dbh = npfft.rfftn(self.db, axes=(-2,-1))
         def fft_uq_to_uqh(self):
             self.uqh = npfft.rfftn(self.uq, axes=(-2,-1))
         def fft_vq_to_vqh(self):
             self.vqh = npfft.rfftn(self.vq, axes=(-2,-1))
+        def fft_ub_to_ubh(self):
+            self.ubh = npfft.rfftn(self.ub, axes=(-2,-1))
+        def fft_vb_to_vbh(self):
+            self.vbh = npfft.rfftn(self.vb, axes=(-2,-1))
         def _dummy_fft(self):
             self._dummy_fft_out = npfft.rfftn(self._dummy_fft_in, axes=(-2,-1))
         def _dummy_ifft(self):
@@ -314,11 +393,12 @@ cdef class PseudoSpectralKernel:
 
     cdef void __invert(self) nogil:
         ### algorithm
-        # invert ph = a * qh
+        # invert ph = a * qh (QG) or ph = a * bh (SQG)
         # uh, vh = -_il * ph, _ik * ph
         # u, v, = ifft(uh), ifft(vh)
 
-        cdef Py_ssize_t k, k1, k2, j, i
+        cdef Py_ssize_t k, k1, k2, j, i 
+
         # set ph to zero
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
@@ -334,8 +414,10 @@ cdef class PseudoSpectralKernel:
                           chunksize=self.chunksize,
                           num_threads=self.num_threads):
                     for i in range(self.nk):
-                        self.ph[k2,j,i] = ( self.ph[k2,j,i] +
-                            self.a[k2,k1,j,i] * self.qh[k1,j,i] )
+                        if not self.SQG:
+                            self.ph[k2,j,i] += ( self.a[k2,k1,j,i] * self.qh[k1,j,i] )
+                        else:
+                            self.ph[k2,j,i] += ( self.a[k2,k1,j,i] * self.bh[k1,j,i] )
 
         # calculate spectral velocities
         for k in range(self.nz):
@@ -348,7 +430,6 @@ cdef class PseudoSpectralKernel:
 
         # transform to get u and v
         with gil:
-            #self.ifft_qh_to_q() # necessary now that timestepping is inside kernel
             self.ifft_uh_to_u()
             self.ifft_vh_to_v()
 
@@ -359,7 +440,7 @@ cdef class PseudoSpectralKernel:
 
     cdef void __do_advection(self) nogil:
         ### algorithm
-        # uq, vq = (u+Ubg)*q, (v+Vbg)*q
+        # uq, vq    = (u+Ubg)*q, v*q
         # uqh, vqh, = fft(uq), fft(vq)
         # tend = kj*uqh + _ilQx*ph + lj*vqh + _ilQy*ph
 
@@ -374,14 +455,22 @@ cdef class PseudoSpectralKernel:
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nx):
-                    self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
-                    self.vq[k,j,i] = self.v[k,j,i] * self.q[k,j,i]
+                    if not self.SQG:
+                        self.uq[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.q[k,j,i]
+                        self.vq[k,j,i] = self.v[k,j,i] * self.q[k,j,i]
+                    else:
+                        self.ub[k,j,i] = (self.u[k,j,i]+self.Ubg[k]) * self.b[k,j,i]
+                        self.vb[k,j,i] = self.v[k,j,i] * self.b[k,j,i]
 
         # transform to get spectral advective flux
         with gil:
-            self.fft_uq_to_uqh()
-            self.fft_vq_to_vqh()
-
+            if not self.SQG:
+                self.fft_uq_to_uqh()
+                self.fft_vq_to_vqh()
+            else:
+                self.fft_ub_to_ubh()
+                self.fft_vb_to_vbh()
+             
         # spectral divergence
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
@@ -389,9 +478,13 @@ cdef class PseudoSpectralKernel:
                       num_threads=self.num_threads):
                 for i in range(self.nk):
                     # overwrite the tendency, since the forcing gets called after
-                    self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
-                                    self._il[j] * self.vqh[k,j,i] +
-                                    self._ikQy[k,i] * self.ph[k,j,i] )
+                    if not self.SQG:
+                        self.dqhdt[k,j,i] = -( self._ik[i] * self.uqh[k,j,i] +
+                                        self._il[j] * self.vqh[k,j,i] +
+                                        self._ikQy[k,i] * self.ph[k,j,i] )
+                    else:
+                        self.dbhdt[k,j,i] = -( self._ik[i] * self.ubh[k,j,i] +
+                                        self._il[j] * self.vbh[k,j,i]  )
         return
 
     def _do_uv_subgrid_parameterization(self):
@@ -414,11 +507,19 @@ cdef class PseudoSpectralKernel:
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
-                    self.dqhdt[k,j,i] = (
-                                        self.dqhdt[k,j,i] +
-                                        (-self._il[j] * self.duh[k, j, i] +
-                                        +self._ik[i] * self.dvh[k, j, i] )
-                                        )
+                    if not self.SQG:
+                        self.dqhdt[k,j,i] = (
+                                            self.dqhdt[k,j,i] +
+                                            (-self._il[j] * self.duh[k, j, i] +
+                                            +self._ik[i] * self.dvh[k, j, i] )
+                                            )
+                    else:
+                        self.dbhdt[k,j,i] = (
+                                            self.dbhdt[k,j,i] +
+                                            (-self._il[j] * self.duh[k, j, i] +
+                                            +self._ik[i] * self.dvh[k, j, i] )
+                                            )
+
         return
 
     def _do_q_subgrid_parameterization(self):
@@ -426,6 +527,7 @@ cdef class PseudoSpectralKernel:
 
     cdef __do_q_subgrid_parameterization(self):
         """Add the q subgrid parameterization"""
+        #FJP: this should only be for self.SQG = 0
         cdef Py_ssize_t k, j, i
         dq = self.q_parameterization(self)
         cdef DTYPE_real_t [:, :, :] dq_view = dq
@@ -441,6 +543,26 @@ cdef class PseudoSpectralKernel:
                     self.dqhdt[k,j,i] = (self.dqhdt[k,j,i] + self.dqh[k,j,i])
         return
 
+    def _do_b_subgrid_parameterization(self):
+        self.__do_b_subgrid_parameterization()
+
+    cdef __do_b_subgrid_parameterization(self):
+        """Add the b subgrid parameterization"""
+        cdef Py_ssize_t k, j, i
+        db = self.b_parameterization(self)
+        cdef DTYPE_real_t [:, :, :] db_view = db
+        # convert to cython memory view
+        self.db[:, :, :] = db_view
+        # convert to spectral space
+        self.fft_db_to_dbh()
+        for k in range(self.nz):
+            for j in prange(self.nl, nogil=True, schedule='static',
+                      chunksize=self.chunksize,
+                      num_threads=self.num_threads):
+                for i in range(self.nk):
+                    self.dbhdt[k,j,i] = (self.dbhdt[k,j,i] + self.dbh[k,j,i])
+        return
+
     def _do_friction(self):
         self.__do_friction()
 
@@ -448,16 +570,16 @@ cdef class PseudoSpectralKernel:
         """Apply Ekman friction to lower layer tendency"""
         cdef Py_ssize_t k = self.nz-1
         cdef Py_ssize_t j, i
+        
         if self.rek:
             for j in prange(self.nl, nogil=True, schedule='static',
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
-                    self.dqhdt[k,j,i] = (
-                     self.dqhdt[k,j,i] +
-                             (self.rek *
-                             self._k2l2[j,i] *
-                             self.ph[k,j,i]) )
+                    if not self.SQG:
+                        self.dqhdt[k,j,i] += (
+                            (self.rek * self._k2l2[j,i] * self.ph[k,j,i]) )
+
         return
 
     def _forward_timestep(self):
@@ -472,8 +594,12 @@ cdef class PseudoSpectralKernel:
         cdef DTYPE_real_t dt3
         cdef Py_ssize_t k, j, i
         cdef DTYPE_com_t [:, :, :] qh_new
+        cdef DTYPE_com_t [:, :, :] bh_new
         with gil:
-            qh_new = self.qh.copy()
+            if not self.SQG:
+                qh_new = self.qh.copy()
+            else:
+                bh_new = self.bh.copy()
 
         # Note that Adams-Bashforth is not self-starting
         if self.ablevel==0:
@@ -499,27 +625,45 @@ cdef class PseudoSpectralKernel:
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
-                    qh_new[k,j,i] = self.filtr[j,i] * (
-                        self.qh[k,j,i] +
-                        dt1 * self.dqhdt[k,j,i] +
-                        dt2 * self.dqhdt_p[k,j,i] +
-                        dt3 * self.dqhdt_pp[k,j,i]
-                    )
-                    self.qh[k,j,i] = qh_new[k,j,i]
-                    self.dqhdt_pp[k,j,i] = self.dqhdt_p[k,j,i]
-                    self.dqhdt_p[k,j,i] = self.dqhdt[k,j,i]
-                    #self.dqhdt[k,j,i] = 0.0
+                    if not self.SQG:
+                        qh_new[k,j,i] = self.filtr[j,i] * (
+                            self.qh[k,j,i] +
+                            dt1 * self.dqhdt[k,j,i] +
+                            dt2 * self.dqhdt_p[k,j,i] +
+                            dt3 * self.dqhdt_pp[k,j,i]
+                        )
+                        self.qh[k,j,i] = qh_new[k,j,i]
+                        self.dqhdt_pp[k,j,i] = self.dqhdt_p[k,j,i]
+                        self.dqhdt_p[k,j,i] = self.dqhdt[k,j,i]
+                        #self.dqhdt[k,j,i] = 0.0
+                    else:
+                        bh_new[k,j,i] = self.filtr[j,i] * (
+                            self.bh[k,j,i] +
+                            dt1 * self.dbhdt[k,j,i] +
+                            dt2 * self.dbhdt_p[k,j,i] +
+                            dt3 * self.dbhdt_pp[k,j,i]
+                        )
+                        self.bh[k,j,i] = bh_new[k,j,i]
+                        self.dbhdt_pp[k,j,i] = self.dbhdt_p[k,j,i]
+                        self.dbhdt_p[k,j,i] = self.dbhdt[k,j,i]
+                        #self.dbhdt[k,j,i] = 0.0
 
-        # do FFT of new qh
+        # do FFT of new qh or bh
         with gil:
-            self.ifft_qh_to_q() # this destroys qh, need to assign again
+            if not self.SQG:
+                self.ifft_qh_to_q() # this destroys qh, need to assign again
+            else:
+                self.ifft_bh_to_b() # this destroys bh, need to assign again
 
         for k in range(self.nz):
             for j in prange(self.nl, nogil=True, schedule='static',
                       chunksize=self.chunksize,
                       num_threads=self.num_threads):
                 for i in range(self.nk):
-                    self.qh[k,j,i] = qh_new[k,j,i]
+                    if not self.SQG:
+                        self.qh[k,j,i] = qh_new[k,j,i]
+                    else:
+                        self.bh[k,j,i] = bh_new[k,j,i]
 
         self.tc += 1
         self.t += self.dt
@@ -573,6 +717,13 @@ cdef class PseudoSpectralKernel:
             self.Qy = Qy
             self._ikQy = 1j * (np.asarray(self.kk)[np.newaxis, :] *
                                np.asarray(Qy)[:, np.newaxis])
+    property By:
+        def __get__(self):
+            return np.asarray(self.By)
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=1] By):
+            self.By = By
+            self._ikBy = 0 * 1j * (np.asarray(self.kk)[np.newaxis, :] *
+                               np.asarray(By)[:, np.newaxis])
     property q:
         def __get__(self):
             return np.asarray(self.q)
@@ -589,6 +740,22 @@ cdef class PseudoSpectralKernel:
             self.ifft_qh_to_q()
             # input might have been destroyed, have to re-assign
             self.qh[:] = b_view
+    property b:
+        def __get__(self):
+            return np.asarray(self.b)
+        def __set__(self, np.ndarray[DTYPE_real_t, ndim=3] b):
+            cdef  DTYPE_real_t [:, :, :] b_view = b
+            self.b[:] = b_view
+            self.fft_b_to_bh()
+    property bh:
+        def __get__(self):
+            return np.asarray(self.bh)
+        def __set__(self, np.ndarray[DTYPE_com_t, ndim=3] b):
+            cdef  DTYPE_com_t [:, :, :] b_view = b
+            self.bh[:] = b_view
+            self.ifft_bh_to_b()
+            # input might have been destroyed, have to re-assign
+            self.bh[:] = b_view
     property dqhdt:
         def __get__(self):
             return np.asarray(self.dqhdt)
@@ -598,6 +765,15 @@ cdef class PseudoSpectralKernel:
     property dqhdt_pp:
         def __get__(self):
             return np.asarray(self.dqhdt_pp)
+    property dbhdt:
+        def __get__(self):
+            return np.asarray(self.dbhdt)
+    property dbhdt_p:
+        def __get__(self):
+            return np.asarray(self.dbhdt_p)
+    property dbhdt_pp:
+        def __get__(self):
+            return np.asarray(self.dbhdt_pp)
     property ph:
         def __get__(self):
             return np.asarray(self.ph)
@@ -629,35 +805,18 @@ cdef class PseudoSpectralKernel:
     property dqh:
         def __get__(self):
             return np.asarray(self.dqh)
+    property ub:
+        def __get__(self):
+            return np.asarray(self.ub)
+    property vb:
+        def __get__(self):
+            return np.asarray(self.vb)
+    property dbh:
+        def __get__(self):
+            return np.asarray(self.dbh)
     property duh:
         def __get__(self):
             return np.asarray(self.duh)
     property dvh:
         def __get__(self):
             return np.asarray(self.dvh)
-
-
-# general purpose timestepping routines
-# take only complex values, since that what the state variables are
-def tendency_forward_euler(DTYPE_real_t dt,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt):
-    """Compute tendency using forward euler timestepping."""
-    return dt * dqdt
-
-def tendency_ab2(DTYPE_real_t dt,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt_p):
-    """Compute tendency using Adams Bashforth 2nd order timestepping."""
-    cdef DTYPE_real_t DT1 = 1.5*dt
-    cdef DTYPE_real_t DT2 = -0.5*dt
-    return DT1 * dqdt + DT2 * dqdt_p
-
-def tendency_ab3(DTYPE_real_t dt,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt_p,
-                    np.ndarray[DTYPE_com_t, ndim=3] dqdt_pp):
-    """Compute tendency using Adams Bashforth 3nd order timestepping."""
-    cdef DTYPE_real_t DT1 = 23/12.*dt
-    cdef DTYPE_real_t DT2 = -16/12.*dt
-    cdef DTYPE_real_t DT3 = 5/12.*dt
-    return DT1 * dqdt + DT2 * dqdt_p + DT3 * dqdt_pp

@@ -1,11 +1,8 @@
-from future.utils import iteritems
 import pytest
-import unittest
 import numpy as np
 import pyqg
 import pickle
 import os
-from pyqg import diagnostic_tools as diag
 
 def test_describe_diagnostics():
     """ Test whether describe_diagnostics runs without error """

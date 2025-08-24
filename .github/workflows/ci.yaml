@@ -1,47 +1,46 @@
 name: CI
-on: [push, pull_request, workflow_dispatch]
-
+on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
-  build:
-    name: Build (${{ matrix.python-version }} | ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+  test:
+    name: 'Test (${{ matrix.python }})'
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
-        python-version: ["3.7", "3.8", "3.9"]
+        python: ['3.8', '3.9', '3.10', '3.11']
     steps:
-      - uses: actions/checkout@v2
-      - name: Cache conda
-        uses: actions/cache@v1
-        env:
-          # Increase this value to reset cache if ci/environment.yml has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('ci/environment-py${{ matrix.python-version }}.yml') }}
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: test_env_pyqg # Defined in ci/environment*.yml
-          auto-update-conda: false
-          python-version: ${{ matrix.python-version }}
-          environment-file: ci/environment-py${{ matrix.python-version }}-pyfftw.yml
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-      - name: Set up conda environment
-        shell: bash -l {0}
-        run: |
-          python setup.py build_ext --inplace
-          python -m pip install -e . --no-deps
-          conda list
-      - name: Run Tests
-        shell: bash -l {0}
-        run: |
-          pytest --cov=./ --cov-report=xml
-      - name: Upload code coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          env_vars: OS,PYTHON
-          name: codecov-umbrella
-          fail_ci_if_error: false
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: false
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      id: setup-python
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Cache pip downloads
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: pip-test-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ github.run_id }}
+        restore-keys: pip-test-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade -r pyqg/tests/requirements.txt
+        python -m pip install --upgrade pytest-cov
+    - name: Install package
+      run: python -m pip install -v .
+    - name: Run tests
+      run: pytest --cov=./ --cov-report=xml pyqg/tests/
+    - name: Upload code coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    - name: Clean up
+      run: python -m pip cache remove pyqg || true

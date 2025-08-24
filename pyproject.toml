@@ -8,3 +8,13 @@ requires = [
     "pyfftw",
     "numpy"
 ]
+
+[tool.cibuildwheel]
+skip = ["*-musllinux*", "pp*"]
+build-frontend = "build"
+before-test = "pip install -r {package}/pyqg/tests/requirements.txt"
+test-command = "pytest {package}/pyqg/tests"
+test-skip = "*-macosx_universal2:arm64"
+
+# Specify manylinux image versions
+manylinux-x86_64-image = "manylinux2014"

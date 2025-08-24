@@ -43,7 +43,7 @@ def test_calc_ispec_peak():
     radial_sine = np.sin(radius * frequency)
 
     # Take its FFT
-    radial_sine_fft = m.fft(np.array([radial_sine, radial_sine]))[0]
+    radial_sine_fft = np.abs(m.fft(np.array([radial_sine, radial_sine]))[0])**2
 
     # Compute an isotropic spectrum
     iso_wavenumbers, iso_spectrum = calc_ispec(m, radial_sine_fft)

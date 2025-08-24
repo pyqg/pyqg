@@ -42,7 +42,7 @@ class SQGModel(model.Model):
         super().__init__(**kwargs)
 
         # initial conditions: (PV anomalies)
-        self.set_q(1e-3*np.random.rand(1,self.ny,self.nx))
+        self.q = 1e-3*np.random.rand(1,self.ny,self.nx)
 
     ### PRIVATE METHODS - not meant to be called by user ###
 
